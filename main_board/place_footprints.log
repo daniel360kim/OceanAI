@@ -1,0 +1,33 @@
+06-02 14:12:26 com_github_MitjaNemec_PlaceFootprints.action_place_footprints 378:Plugin executed on: 'win32'
+06-02 14:12:26 com_github_MitjaNemec_PlaceFootprints.action_place_footprints 379:Plugin executed with python version: '3.9.10 (main, Apr 30 2022, 01:39:58) [MSC v.1929 64 bit (AMD64)]'
+06-02 14:12:26 com_github_MitjaNemec_PlaceFootprints.action_place_footprints 380:KiCad build version: (6.0.5)
+06-02 14:12:26 com_github_MitjaNemec_PlaceFootprints.action_place_footprints 381:Plugin version: 1.2.5
+06-02 14:12:26 com_github_MitjaNemec_PlaceFootprints.action_place_footprints 382:Frame repr: <wx._core.Frame object at 0x0000017A93DFD5E0>
+06-02 14:12:26 com_github_MitjaNemec_PlaceFootprints.place_footprints 121:getting a list of all footprints on board
+06-02 14:12:26 com_github_MitjaNemec_PlaceFootprints.place_footprints 148:Footprint R18 on root level
+06-02 14:12:26 com_github_MitjaNemec_PlaceFootprints.place_footprints 148:Footprint R3 on root level
+06-02 14:12:26 com_github_MitjaNemec_PlaceFootprints.place_footprints 148:Footprint R2 on root level
+06-02 14:12:26 com_github_MitjaNemec_PlaceFootprints.place_footprints 148:Footprint J7 on root level
+06-02 14:12:26 com_github_MitjaNemec_PlaceFootprints.place_footprints 148:Footprint J4 on root level
+06-02 14:12:26 com_github_MitjaNemec_PlaceFootprints.place_footprints 148:Footprint J9 on root level
+06-02 14:12:26 com_github_MitjaNemec_PlaceFootprints.place_footprints 148:Footprint J10 on root level
+06-02 14:12:26 com_github_MitjaNemec_PlaceFootprints.place_footprints 148:Footprint J1 on root level
+06-02 14:12:26 com_github_MitjaNemec_PlaceFootprints.place_footprints 148:Footprint J8 on root level
+06-02 14:12:26 com_github_MitjaNemec_PlaceFootprints.place_footprints 148:Footprint J11 on root level
+06-02 14:12:26 com_github_MitjaNemec_PlaceFootprints.place_footprints 148:Footprint BZ1 on root level
+06-02 14:12:26 com_github_MitjaNemec_PlaceFootprints.place_footprints 148:Footprint J5 on root level
+06-02 14:12:26 com_github_MitjaNemec_PlaceFootprints.place_footprints 148:Footprint J2 on root level
+06-02 14:12:26 com_github_MitjaNemec_PlaceFootprints.place_footprints 148:Footprint J12 on root level
+06-02 14:12:26 com_github_MitjaNemec_PlaceFootprints.place_footprints 148:Footprint J6 on root level
+06-02 14:12:27 com_github_MitjaNemec_PlaceFootprints.action_place_footprints 570:Reference designator is: IC
+06-02 14:12:27 com_github_MitjaNemec_PlaceFootprints.action_place_footprints 571:Reference number is: 1
+06-02 14:12:27 com_github_MitjaNemec_PlaceFootprints.action_place_footprints 603:Sorted and filtered list:
+['IC1', 'IC2']
+06-02 14:12:43 com_github_MitjaNemec_PlaceFootprints.action_place_footprints 641:Footprints to place:
+['IC1', 'IC2']
+06-02 14:12:43 com_github_MitjaNemec_PlaceFootprints.place_footprints 262:Starting placing with circular layout
+06-02 14:12:43 com_github_MitjaNemec_PlaceFootprints.place_footprints 272:reference footprint position at: wxPoint(168400000, 122976000)
+06-02 14:12:43 com_github_MitjaNemec_PlaceFootprints.place_footprints 277:rotation center at: (168400000, 124997000.0)
+06-02 14:12:43 com_github_MitjaNemec_PlaceFootprints.place_footprints 379:Text of: IC1 has property "Keep upright" rotation might not look as intended
+06-02 14:12:43 com_github_MitjaNemec_PlaceFootprints.place_footprints 379:Text of: IC1 has property "Keep upright" rotation might not look as intended
+06-02 14:12:43 com_github_MitjaNemec_PlaceFootprints.action_place_footprints 654:Placing complete

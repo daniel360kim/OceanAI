@@ -1,0 +1,21 @@
+{
+  "name": "ArduCAM",
+  "export": {},
+  "version": "1.0.0",
+  "frameworks": [
+    "arduino"
+  ],
+  "description": "This is a opensource library for taking high resolution still images and short video clip on Arduino based platforms using ArduCAM's camera moduels",
+  "platforms": [
+    "*"
+  ],
+  "repository": {
+    "url": "https://github.com/ArduCAM/Arduino.git",
+    "type": "git"
+  },
+  "keywords": [
+    "cam",
+    "camera",
+    "video"
+  ]
+}

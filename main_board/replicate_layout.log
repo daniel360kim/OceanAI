@@ -1,0 +1,53 @@
+06-03 22:14:45 com_github_MitjaNemec_ReplicateLayout.action_replicate_layout 295:Plugin executed on: 'win32'
+06-03 22:14:45 com_github_MitjaNemec_ReplicateLayout.action_replicate_layout 296:Plugin executed with python version: '3.9.10 (main, Apr 30 2022, 01:39:58) [MSC v.1929 64 bit (AMD64)]'
+06-03 22:14:45 com_github_MitjaNemec_ReplicateLayout.action_replicate_layout 297:KiCad build version: (6.0.5)
+06-03 22:14:45 com_github_MitjaNemec_ReplicateLayout.action_replicate_layout 298:Plugin version: 1.1.2
+06-03 22:14:45 com_github_MitjaNemec_ReplicateLayout.action_replicate_layout 299:Frame repr: <wx._core.Frame object at 0x00000273F39110D0>
+06-03 22:14:45 com_github_MitjaNemec_ReplicateLayout.action_replicate_layout 323:Preparing replicator with IC1 as a reference
+06-03 22:14:45 com_github_MitjaNemec_ReplicateLayout.replicate_layout 98:getting a list of all footprints on board
+06-03 22:14:45 com_github_MitjaNemec_ReplicateLayout.action_replicate_layout 351:source anchor footprint is 'IC1'
+Located on: ['Stepper_b']
+With filenames: ['stpr_drv.kicad_sch']
+With sheet_id:['Stepper_b']
+06-03 22:14:45 com_github_MitjaNemec_ReplicateLayout.action_replicate_layout 358:Corresponding footprints are 
+[('IC1', ['Stepper_b']), ('IC2', ['Stepper_b1'])]
+06-03 22:14:45 com_github_MitjaNemec_ReplicateLayout.action_replicate_layout 370:Showing dialog
+06-03 22:14:45 com_github_MitjaNemec_ReplicateLayout.action_replicate_layout 376:Toolbar position: wx.Point(2339, 117)
+06-03 22:14:45 com_github_MitjaNemec_ReplicateLayout.action_replicate_layout 382:Dialog position: wx.Point(1975, 117)
+06-03 22:14:46 com_github_MitjaNemec_ReplicateLayout.replicate_layout 335:constructing a list of sheets suitable for replication on level:'Stepper_b', file:'stpr_drv.kicad_sch'
+06-03 22:14:46 com_github_MitjaNemec_ReplicateLayout.replicate_layout 372:suitable sheets are:[['Stepper_b1']]
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.replicate_layout 335:constructing a list of sheets suitable for replication on level:'Stepper_b', file:'stpr_drv.kicad_sch'
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.replicate_layout 372:suitable sheets are:[['Stepper_b1']]
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.action_replicate_layout 145:Replicating layout
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.replicate_layout 146:Starting replication of sheets: [['Stepper_b1']]
+on level: ['Stepper_b']
+with tracks=True, zone=True, text=True, containing=True, remove=False, locked=False, by_group=False
+06-03 22:14:54 root 235:updating GUI message: 'Preparing for replication'
+06-03 22:14:54 root 240:updating GUI with: 0
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.replicate_layout 215:Getting the list of source footprints
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.replicate_layout 230:Getting the list of all the remaining footprints
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.replicate_layout 235:Getting nets local to source footprints
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.replicate_layout 238:Getting source bounding box
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.replicate_layout 242:Getting source tracks
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.replicate_layout 257:Getting source zones
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.replicate_layout 266:Getting source text items
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.replicate_layout 275:Getting source drawing items
+06-03 22:14:54 root 235:updating GUI message: 'Replicating footprints'
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.replicate_layout 669:Replicating footprints
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.replicate_layout 675:Replicating footprints on sheet ['Stepper_b1']
+06-03 22:14:54 root 240:updating GUI with: 6
+06-03 22:14:54 root 240:updating GUI with: 12
+06-03 22:14:54 root 235:updating GUI message: 'Replicating tracks'
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.replicate_layout 835:Replicating tracks
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.replicate_layout 841:Replicating tracks on sheet ['Stepper_b1']
+06-03 22:14:54 root 240:updating GUI with: 2
+06-03 22:14:54 root 235:updating GUI message: 'Replicating zones'
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.replicate_layout 893:Replicating zones
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.replicate_layout 900:Replicating zones on sheet ['Stepper_b1']
+06-03 22:14:54 root 235:updating GUI message: 'Replicating text'
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.replicate_layout 963:Replicating text
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.replicate_layout 970:Replicating text on sheet ['Stepper_b1']
+06-03 22:14:54 root 235:updating GUI message: 'Replicating drawings'
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.replicate_layout 1003:Replicating drawings
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.replicate_layout 1009:Replicating drawings on sheet ['Stepper_b1']
+06-03 22:14:54 com_github_MitjaNemec_ReplicateLayout.action_replicate_layout 169:Replication complete

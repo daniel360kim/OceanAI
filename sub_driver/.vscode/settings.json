@@ -1,0 +1,61 @@
+{
+    "git.ignoreLimitWarning": true,
+
+    "editor.tokenColorCustomizations": {
+        "[Electron]": {
+            "textMateRules": [
+            
+            {"scope": ["entity.name.namespace.cpp"],
+            "settings": {
+                "foreground": "#ff62e0",
+                "fontStyle": ""
+            }
+        
+            },
+            {
+                "scope":["string.quoted.double.cpp"],
+                "settings": {
+                    "foreground": "#00ffb7",
+                    "fontStyle": "italic"
+                }
+            },
+            {
+                "scope": ["punctuation.separator.dot-access.cpp"],
+                "settings": {
+                    "foreground": "#4FF2F8",
+                    "fontStyle": ""
+                }
+            }, 
+
+            {
+                "scope": ["punctuation.terminator.statement.cpp"],
+                "settings": {
+                    "foreground": "#18cdfa",
+                    "fontStyle": ""
+                }
+            },
+            /*
+            {
+                "scope": ["variable.other.local.cpp"],
+                "settings": {
+                    "foreground": "#64e5ff",
+                    "fontStyle": ""
+                }
+            },
+            */
+            {
+                "scope": ["meta.body.namespace.cpp"],
+                "settings": {
+                    "foreground": "#ffbb00",
+                    "fontStyle": ""
+                }
+            },
+       ]
+    }
+
+},
+"files.associations": {
+    "Makefile": "cpp",
+    "*.tpp": "cpp"
+}
+}

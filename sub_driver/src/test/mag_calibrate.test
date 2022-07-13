@@ -1,0 +1,260 @@
+/*
+#include "Sensors/Sensors.h"
+#include "Sensors/BMI088/BMI088.h"
+#include "Sensors/BMP388/BMP388_DEV.h"
+#include "Sensors/LIS3MDL/Adafruit_LIS3MDL.h"
+#include "Orientation/Orientation.h"
+#include "pins.h"
+
+#include "Data/data_struct.h"
+#include "Data/SD/SD.h"
+
+#include "indication/LED.h"
+#include "indication/Buzzer.h"
+
+#include <Arduino.h>
+#include <Entropy.h>
+
+#include "time/time_util.h"
+
+#include <SensorFusion.h>
+
+#include "Sensors/LowPass.h"
+SF filt;
+SF filtf;
+
+
+sensors::UnifiedSensors sensor;
+Orientation ori;
+RGBLED LEDa(RED_a, GRN_a, BLU_a);
+RGBLED LEDb(RED_b, GRN_b, BLU_b);
+
+LED signal(SIGNAL);
+
+Buzzer buzz(BUZZ);
+
+unsigned long long previous_time;
+
+Data data;
+
+SD start;
+
+
+void setup()
+{
+  Serial.begin(2000000);
+  sensor.initNavSensors();
+  sensor.initVoltmeter(v_div);
+  sensor.initTDS(TDS);
+  sensor.setInterrupts(BAR_int, ACC_int, GYR_int, MAG_int);
+  sensor.setGyroBias();
+  Entropy.Initialize();
+  start.Startup();
+
+  previous_time = micros();
+
+}
+
+
+void loop()
+{ 
+  
+  data.time_us = micros();
+  data.dt = (data.time_us - previous_time) / 1000000.0;
+  previous_time = data.time_us;
+
+  signal.blink(Entropy.random(20, 200));
+  LEDa.displaySpectrum();
+  LEDb.displaySpectrum();
+
+  sensor.logToStruct(data);
+  
+  Quaternion orientation = ori.update(data.rgyr_x, data.rgyr_y, data.rgyr_z, data.dt);
+ 
+  ori.convertAccelFrame(orientation, data.racc_x, data.racc_y, data.racc_z, &data.fWfacc_x, &data.fWfacc_y, &data.fWfacc_z);
+  ori.toEuler(&data.ori_X, &data.ori_Y, &data.ori_Z);
+
+  filt.MadgwickUpdate(data.rgyr_x, data.rgyr_y, data.rgyr_z, data.racc_x, data.racc_y, data.racc_z, data.rmag_x, data.rmag_y, data.rmag_z, data.dt);
+  filtf.MadgwickUpdate(data.fgyr_x, data.fgyr_y, data.fgyr_z, data.facc_x, data.facc_y, data.facc_z, data.rmag_x, data.rmag_y, data.rmag_z, data.dt);
+
+  double rx = filt.getRoll();
+  double ry = filt.getPitch();
+  double rz = filt.getYaw();
+
+  double fx = filt.getRoll();
+  double fy = filtf.getPitch();
+  double fz = filtf.getYaw();
+
+  Serial.print(rx);
+  Serial.print("\t");
+  Serial.print(ry);
+  Serial.print("\t");
+  Serial.print(rz);
+  Serial.print("\t\t");
+  Serial.print(fx);
+  Serial.print("\t");
+  Serial.print(fy);
+  Serial.print("\t");
+  Serial.print(fz);
+  Serial.print("\t\t");
+  Serial.print(data.rmag_x);
+  Serial.print("\t");
+  Serial.print(data.rmag_y);
+  Serial.print("\t");
+  Serial.println(data.rmag_z);
+
+  
+
+  
+
+  while(data.time_us >= 900000000ull)
+  {
+    //Serial.println(micros());
+    LEDa.setColor(255,0,0);
+    start.rewindPrint();
+    LEDa.setColor(0,255,0);
+  }
+  
+
+
+ 
+}
+
+
+
+*/
+
+#include "Sensors/Sensors.h"
+#include "Sensors/BMI088/BMI088.h"
+#include "Sensors/BMP388/BMP388_DEV.h"
+#include "Sensors/LIS3MDL/Adafruit_LIS3MDL.h"
+#include "Orientation/Orientation.h"
+#include "pins.h"
+
+#include "Data/data_struct.h"
+#include "Data/SD/SD.h"
+
+#include "indication/LED.h"
+#include "indication/Buzzer.h"
+
+#include <Arduino.h>
+#include <Entropy.h>
+
+
+
+#include "time/time_util.h"
+
+
+
+sensors::UnifiedSensors sensor;
+Orientation ori;
+RGBLED LEDa(RED_a, GRN_a, BLU_a);
+RGBLED LEDb(RED_b, GRN_b, BLU_b);
+
+LED signal(SIGNAL);
+
+Buzzer buzz(BUZZ);
+
+unsigned long long previous_time;
+
+Data data;
+
+SD start;
+
+double min_x, max_x, mid_x;
+double min_y, max_y, mid_y;
+double min_z, max_z, mid_z;
+
+void setup()
+{
+  Serial.begin(2000000);
+
+  sensor.initNavSensors();
+  sensor.initVoltmeter(v_div);
+  sensor.initTDS(TDS);
+  sensor.setInterrupts(BAR_int, ACC_int, GYR_int, MAG_int);
+  //sensor.setGyroBias();
+  Entropy.Initialize();
+  start.Startup();
+
+
+
+  double x, y, z;
+  sensor.returnRawMag(&x, &y, &z);
+  
+  min_x = max_x = x;
+  min_y = max_y = y;
+  min_z = max_z = z;
+
+  previous_time = micros();
+
+}
+
+
+void loop()
+{ 
+  /*
+  data.time_us = micros();
+  data.dt = (data.time_us - previous_time) / 1000000.0;
+  previous_time = data.time_us;
+
+  signal.blink(Entropy.random(20, 200));
+  LEDa.displaySpectrum();
+  LEDb.displaySpectrum();
+
+  sensor.logToStruct(data);
+  
+  Quaternion orientation = ori.update(data.fgyr_x, data.fgyr_y, data.fgyr_z, data.dt);
+ 
+  ori.convertAccelFrame(orientation, data.facc_x, data.facc_y, data.facc_z, &data.fWfacc_x, &data.fWfacc_y, &data.fWfacc_z);
+  ori.toEuler(&data.ori_X, &data.ori_Y, &data.ori_Z);
+
+  Matrix korientation = filter.updateSensor(data.facc_x, data.facc_y, data.facc_z,data.fgyr_x, data.fgyr_y, data.fgyr_z, data.fmag_x, data.fmag_y, data.fmag_z, data.dt);
+
+  ori.toEuler(korientation[0][0], korientation[1][0], korientation[2][0], korientation[3][0], &data.EKF_x, &data.EKF_y, &data.EKF_z);
+  
+  start.logData(data);
+
+  //Serial.println(data.time_us);
+
+  while(data.time_us >= 900000000ull)
+  {
+    //Serial.println(micros());
+    LEDa.setColor(255,0,0);
+    start.rewindPrint();
+    LEDa.setColor(0,255,0);
+  }
+  */
+ double x, y, z;
+ sensor.returnRawMag(&x, &y, &z);
+ Serial.print("Mag: (");
+ Serial.print(x); Serial.print(", ");
+ Serial.print(y); Serial.print(", ");
+ Serial.print(z); Serial.print(")");
+
+ min_x = min(min_x, x);
+ min_y = min(min_y, y);
+ min_z = min(min_z, z);
+
+ max_x = max(max_x, x);
+ max_y = max(max_y, y);
+ max_z = max(max_z, z);
+
+ mid_x = (max_x + min_x) / 2;
+ mid_y = (max_y + min_y) / 2;
+ mid_z = (max_z + min_z) / 2;
+ Serial.print(" Hard offset: (");
+ Serial.print(mid_x,15); Serial.print(", ");
+ Serial.print(mid_y,15); Serial.print(", ");
+ Serial.print(mid_z,15); Serial.print(")");  
+
+ Serial.print(" Field: (");
+ Serial.print((max_x - min_x)/2); Serial.print(", ");
+ Serial.print((max_y - min_y)/2); Serial.print(", ");
+ Serial.print((max_z - min_z)/2); Serial.println(")");    
+ 
+  
+
+ 
+}
+

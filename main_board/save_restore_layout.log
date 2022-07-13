@@ -1,0 +1,14 @@
+06-02 14:05:42 com_github_MitjaNemec_SaveRestoreLayout.action_save_restore_layout 149:Plugin executed on: 'win32'
+06-02 14:05:42 com_github_MitjaNemec_SaveRestoreLayout.action_save_restore_layout 150:Plugin executed with python version: '3.9.10 (main, Apr 30 2022, 01:39:58) [MSC v.1929 64 bit (AMD64)]'
+06-02 14:05:42 com_github_MitjaNemec_SaveRestoreLayout.action_save_restore_layout 151:KiCad build version: (6.0.5)
+06-02 14:05:42 com_github_MitjaNemec_SaveRestoreLayout.action_save_restore_layout 152:Plugin version: 1.1.2
+06-02 14:05:42 com_github_MitjaNemec_SaveRestoreLayout.action_save_restore_layout 153:Frame repr: <wx._core.Frame object at 0x0000017A93CF9280>
+06-02 14:05:42 com_github_MitjaNemec_SaveRestoreLayout.action_save_restore_layout 171:Anchor footprint reference is 'IC2'
+06-02 14:05:46 com_github_MitjaNemec_SaveRestoreLayout.action_save_restore_layout 180:Save layout chosen
+06-02 14:05:46 com_github_MitjaNemec_SaveRestoreLayout.save_restore_layout 281:Working on E:\KiCad\OceanAI\main_board\main_board.kicad_pcb
+06-02 14:05:46 com_github_MitjaNemec_SaveRestoreLayout.save_restore_layout 132:getting a list of all footprints on board
+06-02 14:05:46 com_github_MitjaNemec_SaveRestoreLayout.save_restore_layout 286:Saving the current board temporary in order to leave current layout intact
+06-02 14:05:46 com_github_MitjaNemec_SaveRestoreLayout.save_restore_layout 292:Saving board as tempfile: C:\Users\danie\AppData\Local\Temp\temp_board_file_for_save.kicad_pcb
+06-02 14:05:47 com_github_MitjaNemec_SaveRestoreLayout.save_restore_layout 297:Loaded temp boardfile: C:\Users\danie\AppData\Local\Temp\temp_board_file_for_save.kicad_pcb
+06-02 14:05:47 com_github_MitjaNemec_SaveRestoreLayout.save_restore_layout 298:Get project schematics and layout data
+06-02 14:05:47 com_github_MitjaNemec_SaveRestoreLayout.save_restore_layout 132:getting a list of all footprints on board
