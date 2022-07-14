@@ -196,12 +196,6 @@ struct CombinedData
     GPSdata g;
 }; 
 
-void acquireData(Data* data);
-void printData(Print* pr, Data* data);
-void printHeader(Print* pr);
-void userSetup();
-
-
 
 
 #endif

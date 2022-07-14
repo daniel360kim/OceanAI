@@ -1,9 +1,9 @@
 #ifndef Config_h
 #define Config_h
 
-#define DEBUG_ON false
-#define LIVE_DEBUG false
+#define DEBUG_ON true
+#define LIVE_DEBUG true
 
-#define OPTICS_ON false
+#define OPTICS_ON true
 
 #endif

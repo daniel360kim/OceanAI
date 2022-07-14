@@ -74,8 +74,7 @@ void setup()
   {
     Serial.println("File init failed");
   }
-  Serial.print("Startup time is: "); Serial.println(micros());
-  previous_time = micros();
+
 
 }
 
@@ -146,27 +145,8 @@ void loop()
     Serial.println("Logging failed");
   }
 
-  //Serial.println(data.voltage);
-  if(data.time_us <= 10000000ull && logged == false)
-  {
-      Serial.println(1/data.dt);
-   
-  
-   /*
-    LEDa.setColor(255,0,0);
-    //start.rewindGPSPrint();
-    LEDb.setColor(0,0,255);
-    LEDb.setColor(0,0,255);
-    //delay(10000);
-    LEDb.setColor(0,255,255);
-    LEDb.setColor(0,255,255);
-    start.rewindPrint();
-    LEDa.setColor(0,255,0);
-    
-*/
-  }
+  Serial.println(1.0/data.dt);
 
-
-
+ 
 
 }

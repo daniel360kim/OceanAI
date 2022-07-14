@@ -18,6 +18,7 @@
 #include "DataFile.h"
 #include "../data_struct.h"
 #include "RingBuffer.h"
+#include "../../time/Time.h"
 
 namespace SD_Settings
 {
@@ -27,16 +28,22 @@ namespace SD_Settings
     constexpr unsigned int BUF_SIZE = 200u; //400 sections of 512 byte structs in our buffer
     constexpr unsigned long LOG_FILE_SIZE = 259200u * DATA_SIZE * LOG_RATE; //3 days (in seconds) * size of struct * data rate in hertz
     constexpr unsigned int READ_BUF_SIZE = 600u;
+    constexpr unsigned long FLUSH_INTERVAL_US = 15000000ul; //flush every 15 seconds
 };
 
 extern unsigned long _heap_start;
 extern unsigned long _heap_end;
 extern char *__brkval;
 
+volatile bool SD_Logger::cap_update_int = false;
+
 SdFs sd;
 FsFile file;
 
 CircularBuffer<Data> buf(SD_Settings::BUF_SIZE);
+
+Timer<1, micros> flusher;
+Timer<1, micros> cap_update;
 
 SD_Logger::SD_Logger()
 {
@@ -50,7 +57,6 @@ bool SD_Logger::init()
     DataFile csvFile("ASCII", DataFile::ENDING::CSV);
     if(!csvFile.createFile())
     {
-        Serial.println("ASCII file create failed");
         return false;
     }
 
@@ -72,13 +78,19 @@ bool SD_Logger::init()
         return false;
     }
 
+    flusher.every(SD_Settings::FLUSH_INTERVAL_US, SD_Logger::flush);
+    cap_update.every(1000000, SD_Logger::getCapacity);
+
     return true;
 }
 
 bool SD_Logger::logData(Data data)
 {
-    //Open and truncate existing file
-
+    if(SD_Logger::cap_update_int == true)
+    {
+        data.sd_capacity = sd.freeClusterCount();
+        SD_Logger::cap_update_int = false;
+    }
 
     unsigned long long current_time = micros();
     if(current_time - previous_time >= SD_Settings::LOG_INTERVAL_US)
@@ -95,7 +107,6 @@ bool SD_Logger::logData(Data data)
             {
                 file.write((const uint8_t*)&data, sizeof(data));
                 iterations++;
-                file.flush();
             }
             else
             {
@@ -104,7 +115,6 @@ bool SD_Logger::logData(Data data)
                 data = buf.get();
                 file.write((const uint8_t*)&data, sizeof(data));
                 iterations++;
-                file.flush();
             }
         }
         previous_time = micros();
@@ -114,7 +124,9 @@ bool SD_Logger::logData(Data data)
         return false;
     }
 
-
+    cap_update.tick();
+    flusher.tick();
+    
     return true;
     
 }
@@ -130,7 +142,7 @@ bool SD_Logger::rewindPrint()
         file.open(data_filename, FILE_READ);
 
         Data datacopy;
-        for(unsigned int i = 0; i < buf_size + (write_iterator * buf_size); i++)
+        for(long i = 0; i < buf_size + (write_iterator * buf_size); i++)
         {
             file.read((uint8_t *)&datacopy, sizeof(datacopy));
             if(i >= buf_size + ((write_iterator - 1) * buf_size))
@@ -141,6 +153,7 @@ bool SD_Logger::rewindPrint()
         if(read_buf->full())
         {
             Serial.println("Readbuf full!");
+            Serial.print("Freemem "); Serial.println(freeMemory());
         }
         
         file.close();
@@ -178,14 +191,14 @@ bool SD_Logger::rewindPrint()
             ASCII_header_made = true;
         }
 
-        for(unsigned int i = 0; i < buf_size; i++)
+        for(long i = 0; i < buf_size; i++)
         {
             char* comma = (char*)",";
             Data cc;
             cc = read_buf->get();
             file.print(cc.time_us); file.print(F(comma));
             file.print(cc.system_state); file.print(F(comma));
-            file.print(cc.dt); file.print(F(comma));
+            file.print(cc.dt,7); file.print(F(comma));
             file.print(cc.bmp_rpres); file.print(F(comma)); file.print(cc.bmp_rtemp); file.print(F(comma)); file.print(cc.bmp_fpres); file.print(F(comma)); file.print(cc.bmp_ftemp);file.print(F(comma));
             file.print(cc.racc.x); file.print(F(comma)); file.print(cc.racc.y); file.print(F(comma)); file.print(cc.racc.z); file.print(F(comma));
             file.print(cc.facc.x); file.print(F(comma)); file.print(cc.facc.y); file.print(F(comma)); file.print(cc.facc.z); file.print(F(comma));
@@ -214,6 +227,7 @@ bool SD_Logger::rewindPrint()
         file.close();
         write_iterator++;
         delete read_buf;
+        Serial.print("Freemem new: "); Serial.println(freeMemory());
     
     }
     return true;
@@ -236,12 +250,12 @@ unsigned int SD_Logger::findFactors()
     }
 
     unsigned int free_mem = freeMemory();
-    unsigned int factor_to_use;
+    unsigned int factor_to_use = 0;
 
     //Reverse iterate to find largest factor
     for(auto i = factors.rbegin(); i != factors.rend(); i++)
     {
-        if(*i * sizeof(Data) <= free_mem) //leave 1000 bytes free to ensure we dont over do it
+        if(*i * sizeof(Data) <= free_mem - 1000) //leave 1000 bytes free to ensure we dont over do it
         {
             factor_to_use = *i;
             break;
@@ -249,4 +263,16 @@ unsigned int SD_Logger::findFactors()
     }
 
     return factor_to_use;
+}
+
+bool SD_Logger::flush(void*)
+{
+    file.flush();
+    return true;
+}
+
+bool SD_Logger::getCapacity(void*)
+{
+    SD_Logger::cap_update_int = true;
+    return true;
 }

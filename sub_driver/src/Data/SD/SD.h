@@ -36,15 +36,20 @@ private:
     char* data_filename;
     char* csv_filename;
     unsigned long long previous_time;
+
+    unsigned long pt_cap_update;
     bool ASCII_header_made = false;
 
     unsigned long long iterations;
 
+    static volatile bool cap_update_int;
+
     static unsigned int freeMemory();
     unsigned int findFactors();
+    static bool flush(void*);
+    static bool getCapacity(void*);
 
-    
-    
+
 };
 
 

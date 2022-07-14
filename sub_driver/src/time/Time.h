@@ -52,7 +52,7 @@
 
 template <
     size_t max_tasks = TIMER_MAX_TASKS, /* max allocated tasks */
-    unsigned long (*time_func)() = millis, /* time function for timer */
+    unsigned long long (*time_func)() = micros, /* time function for timer */
     typename T = void * /* handler argument type */
 >
 class Timer {

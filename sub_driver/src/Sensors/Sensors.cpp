@@ -26,7 +26,6 @@ LIS3MDL mag;
 
 Timer<1, micros> TDS_interrupt;
 Timer<1, micros> voltage_interrupt;
-Timer<1, micros> internal_interrupt;
 
 namespace Filter
 {
@@ -49,7 +48,6 @@ volatile bool UnifiedSensors::mag_flag = true;
 
 volatile bool UnifiedSensors::TDS_flag = false;
 volatile bool UnifiedSensors::voltage_flag = false;
-volatile bool UnifiedSensors::internal_flag = false;
 
 UnifiedSensors::UnifiedSensors() {}
 
@@ -200,11 +198,6 @@ void UnifiedSensors::initVoltmeter(uint8_t input_pin)
     voltage_interrupt.every(1000000, voltage_drdy);
 }
 
-void UnifiedSensors::initInternalTemp()
-{
-    internal_interrupt.every(100000, internal_drdy);
-}
-
 void UnifiedSensors::setInterrupts(uint8_t bar_int, uint8_t accel_int, uint8_t gyro_int, uint8_t mag_int)
 {
     pinMode(bar_int, INPUT);
@@ -269,11 +262,6 @@ void UnifiedSensors::returnRawMag(double *x, double *y, double *z)
     *x = mag.m.x / 68.42 - HARD_IRON_BIAS[0]; 
     *y = mag.m.y / 68.42 - HARD_IRON_BIAS[1];
     *z = mag.m.z / 68.42- HARD_IRON_BIAS[2];  
-}
-
-double UnifiedSensors::readInternalTemp()
-{  
-    return InternalTemperature.readTemperatureC();
 }
 
 double UnifiedSensors::readTDS()
@@ -351,17 +339,8 @@ void UnifiedSensors::logToStruct(Data &data)
         UnifiedSensors::voltage_flag = false;
     }
 
-    if(UnifiedSensors::internal_flag)
-    {
-        data.internal_temp = readInternalTemp();
-        UnifiedSensors::internal_flag = false;
-    }
-
-    
     TDS_interrupt.tick();
     voltage_interrupt.tick();
-    internal_interrupt.tick();
-    
 
 }
 

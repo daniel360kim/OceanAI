@@ -33,7 +33,6 @@ public:
     void initADC();
     void initTDS(uint8_t TDS_pin);
     void initVoltmeter(uint8_t input_pin);
-    void initInternalTemp();
     void setInterrupts(uint8_t bar_int, uint8_t accel_int, uint8_t gyro_int, uint8_t mag_int);
     void setGyroBias();
 
@@ -46,7 +45,6 @@ public:
 
     double readTDS();
     double readVoltage();
-    double readInternalTemp();
 
     static volatile bool bar_flag;
     static volatile bool accel_flag;
@@ -66,16 +64,14 @@ private:
     double temp = 25;
     int getMedian(int bArray[], int iFilterLen);
 
-
     //Using a timer we generate a fake interrupt for analog reads
     static volatile bool TDS_flag;
     static volatile bool voltage_flag;
-    static volatile bool internal_flag;
 
     //Set the flags true for the interrupt
     static inline bool TDS_drdy(void*) { TDS_flag = true; return true; }
     static inline bool voltage_drdy(void*) { voltage_flag = true; return true; }
-    static inline bool internal_drdy(void*) { internal_flag = true; return true; }
+
     
     
 
