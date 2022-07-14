@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Wed Jul 13 18:08:28 2022
+# Make data base, printed on Wed Jul 13 18:12:29 2022
 
 # Variables
 
@@ -215,7 +215,8 @@ SESSIONNAME = Console
 # environment
 PROCESSOR_REVISION = a502
 # environment
-PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 165 Stepping 2, GenuineIntel
+PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 165 Stepping 2, Genui 
+neIntel
 # variable set hash-table stats:
 # Load=102/1024=10%, Rehash=0, Collisions=12/126=10%
 
@@ -225,9 +226,9 @@ PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 165 Stepping 2, GenuineIntel
 
 # Directories
 
-# . (key e:/OceanAI, mtime 1657757308): 9 files, no impossibilities.
+# . (key e:/OceanAI, mtime 1657757462): 10 files, no impossibilities.
 
-# 9 files, no impossibilities in 1 directories.
+# 10 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -284,12 +285,12 @@ GNUmakefile:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 16 / storage = 131 B / avg = 8 B
-# current buf: size = 8174 B / used = 131 B / count = 16 / avg = 8 B
+# strcache buffers: 1 (0) / strings = 17 / storage = 141 B / avg = 8 B
+# current buf: size = 8174 B / used = 141 B / count = 17 / avg = 8 B
 
-# strcache performance: lookups = 19 / hit rate = 15%
+# strcache performance: lookups = 20 / hit rate = 15%
 # hash-table stats:
-# Load=16/8192=0%, Rehash=0, Collisions=0/19=0%
-# Finished Make data base on Wed Jul 13 18:08:28 2022
+# Load=17/8192=0%, Rehash=0, Collisions=0/20=0%
+# Finished Make data base on Wed Jul 13 18:12:29 2022
 
  
