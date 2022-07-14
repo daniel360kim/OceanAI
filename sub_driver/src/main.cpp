@@ -68,12 +68,14 @@ void setup()
   #if OPTICS_ON == true
     camera.begin();
   #endif
-  previous_time = micros();
+  
   
   if(!logger.init())
   {
     Serial.println("File init failed");
   }
+  Serial.print("Startup time is: "); Serial.println(micros());
+  previous_time = micros();
 
 }
 
@@ -145,17 +147,9 @@ void loop()
   }
 
   //Serial.println(data.voltage);
-  if(data.time_us >= 30000000ull && logged == false)
+  if(data.time_us <= 10000000ull && logged == false)
   {
-      logged = true;
-      if(!logger.rewindPrint())
-      {
-        Serial.println("Rewind failed");
-      }
-
-      Serial.println("rewind finished");
-
-      while(1);
+      Serial.println(1/data.dt);
    
   
    /*

@@ -12,6 +12,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <SdFat.h>
+#include <vector>
 
 #include "SD.h"
 #include "DataFile.h"
@@ -28,6 +29,10 @@ namespace SD_Settings
     constexpr unsigned int READ_BUF_SIZE = 600u;
 };
 
+extern unsigned long _heap_start;
+extern unsigned long _heap_end;
+extern char *__brkval;
+
 SdFs sd;
 FsFile file;
 
@@ -42,11 +47,20 @@ bool SD_Logger::init()
     DataFile data("data", DataFile::ENDING::TXT);
     data_filename = data.file_name;
 
+    DataFile csvFile("ASCII", DataFile::ENDING::CSV);
+    if(!csvFile.createFile())
+    {
+        Serial.println("ASCII file create failed");
+        return false;
+    }
+
+    csv_filename = csvFile.file_name;
+
     if(!data.createFile())
     {
         return false;
     }
-    if(!file.open(data_filename, O_RDWR | O_CREAT | O_TRUNC))
+    if(!file.open(data_filename, O_RDWR | O_CREAT))
     {
         return false;
     }
@@ -107,17 +121,22 @@ bool SD_Logger::logData(Data data)
 
 bool SD_Logger::rewindPrint()
 {
-    for(unsigned long long j = 0; j < 1 + ((iterations - 1) / SD_Settings::READ_BUF_SIZE); j++)
+    long buf_size = findFactors();
+
+    long write_iterator = 0;
+    for(unsigned long long j = 0; j < iterations / buf_size; j++)
     {
-        CircularBuffer<Data> *read_buf = new CircularBuffer<Data>(SD_Settings::READ_BUF_SIZE);
+        CircularBuffer<Data> *read_buf = new CircularBuffer<Data>(buf_size);
         file.open(data_filename, FILE_READ);
 
         Data datacopy;
-        for(unsigned int i = 0; i < SD_Settings::READ_BUF_SIZE; i++)
+        for(unsigned int i = 0; i < buf_size + (write_iterator * buf_size); i++)
         {
             file.read((uint8_t *)&datacopy, sizeof(datacopy));
-            read_buf->insert(datacopy);
-
+            if(i >= buf_size + ((write_iterator - 1) * buf_size))
+            {
+                read_buf->insert(datacopy);
+            }
         }
         if(read_buf->full())
         {
@@ -126,14 +145,8 @@ bool SD_Logger::rewindPrint()
         
         file.close();
 
-        DataFile csvFile("ASCII", DataFile::ENDING::CSV);
-        if(!csvFile.createFile())
-        {
-            Serial.println("ASCII filed create failed");
-            return false;
-        }
 
-        if(!file.open(csvFile.file_name, O_RDWR | O_CREAT | O_TRUNC))
+        if(!file.open(csv_filename, O_CREAT | O_APPEND | O_WRITE))
         {
             Serial.println("File open failed");
             return false;
@@ -165,9 +178,9 @@ bool SD_Logger::rewindPrint()
             ASCII_header_made = true;
         }
 
-        for(unsigned int i = 0; i < SD_Settings::READ_BUF_SIZE; i++)
+        for(unsigned int i = 0; i < buf_size; i++)
         {
-            char* comma = ",";
+            char* comma = (char*)",";
             Data cc;
             cc = read_buf->get();
             file.print(cc.time_us); file.print(F(comma));
@@ -199,15 +212,41 @@ bool SD_Logger::rewindPrint()
         }   
 
         file.close();
-
-        if(!read_buf->empty())
-        {
-            Serial.println("Read buf aint empty");
-            return false;
-        }
-
+        write_iterator++;
         delete read_buf;
     
     }
     return true;
+}
+
+unsigned int SD_Logger::freeMemory()
+{
+    return (char *)&_heap_end - __brkval;
+}
+
+unsigned int SD_Logger::findFactors()
+{
+    std::vector<unsigned int> factors;
+    for(unsigned int i = 1; i <= iterations; i++)
+    {
+        if(iterations % i == 0)
+        {
+            factors.push_back(i);
+        }
+    }
+
+    unsigned int free_mem = freeMemory();
+    unsigned int factor_to_use;
+
+    //Reverse iterate to find largest factor
+    for(auto i = factors.rbegin(); i != factors.rend(); i++)
+    {
+        if(*i * sizeof(Data) <= free_mem) //leave 1000 bytes free to ensure we dont over do it
+        {
+            factor_to_use = *i;
+            break;
+        }
+    }
+
+    return factor_to_use;
 }

@@ -34,10 +34,14 @@ public:
 
 private:
     char* data_filename;
+    char* csv_filename;
     unsigned long long previous_time;
     bool ASCII_header_made = false;
 
     unsigned long long iterations;
+
+    static unsigned int freeMemory();
+    unsigned int findFactors();
 
     
     
