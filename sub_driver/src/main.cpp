@@ -145,7 +145,7 @@ void loop()
   }
 
   //Serial.println(data.voltage);
-  if(data.time_us >= 10000000ull && logged == false)
+  if(data.time_us >= 30000000ull && logged == false)
   {
       logged = true;
       if(!logger.rewindPrint())

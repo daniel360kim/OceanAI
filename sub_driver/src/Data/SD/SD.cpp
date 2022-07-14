@@ -143,8 +143,8 @@ bool SD_Logger::rewindPrint()
         if(!ASCII_header_made)
         {
             file.print(F("Time us,sys_state,dt,"));
-            file.print(F("bmp_rpres, bmp_rtemp, bmp_fpres, bmp_ftemp"));
-            file.print(F("racc_x, racc_y, racc_z,facc_x,facc_y,facc_z,"));
+            file.print(F("bmp_rpres, bmp_rtemp, bmp_fpres, bmp_ftemp,"));
+            file.print(F("racc_x,racc_y,racc_z,facc_x,facc_y,facc_z,"));
             file.print(F("wfax,wfay,wfaz,"));
             file.print(F("vx,vy,vz,px,py,pz,"));
             file.print(F("rgx,rgy,rgz,fgx,fgy,fgz,"));
@@ -192,6 +192,8 @@ bool SD_Logger::rewindPrint()
             file.print(cc.clock_speed); file.print(F(comma)); file.print(cc.internal_temp); file.print(F(comma));
             file.print(cc.dive_pid.setpoint); file.print(F(comma)); file.print(cc.dive_pid.output); file.print(F(comma));
             file.print(cc.pitch_pid.setpoint); file.print(F(comma)); file.print(cc.pitch_pid.output); file.print(F(comma)); 
+            file.print(cc.dive_stepper.limit_state); file.print(F(comma)); file.print(cc.dive_stepper.homed); file.print(F(comma)); file.print(cc.dive_stepper.sleep); file.print(F(comma)); file.print(cc.dive_stepper.predicted_position); file.print(F(comma));
+            file.print(cc.pitch_stepper.limit_state); file.print(F(comma)); file.print(cc.pitch_stepper.homed); file.print(F(comma)); file.print(cc.pitch_stepper.sleep); file.print(F(comma)); file.print(cc.pitch_stepper.predicted_position); file.print(F(comma));
             file.print(cc.optical_data.capture_time); file.print(F(comma)); file.print(cc.optical_data.save_time); file.print(F(comma)); file.print(cc.optical_data.FIFO_length); file.print(F(comma));
             file.println(cc.sd_capacity);
         }   
