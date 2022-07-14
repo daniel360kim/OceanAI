@@ -105,6 +105,7 @@ void UnifiedSensors::initNavSensors()
                     
                     break;
                 case 1:
+                {
                     #if DEBUG_ON == true
                         message = (char*)"Sensors: Accelerometer initialization error";
                         Debug::error.addToBuffer(micros(), Debug::Critical_Error, message);
@@ -115,7 +116,9 @@ void UnifiedSensors::initNavSensors()
                         
                     #endif 
                     break;
+                }
                 case 2:
+                {
                     #if DEBUG_ON == true
                         message = (char*)"Sensors: Gyroscope initialization error";
                         Debug::error.addToBuffer(micros(), Debug::Critical_Error, message);
@@ -126,8 +129,10 @@ void UnifiedSensors::initNavSensors()
                         
                     #endif 
                     break;
+                }
 
                 case 3:
+                {
                     #if DEBUG_ON == true
                         message = (char*)"Sensors: Magentometer initialization error";
                         Debug::error.addToBuffer(micros(), Debug::Critical_Error, message);
@@ -139,8 +144,9 @@ void UnifiedSensors::initNavSensors()
                     #endif 
 
                     break;
-                
+                }
                 default:
+                {
                     #if DEBUG_ON == true
                         message = (char*)"Sensors: Unknown sensor error initialization error";
                         Debug::error.addToBuffer(micros(), Debug::Critical_Error, message);
@@ -151,6 +157,7 @@ void UnifiedSensors::initNavSensors()
                         
                     #endif 
                     Serial.println(F(""));
+                }
             }
             //indicate error
         } 

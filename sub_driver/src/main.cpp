@@ -26,7 +26,7 @@
 
 Fusion SFori;
 
-Optics::Camera camera(Wire, SPI, CS_VD);
+Optics::Camera camera(CS_VD);
 GPS gps(9600);
 
 UnifiedSensors sensor;
@@ -44,7 +44,7 @@ Position nav_p;
 
 Radio rf(50000);
 
-Data data;
+extern Data data;
 GPSdata gps_data;
 
 CombinedData cdata;
@@ -133,7 +133,7 @@ void loop()
   //start.logGPSdata(gps_data);
 
   #if OPTICS_ON == true
-    camera.capture(1000000);
+    camera.capture(1000000, data.optical_data.capture_time, data.optical_data.save_time, data.optical_data.FIFO_length);
   #endif
   //cdata.d = data;
   //cdata.g = gps_data;
@@ -145,7 +145,7 @@ void loop()
     Serial.println("Logging failed");
   }
 
-  Serial.println(1.0/data.dt);
+
 
  
 

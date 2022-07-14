@@ -20,19 +20,18 @@
 #include "../Data/SD/DataFile.h"
 #include "../debug.h"
 #include "../config.h"
+#include "../pins.h"
 
 FsFile image_file;
 
+
 namespace Optics
 {
+    ArduCAM camera(OV2640, CS_VD);
 
-    Camera::Camera(TwoWire &bus, SPIClass &spiBus, const uint8_t cs_pin)
+    Camera::Camera(const uint8_t cs_pin)
     {
-        _i2c = &bus;
-        _spi = &spiBus;
         this->cs_pin = cs_pin;
-
-        camera = new ArduCAM(OV2640, cs_pin);
     }
 
     bool Camera::begin()
@@ -41,20 +40,20 @@ namespace Optics
         pinMode(cs_pin, OUTPUT);
         digitalWrite(cs_pin, HIGH);
 
-        _i2c->begin();
-        _spi->begin(); //initialize SPI bus
+        Wire.begin();
+        SPI.begin(); //initialize SPI bus
 
-        camera->write_reg(0x07, 0x80); //Reset the CPLD
+        camera.write_reg(0x07, 0x80); //Reset the CPLD
         delay(100);
-        camera->write_reg(0x08, 0x80);
+        camera.write_reg(0x08, 0x80);
         delay(100);
 
         uint8_t temp = 0;
         while(1)
         {
             //Check the SPI bus is good to go
-            camera->write_reg(ARDUCHIP_TEST1, 0x55);
-            temp = camera->read_reg(ARDUCHIP_TEST1);
+            camera.write_reg(ARDUCHIP_TEST1, 0x55);
+            temp = camera.read_reg(ARDUCHIP_TEST1);
             if(temp != 0x55)
             {
                 #if DEBUG_ON == true
@@ -88,9 +87,9 @@ namespace Optics
         while(1)
         {
             //x2 check that the camera connected is the OV2640 
-            camera->wrSensorReg8_8(0xff, 0x01);
-            camera->rdSensorReg8_8(OV2640_CHIPID_HIGH, &vid);
-            camera->rdSensorReg8_8(OV2640_CHIPID_LOW, &pid);
+            camera.wrSensorReg8_8(0xff, 0x01);
+            camera.rdSensorReg8_8(OV2640_CHIPID_HIGH, &vid);
+            camera.rdSensorReg8_8(OV2640_CHIPID_LOW, &pid);
 
             if((vid != 0x26) && ((pid != 0x41) || (pid != 0x42)))
             {
@@ -127,54 +126,52 @@ namespace Optics
         
     
         
-        camera->set_format(JPEG);
-        camera->InitCAM();
-        camera->clear_fifo_flag();
-        camera->write_reg(0x01, frame_num);
+        camera.set_format(JPEG);
+        camera.InitCAM();
+        camera.clear_fifo_flag();
+        camera.write_reg(0x01, frame_num);
+
+        
         
         return true;
     }
     
-    void Camera::capture(unsigned long delay_micros)
+    void Camera::capture(unsigned long delay_micros, unsigned long &capture_time, unsigned long &save_time, uint8_t &FIFO_length)
     {
         unsigned long long current_micros = micros();
 
         if(current_micros - previous_log >= delay_micros)
         {
-            camera->flush_fifo();
-            camera->clear_fifo_flag();
-            camera->OV2640_set_JPEG_size(OV2640_1600x1200);
+            camera.flush_fifo();
+            camera.clear_fifo_flag();
+            camera.OV2640_set_JPEG_size(OV2640_640x480);
 
-            camera->start_capture();
+            camera.start_capture();
             
+            unsigned long long total_time = micros();
+            while ( !camera.get_bit(ARDUCHIP_TRIG, CAP_DONE_MASK));
 
-            unsigned long total_time = millis();
-            while ( !camera->get_bit(ARDUCHIP_TRIG, CAP_DONE_MASK));
+            capture_time = total_time - micros();
+            total_time = micros();
 
-            #if LIVE_DEBUG == true
-                Serial.println(F("CAM Capture Done."));
-                total_time = millis() - total_time;
-                Serial.print(F("capture total_time used (in miliseconds):"));
-                Serial.println(total_time, DEC);
-                total_time = millis();
-            #endif
+            read_fifo_burst(FIFO_length);
+            total_time = micros() - total_time;
+            camera.clear_fifo_flag();
 
-            read_fifo_burst();
-            total_time = millis() - total_time;
-            camera->clear_fifo_flag();
+            save_time = total_time;
             
             #if LIVE_DEBUG == true
                 Serial.print(F("save capture total_time used (in miliseconds):"));
                 Serial.println(total_time, DEC);
             #endif
 
-            camera->clear_fifo_flag();
+            camera.clear_fifo_flag();
 
             previous_log = current_micros;
         };
     }
     
-    uint8_t Camera::read_fifo_burst()
+    uint8_t Camera::read_fifo_burst(uint8_t &fifolength)
     {
         uint8_t temp = 0, temp_last = 0;
         uint32_t length = 0;
@@ -183,7 +180,8 @@ namespace Optics
         char str[16];
         byte buf[256];
 
-        length = camera->read_fifo_length();
+        length = camera.read_fifo_length();
+        fifolength = length;
         #if LIVE_DEBUG == true
             Serial.print(F("The FIFO length is: "));
             Serial.println(length, DEC);
@@ -201,26 +199,26 @@ namespace Optics
              #endif
         }
 
-        camera->CS_LOW();
-        camera->set_fifo_burst();
+        camera.CS_LOW();
+        camera.set_fifo_burst();
         i = 0;
 
         while(length--)
         {
             temp_last = temp;
-            temp =  _spi->transfer(0x00);
+            temp =  SPI.transfer(0x00);
             //Read JPEG data from FIFO
             if ( (temp == 0xD9) && (temp_last == 0xFF) ) //If find the end ,break while,
             {
                 buf[i++] = temp;  //save the last  0XD9
                 //Write the remain bytes in the buffer
-                camera->CS_HIGH();
+                camera.CS_HIGH();
                 image_file.write(buf, i);
                 //Close the file
                 image_file.close();
                 is_header = false;
-                camera->CS_LOW();
-                camera->set_fifo_burst();
+                camera.CS_LOW();
+                camera.set_fifo_burst();
                 i = 0;
             
             }
@@ -232,18 +230,18 @@ namespace Optics
                 else
                 {
                     //Write 256 bytes image data to file
-                    camera->CS_HIGH();
+                    camera.CS_HIGH();
                     image_file.write(buf, 256);
                     i = 0;
                     buf[i++] = temp;
-                    camera->CS_LOW();
-                    camera->set_fifo_burst();
+                    camera.CS_LOW();
+                    camera.set_fifo_burst();
                 }
             }
             else if ((temp == 0xD8) && (temp_last == 0xFF))
             {
                 is_header = true;
-                camera->CS_HIGH();
+                camera.CS_HIGH();
                 //Create a avi file
                 k = k + 1;
 
@@ -257,7 +255,7 @@ namespace Optics
                 char c_path[50];
                 path.toCharArray(c_path,50);
                 //Open the new file
-                if(!image_file.open(c_path, O_WRITE | O_CREAT | O_TRUNC))
+                if(!image_file.open(c_path, O_WRITE | O_CREAT))
                 {
                     #if DEBUG_ON == true
                         char* message = (char*)"Failed to open image file";
@@ -269,16 +267,30 @@ namespace Optics
 
                     #endif
                 }
+
+                if(!image_file.preAllocate(11000u))
+                {
+                    file.close();
+                    #if DEBUG_ON == true
+                        char* message = (char*)"Failed to preallocate image file";
+                        Debug::error.addToBuffer(micros(), Debug::Warning, message);
+                        
+                        #if LIVE_DEBUG == true
+                            Serial.println(F(message));
+                        #endif
+
+                    #endif
+                }
                 
                 //error check here
-                camera->CS_LOW();
-                camera->set_fifo_burst();
+                camera.CS_LOW();
+                camera.set_fifo_burst();
                 buf[i++] = temp_last;
                 buf[i++] = temp;
             }
         }
 
-        camera->CS_HIGH();
+        camera.CS_HIGH();
         return 1;
     }
 };

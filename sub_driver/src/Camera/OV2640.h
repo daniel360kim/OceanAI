@@ -36,27 +36,20 @@ namespace Optics
     {
     public:
 
-        //How many pictures to take
-       
-        
-        
 
-        Camera(TwoWire &bus, SPIClass &spiBus, const uint8_t cs_pin);
+        Camera(const uint8_t cs_pin);
 
         bool begin();
         void setFrameCount(uint8_t frame_num) { this->frame_num = frame_num; }
-        void capture(unsigned long delay_micros);
+        void capture(unsigned long delay_micros, unsigned long &capture_time, unsigned long &save_time, uint8_t &FIFO_length);
 
     private:
-        ArduCAM *camera;
-        TwoWire *_i2c;
-        SPIClass *_spi;
 
         uint8_t cs_pin;
         uint8_t frame_num = ONE_PHOTO;
         bool is_header = false;
         char* image_file_name;
-        uint8_t read_fifo_burst();
+        uint8_t read_fifo_burst(uint8_t &fifolength);
 
 
         unsigned long long previous_log;
