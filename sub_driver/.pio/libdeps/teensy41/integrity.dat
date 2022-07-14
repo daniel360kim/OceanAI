@@ -1,10 +1,9 @@
-latimes2/InternalTemperature@^2.1.1-a
-https://github.com/adafruit/Adafruit_Sensor
 adafruit/Adafruit BusIO@^1.11.6
-Buzzer
-https://github.com/mikalhart/TinyGPSPlus
-greiman/SdFat@^2.2.0
 arducam/ArduCAM@^1.0.0
 https://github.com/nRF24/RF24Mesh
-https://github.com/janelia-arduino/Vector
+https://github.com/adafruit/Adafruit_Sensor
+https://github.com/mikalhart/TinyGPSPlus
+Buzzer
+latimes2/InternalTemperature@^2.1.1-a
+greiman/SdFat@^2.2.0
 https://github.com/pedvide/ADC
