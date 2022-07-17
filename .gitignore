@@ -1,5 +1,2 @@
 # Visual Studio Code files and folder
-.vscode/configurationCache.log
-.vscode/dryrun.log
-.vscode/settings.json
-.vscode/targets.log
+.vscode\configurationCache.log
