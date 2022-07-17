@@ -36,7 +36,7 @@ class Radio
 public:
     
     Radio(unsigned long log_freq_micros) : log_freq(log_freq_micros) {}
-    void init()
+    bool init()
     {
         if(!radio.begin())
         {
@@ -49,6 +49,8 @@ public:
                 #endif
 
             #endif
+
+            return false;
         }
         else
         {
@@ -69,6 +71,7 @@ public:
         radio.enableAckPayload();
         radio.setPALevel(RF24_PA_HIGH);
 
+        return true;
     }
     
     /**
@@ -88,7 +91,7 @@ public:
      * @param data the object to be transmitted
      */
     template <typename T>
-    void writeData(T data)
+    bool writeData(T data)
     {
         network.update();
         
@@ -109,6 +112,8 @@ public:
                     #endif
                     
                 #endif
+
+                return false;
             }
 
             else
@@ -125,6 +130,7 @@ public:
             }
        
             previousLog = current_micros;
+            return true;
         }
            
         

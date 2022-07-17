@@ -624,9 +624,9 @@ int Bmi088Accel::begin()
   else 
   {
     /* starting the I2C bus */
-    _i2c->begin();
+    Wire.begin();
     /* setting the I2C clock */
-    _i2c->setClock(_i2cRate);
+    Wire.setClock(_i2cRate);
   }
   /* check device id */
   if (!isCorrectId()) 
@@ -1215,10 +1215,10 @@ void Bmi088Accel::writeRegister(uint8_t subAddress, uint8_t data)
     digitalWrite(_csPin,HIGH); // deselect the chip
     _spi->endTransaction(); // end the transaction
   } else {
-    _i2c->beginTransmission(_address); // open the device
-    _i2c->write(subAddress); // write the register address
-    _i2c->write(data); // write the data
-    _i2c->endTransmission();
+    Wire.beginTransmission(_address); // open the device
+    Wire.write(subAddress); // write the register address
+    Wire.write(data); // write the data
+    Wire.endTransmission();
   }
 }
 
@@ -1235,12 +1235,12 @@ void Bmi088Accel::writeRegisters(uint8_t subAddress, uint8_t count, const uint8_
     digitalWrite(_csPin,HIGH); // deselect the chip
     _spi->endTransaction(); // end the transaction
   } else {
-    _i2c->beginTransmission(_address); // open the device
-    _i2c->write(subAddress); // write the register address
+    Wire.beginTransmission(_address); // open the device
+    Wire.write(subAddress); // write the register address
     for (uint8_t i = 0; i < count; i++) {
-      _i2c->write(data[i]); // write the data
+      Wire.write(data[i]); // write the data
     }
-    _i2c->endTransmission();
+    Wire.endTransmission();
   }
 }
 
@@ -1262,12 +1262,12 @@ void Bmi088Accel::readRegisters(uint8_t subAddress, uint8_t count, uint8_t* dest
     digitalWrite(_csPin,HIGH); // deselect the chip
     _spi->endTransaction(); // end the transaction
   } else {
-    _i2c->beginTransmission(_address); // open the device
-    _i2c->write(subAddress); // specify the starting register address
-    _i2c->endTransmission(false);
-    _i2c->requestFrom(_address, count); // specify the number of bytes to receive
+    Wire.beginTransmission(_address); // open the device
+    Wire.write(subAddress); // specify the starting register address
+    Wire.endTransmission(false);
+    Wire.requestFrom(_address, count); // specify the number of bytes to receive
     for (uint8_t i = 0; i < count; i++) {
-      dest[i] = _i2c->read(); // read the data
+      dest[i] = Wire.read(); // read the data
     }
   }
 }
@@ -1300,9 +1300,9 @@ int Bmi088Gyro::begin()
     _spi->begin();
   } else {
     /* starting the I2C bus */
-    _i2c->begin();
+    Wire.begin();
     /* setting the I2C clock */
-    _i2c->setClock(_i2cRate);
+    Wire.setClock(_i2cRate);
   }
   /* check device id */
   if (!isCorrectId()) {
@@ -1565,10 +1565,10 @@ void Bmi088Gyro::writeRegister(uint8_t subAddress, uint8_t data)
     digitalWrite(_csPin,HIGH); // deselect the chip
     _spi->endTransaction(); // end the transaction
   } else {
-    _i2c->beginTransmission(_address); // open the device
-    _i2c->write(subAddress); // write the register address
-    _i2c->write(data); // write the data
-    _i2c->endTransmission();
+    Wire.beginTransmission(_address); // open the device
+    Wire.write(subAddress); // write the register address
+    Wire.write(data); // write the data
+    Wire.endTransmission();
   }
 }
 
@@ -1585,12 +1585,12 @@ void Bmi088Gyro::readRegisters(uint8_t subAddress, uint8_t count, uint8_t* dest)
     digitalWrite(_csPin,HIGH); // deselect the chip
     _spi->endTransaction(); // end the transaction
   } else {
-    _i2c->beginTransmission(_address); // open the device
-    _i2c->write(subAddress); // specify the starting register address
-    _i2c->endTransmission(false);
-    _i2c->requestFrom(_address, count); // specify the number of bytes to receive
+    Wire.beginTransmission(_address); // open the device
+    Wire.write(subAddress); // specify the starting register address
+    Wire.endTransmission(false);
+    Wire.requestFrom(_address, count); // specify the number of bytes to receive
     for (uint8_t i = 0; i < count; i++) {
-      dest[i] = _i2c->read(); // read the data
+      dest[i] = Wire.read(); // read the data
     }
   }
 }

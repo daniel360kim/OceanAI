@@ -29,13 +29,13 @@ Timer<1, micros> voltage_interrupt;
 
 namespace Filter
 {
-    LowPass<2> gyr_x(10, 1e3, true); 
-    LowPass<2> gyr_y(10, 1e3, true); 
-    LowPass<2> gyr_z(10, 1e3, true);
+    LowPass<1> gyr_x(10); 
+    LowPass<1> gyr_y(10); 
+    LowPass<1> gyr_z(10);
 
-    LowPass<2> acc_x(10, 1e3, true); 
-    LowPass<2> acc_y(10, 1e3, true); 
-    LowPass<2> acc_z(10, 1e3, true);     
+    LowPass<1> acc_x(10); 
+    LowPass<1> acc_y(10); 
+    LowPass<1> acc_z(10);     
 };
 
 
@@ -51,7 +51,7 @@ volatile bool UnifiedSensors::voltage_flag = false;
 
 UnifiedSensors::UnifiedSensors() {}
 
-void UnifiedSensors::initNavSensors()
+bool UnifiedSensors::initNavSensors()
 {
     int status[10]; 
 
@@ -103,6 +103,7 @@ void UnifiedSensors::initNavSensors()
                         
                     #endif 
                     
+                    return false;
                     break;
                 case 1:
                 {
@@ -115,6 +116,8 @@ void UnifiedSensors::initNavSensors()
                         #endif
                         
                     #endif 
+
+                    return false;
                     break;
                 }
                 case 2:
@@ -128,6 +131,8 @@ void UnifiedSensors::initNavSensors()
                         #endif
                         
                     #endif 
+
+                    return false;
                     break;
                 }
 
@@ -143,6 +148,7 @@ void UnifiedSensors::initNavSensors()
                         
                     #endif 
 
+                    return false;
                     break;
                 }
                 default:
@@ -156,10 +162,10 @@ void UnifiedSensors::initNavSensors()
                         #endif
                         
                     #endif 
-                    Serial.println(F(""));
+                    return false;
                 }
             }
-            //indicate error
+
         } 
 
     }
@@ -173,6 +179,8 @@ void UnifiedSensors::initNavSensors()
         #endif
         
     #endif 
+
+    return true;
 }
 
 void UnifiedSensors::initADC()
@@ -312,20 +320,22 @@ void UnifiedSensors::logToStruct(Data &data)
 
         returnRawAccel(&data.racc.x, &data.racc.y, &data.racc.z, &data.bmi_temp);
 
-        data.facc.x = Filter::acc_x.filt(data.racc.x);
-        data.facc.y = Filter::acc_y.filt(data.racc.y);
-        data.facc.z = Filter::acc_z.filt(data.racc.z);
+        
+        data.facc.x = Filter::acc_x.filt(data.racc.x, data.dt);
+        data.facc.y = Filter::acc_y.filt(data.racc.y, data.dt);
+        data.facc.z = Filter::acc_z.filt(data.racc.z, data.dt);
+
         UnifiedSensors::accel_flag = false;
 
 
         returnRawGyro(&data.rgyr.x, &data.rgyr.y, &data.rgyr.z);
 
-        data.fgyr.x = Filter::gyr_x.filt(data.rgyr.x);
-        data.fgyr.y = Filter::gyr_y.filt(data.rgyr.y);
-        data.fgyr.z = Filter::gyr_z.filt(data.rgyr.z);
+        data.fgyr.x = Filter::gyr_x.filt(data.rgyr.x, data.dt);
+        data.fgyr.y = Filter::gyr_y.filt(data.rgyr.y, data.dt);
+        data.fgyr.z = Filter::gyr_z.filt(data.rgyr.z, data.dt);
 
         UnifiedSensors::gyro_flag = false;
-
+    
     }
 
     if(UnifiedSensors::bar_flag)

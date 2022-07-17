@@ -48,8 +48,13 @@ private:
     unsigned int findFactors();
     static bool flush(void*);
     static bool getCapacity(void*);
+};
 
+class GPS_Logger
+{
+public:
 
+private:
 };
 
 

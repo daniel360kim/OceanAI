@@ -12,6 +12,8 @@
 #ifndef OS_H
 #define OS_H
 
+
+/*
 #include <Arduino.h>
 #include <InternalTemperature.h>
 
@@ -30,7 +32,7 @@ namespace OS_Settings
 class OS
 {
 public:
-    OS() {} 
+    OS();
     void log_cpu_state(Data &data);
 
 private:
@@ -74,4 +76,6 @@ void OS::LowAlarmISR()
     InternalTemperature.attachHighTempInterruptCelsius (OS_Settings::HIGH_TEMP, &HighAlarmISR);
 }
 
-#endif
+#endif\
+
+*/

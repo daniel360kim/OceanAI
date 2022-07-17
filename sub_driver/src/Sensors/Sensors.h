@@ -29,7 +29,7 @@ class UnifiedSensors
 
 public:
     UnifiedSensors();
-    void initNavSensors();
+    bool initNavSensors();
     void initADC();
     void initTDS(uint8_t TDS_pin);
     void initVoltmeter(uint8_t input_pin);
@@ -51,10 +51,10 @@ public:
     static volatile bool gyro_flag ;
     static volatile bool mag_flag;
 
-    static inline void bar_drdy() __attribute__((always_inline)) { bar_flag = true; }
-    static inline void accel_drdy() __attribute__((always_inline)) { accel_flag = true; }
-    static inline void gyro_drdy() __attribute__((always_inline)) { gyro_flag = true; }
-    static inline void mag_drdy() __attribute__((always_inline)) { mag_flag = true; }
+    static void bar_drdy()  { bar_flag = true; }
+    static void accel_drdy()  { accel_flag = true; }
+    static void gyro_drdy()  { gyro_flag = true; }
+    static void mag_drdy()  { mag_flag = true; }
 
     double gx_bias = 0, gy_bias = 0, gz_bias = 0;
     const double HARD_IRON_BIAS[3] = { 0.36, 0.39, 0.49 };

@@ -65,7 +65,7 @@ namespace Optics
                     #endif
 
                 #endif
-
+                
                 return false;
             }
             else
@@ -123,20 +123,14 @@ namespace Optics
 
         }
 
-        
-    
-        
         camera.set_format(JPEG);
         camera.InitCAM();
         camera.clear_fifo_flag();
         camera.write_reg(0x01, frame_num);
-
-        
-        
         return true;
     }
     
-    void Camera::capture(unsigned long delay_micros, unsigned long &capture_time, unsigned long &save_time, uint8_t &FIFO_length)
+    void Camera::capture(unsigned long delay_micros, unsigned long *capture_time, unsigned long *save_time, uint8_t *FIFO_length)
     {
         unsigned long long current_micros = micros();
 
@@ -151,18 +145,22 @@ namespace Optics
             unsigned long long total_time = micros();
             while ( !camera.get_bit(ARDUCHIP_TRIG, CAP_DONE_MASK));
 
-            capture_time = total_time - micros();
+            *capture_time = total_time - micros();
+            #if LIVE_DEBUG == true
+                Serial.print(F("capture total_time used (in miliseconds):"));
+                Serial.println(*capture_time / 1000, DEC);
+            #endif
             total_time = micros();
 
             read_fifo_burst(FIFO_length);
             total_time = micros() - total_time;
             camera.clear_fifo_flag();
 
-            save_time = total_time;
+            *save_time = total_time;
             
             #if LIVE_DEBUG == true
                 Serial.print(F("save capture total_time used (in miliseconds):"));
-                Serial.println(total_time, DEC);
+                Serial.println(*save_time / 1000, DEC);
             #endif
 
             camera.clear_fifo_flag();
@@ -171,7 +169,7 @@ namespace Optics
         };
     }
     
-    uint8_t Camera::read_fifo_burst(uint8_t &fifolength)
+    uint8_t Camera::read_fifo_burst(uint8_t *fifolength)
     {
         uint8_t temp = 0, temp_last = 0;
         uint32_t length = 0;
@@ -181,11 +179,7 @@ namespace Optics
         byte buf[256];
 
         length = camera.read_fifo_length();
-        fifolength = length;
-        #if LIVE_DEBUG == true
-            Serial.print(F("The FIFO length is: "));
-            Serial.println(length, DEC);
-        #endif
+        *fifolength = length;
         if(length >= MAX_FIFO_SIZE) //8M
         {
              #if DEBUG_ON == true

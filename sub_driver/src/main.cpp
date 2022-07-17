@@ -6,11 +6,10 @@
 
 #include "Data/SD/SD.h"
 
-#include "indication/LED.h"
-#include "indication/Buzzer.h"
+#include "indication/OutputFuncs.h"
 
 #include <Arduino.h>
-#include <Entropy.h>
+
 
 #include "Navigation/SensorFusion/Fusion.h"
 #include "Navigation/Postioning.h"
@@ -21,9 +20,6 @@
 #include "debug.h"
 #include "time/Time.h"
 
-#include <vector>
-#include <numeric>
-
 Fusion SFori;
 
 Optics::Camera camera(CS_VD);
@@ -31,55 +27,62 @@ GPS gps(9600);
 
 UnifiedSensors sensor;
 Orientation ori;
-RGBLED LEDa(RED_a, GRN_a, BLU_a);
-RGBLED LEDb(RED_b, GRN_b, BLU_b);
 
 LED signal(SIGNAL);
 
-Piezo buzzer(BUZZ);
-
 unsigned long long previous_time;
+
 Velocity nav_v;
 Position nav_p;
 
 Radio rf(50000);
-
-extern Data data;
+Data data;
 GPSdata gps_data;
 
 CombinedData cdata;
 
-Timer<1,micros, double> print;
 SD_Logger logger;
+
+bool warning = false;
 void setup()
 {
-  
-  buzzer.startupSounds();
+  output.startupSequence();
   Serial.begin(2000000);
-  sensor.initNavSensors();
+
+  if(!sensor.initNavSensors())
+  {
+    output.indicateError();
+  }
+
   sensor.initVoltmeter(v_div);
   sensor.initTDS(TDS);
   sensor.setInterrupts(BAR_int, ACC_int, GYR_int, MAG_int);
   sensor.setGyroBias();
-  Entropy.Initialize();
 
-  rf.init();
-  buzzer.indicateCompeteStartup();
+  if(!rf.init())
+  {
+    warning = true;
+  }
+  
   #if OPTICS_ON == true
-    camera.begin();
+    if(!camera.begin())
+    {
+      warning = true;
+    }
   #endif
   
-  
+  delay(500);
   if(!logger.init())
   {
-    Serial.println("File init failed");
+    output.indicateError();
   }
 
+  output.indicateCompleteStartup();
 
+  previous_time = micros();
 }
 
 bool logged = false;
-
 
 void loop()
 { 
@@ -89,17 +92,13 @@ void loop()
   previous_time = data.time_us;
 
 
-  LEDa.displaySpectrum();
-  LEDb.displaySpectrum();
+  output.loopIndication();
   sensor.logToStruct(data);
+  
   
   gps.updateData(gps_data);
 
- 
-
-
   ori.update(data.fgyr.x, data.fgyr.y, data.fgyr.z, data.dt);
-
 
   nav_v.updateVelocity(data);
   nav_p.updatePosition(data);
@@ -108,45 +107,45 @@ void loop()
   
   Quaternion sf_orientation = Orientation::toQuaternion(data.rel_ori.x, data.rel_ori.y, data.rel_ori.z);
   ori.convertAccelFrame(sf_orientation, data.facc.x, data.facc.y, data.facc.z, &data.wfacc.x, &data.wfacc.y, &data.wfacc.z);
-  nav_v.updateVelocity(data);
-  
-  //Serial.println(data.fgyr_x);
-  /*
 
-  Serial.print(data.SF_x);
-  Serial.print("\t");
-  Serial.print(data.SF_y);
-  Serial.print("\t");
-  Serial.println(data.SF_z);
   
-  Serial.print("\t\t");
-  Serial.print(data.location.age);
-  Serial.print("\t");
-  Serial.print(data.Py);
-  Serial.print("\t");
-  Serial.print(data.Pz);
-  Serial.print("\n");
-  
-  
-  //Serial.println(data.GPS_activated);
-*/
-  //start.logGPSdata(gps_data);
 
   #if OPTICS_ON == true
-    camera.capture(1000000, data.optical_data.capture_time, data.optical_data.save_time, data.optical_data.FIFO_length);
+    camera.capture(1000000, &data.optical_data.capture_time, &data.optical_data.save_time, &data.optical_data.FIFO_length);
   #endif
-  //cdata.d = data;
-  //cdata.g = gps_data;
   
-  //rf.writeData(cdata);
 
   if(!logger.logData(data))
   {
-    Serial.println("Logging failed");
+    output.indicateError();
+  }
+  
+
+  if(!warning)
+  {
+    LEDb.displaySpectrum();
+  }
+  else
+  {
+    LEDb.blink(255, 0, 0, 500);
   }
 
+  /*
+  
+  if(data.time_us >= 10000000)
+  {
+    logger.rewindPrint();
+    while(1);
+  }
+
+  */
 
 
+  
+  
+  cdata.d = data;
+  cdata.g = gps_data;
  
-
+    
+  rf.writeData(cdata);
 }

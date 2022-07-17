@@ -1,0 +1,4 @@
+# Visual Studio Code files and folder
+.vscode/
+**.log
+**.json

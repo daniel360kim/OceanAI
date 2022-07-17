@@ -10,7 +10,6 @@
             "includePath": [
                 "e:/OceanAI/sub_driver/include",
                 "e:/OceanAI/sub_driver/src",
-                "C:/Users/danie/.platformio/packages/framework-arduinoteensy/libraries/TeensyThreads",
                 "C:/Users/danie/.platformio/packages/framework-arduinoteensy/libraries/Entropy",
                 "e:/OceanAI/sub_driver/.pio/libdeps/teensy41/SdFat/src",
                 "e:/OceanAI/sub_driver/.pio/libdeps/teensy41/Buzzer/src",
@@ -106,6 +105,7 @@
                 "C:/Users/danie/.platformio/packages/framework-arduinoteensy/libraries/SoftwareSerial",
                 "C:/Users/danie/.platformio/packages/framework-arduinoteensy/libraries/TFT_ILI9163C",
                 "C:/Users/danie/.platformio/packages/framework-arduinoteensy/libraries/Talkie",
+                "C:/Users/danie/.platformio/packages/framework-arduinoteensy/libraries/TeensyThreads",
                 "C:/Users/danie/.platformio/packages/framework-arduinoteensy/libraries/Time",
                 "C:/Users/danie/.platformio/packages/framework-arduinoteensy/libraries/TimeAlarms",
                 "C:/Users/danie/.platformio/packages/framework-arduinoteensy/libraries/TimerOne",
@@ -131,7 +131,6 @@
                 "path": [
                     "e:/OceanAI/sub_driver/include",
                     "e:/OceanAI/sub_driver/src",
-                    "C:/Users/danie/.platformio/packages/framework-arduinoteensy/libraries/TeensyThreads",
                     "C:/Users/danie/.platformio/packages/framework-arduinoteensy/libraries/Entropy",
                     "e:/OceanAI/sub_driver/.pio/libdeps/teensy41/SdFat/src",
                     "e:/OceanAI/sub_driver/.pio/libdeps/teensy41/Buzzer/src",
@@ -227,6 +226,7 @@
                     "C:/Users/danie/.platformio/packages/framework-arduinoteensy/libraries/SoftwareSerial",
                     "C:/Users/danie/.platformio/packages/framework-arduinoteensy/libraries/TFT_ILI9163C",
                     "C:/Users/danie/.platformio/packages/framework-arduinoteensy/libraries/Talkie",
+                    "C:/Users/danie/.platformio/packages/framework-arduinoteensy/libraries/TeensyThreads",
                     "C:/Users/danie/.platformio/packages/framework-arduinoteensy/libraries/Time",
                     "C:/Users/danie/.platformio/packages/framework-arduinoteensy/libraries/TimeAlarms",
                     "C:/Users/danie/.platformio/packages/framework-arduinoteensy/libraries/TimerOne",

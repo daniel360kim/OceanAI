@@ -19,16 +19,18 @@
 #include "../data_struct.h"
 #include "RingBuffer.h"
 #include "../../time/Time.h"
+#include "../../debug.h"
+#include "../../config.h"
 
 namespace SD_Settings
 {
     constexpr unsigned int LOG_RATE = 100u; //log rate in hertz
-    constexpr unsigned int LOG_INTERVAL_US = 10000u; 
+    constexpr unsigned int LOG_INTERVAL_US = 1000u; 
     constexpr unsigned int DATA_SIZE = sizeof(Data);
     constexpr unsigned int BUF_SIZE = 200u; //400 sections of 512 byte structs in our buffer
     constexpr unsigned long LOG_FILE_SIZE = 259200u * DATA_SIZE * LOG_RATE; //3 days (in seconds) * size of struct * data rate in hertz
     constexpr unsigned int READ_BUF_SIZE = 600u;
-    constexpr unsigned long FLUSH_INTERVAL_US = 15000000ul; //flush every 15 seconds
+    constexpr unsigned long FLUSH_INTERVAL_US = 60000000ul; //flush every 60 seconds
 };
 
 extern unsigned long _heap_start;
@@ -45,9 +47,7 @@ CircularBuffer<Data> buf(SD_Settings::BUF_SIZE);
 Timer<1, micros> flusher;
 Timer<1, micros> cap_update;
 
-SD_Logger::SD_Logger()
-{
-}
+SD_Logger::SD_Logger() {}
 
 bool SD_Logger::init()
 {
@@ -66,7 +66,26 @@ bool SD_Logger::init()
     {
         return false;
     }
-    if(!file.open(data_filename, O_RDWR | O_CREAT))
+
+    if(!sd.exists("Images"))
+    {
+        if(!sd.mkdir("Images"))
+        {
+            #if DEBUG_ON == true
+                char* message = (char*)"Failed to make directory";
+                Debug::error.addToBuffer(micros(), Debug::Fatal, message);
+                
+                #if LIVE_DEBUG == true
+                    Serial.println(F(message));
+                #endif
+
+            #endif
+            return false;
+        }
+    }
+
+
+    if(!file.open(data_filename, O_WRITE | O_CREAT))
     {
         return false;
     }
@@ -79,13 +98,14 @@ bool SD_Logger::init()
     }
 
     flusher.every(SD_Settings::FLUSH_INTERVAL_US, SD_Logger::flush);
-    cap_update.every(1000000, SD_Logger::getCapacity);
+    cap_update.every(3600000000, SD_Logger::getCapacity);
 
     return true;
 }
 
 bool SD_Logger::logData(Data data)
 {
+    
     if(SD_Logger::cap_update_int == true)
     {
         data.sd_capacity = sd.freeClusterCount();
@@ -99,6 +119,7 @@ bool SD_Logger::logData(Data data)
         if(file.isBusy())
         {
             buf.insert(data);
+            Serial.println("File busy!");
         }
         else
         {
@@ -121,6 +142,7 @@ bool SD_Logger::logData(Data data)
     }
     if(buf.full())
     {
+        Serial.println("Buff full!");
         return false;
     }
 
@@ -198,7 +220,7 @@ bool SD_Logger::rewindPrint()
             cc = read_buf->get();
             file.print(cc.time_us); file.print(F(comma));
             file.print(cc.system_state); file.print(F(comma));
-            file.print(cc.dt,7); file.print(F(comma));
+            file.print(cc.dt,15); file.print(F(comma));
             file.print(cc.bmp_rpres); file.print(F(comma)); file.print(cc.bmp_rtemp); file.print(F(comma)); file.print(cc.bmp_fpres); file.print(F(comma)); file.print(cc.bmp_ftemp);file.print(F(comma));
             file.print(cc.racc.x); file.print(F(comma)); file.print(cc.racc.y); file.print(F(comma)); file.print(cc.racc.z); file.print(F(comma));
             file.print(cc.facc.x); file.print(F(comma)); file.print(cc.facc.y); file.print(F(comma)); file.print(cc.facc.z); file.print(F(comma));
