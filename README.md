@@ -19,4 +19,48 @@ The plan for OceanAI is to develop an autonomous underwater vehicle (AUV) and us
 * Fully trained computer vision model (still training)
 * Finished submarine.
 
+## Directory Guide 
 
+<details>
+<summary>CAD</summary>
+<ul>
+  <li>Contains compressed CAD .step files of the submarine</li>
+  <li>Dependencies hold external designs that were imported when designing the submarine</li>
+  <li>The design is pretty much finalized now!</li>
+</ul>
+    <img src="Resources/project_images/sub_cad/complete/render1.png" alt="Girl in a jacket">
+</details>
+
+
+<details>
+<summary>main_board</summary>
+<ul>
+  <li>Contains all the files and fabrication outputs of the PCB that controls the submarine</li>
+  <li>3D folder contains .step files of the board</li>
+  <li>The board has been fully designed, fabricated, tested, and built! It works great!</li>
+</ul>
+    <img src="Resources/project_images/pcb/render.gif" alt="Girl in a jacket">
+    <h3>This directory does not contain the external dependencies used in this project! These will be added later.</h3>
+</details>
+
+<details>
+<summary>Vision</summary>
+<ul>
+  <li>Contains the Notebook that guides you in creating a custom YOLOv5 model</li>
+   <h3>See the <a href="https://github.com/daniel360kim/OceanAI/blob/master/Vision/README.md">README</a> for more info and a tutorial!</h3>
+</ul>
+    <img src="Resources\project_images\object_detection\Run 1\44a9e4ca-a3bc-4e35-8018-6accfdf4da92.jpg" alt="Girl in a jacket">
+   
+</details>
+
+<details>
+<summary>software</summary>
+<ul>
+  <li>Contains two directories: <a href="https://github.com/daniel360kim/OceanAI/tree/master/software/receiver_driver">receiver_driver</a> and <a href=">https://github.com/daniel360kim/OceanAI/tree/master/software/sub_driver">sub_driver</a></li>
+  <li>sub_driver contains all the code that controls the submarine</li>
+  <li>receiver_driver runs code that receives transmitted data from the submarine and displays the image in a GUI</li>
+
+</ul>
+    <img src="software\receiver_driver\resources\gui_preview.png">
+   
+</details>
