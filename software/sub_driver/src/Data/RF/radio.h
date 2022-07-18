@@ -130,10 +130,10 @@ public:
             }
        
             previousLog = current_micros;
-            return true;
+            
         }
            
-        
+        return true;
         
     }
 

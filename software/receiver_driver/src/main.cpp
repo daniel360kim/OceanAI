@@ -325,7 +325,11 @@ void loop()
         Serial.print(F(comma));
         Serial.print(datacopy.g.metadata.failedChecksum);
         Serial.print(F(comma));
-        Serial.print(datacopy.d.dt);
+        Serial.print(datacopy.d.dt,20);
+        Serial.print(F(comma));
+        Serial.print(datacopy.d.sd_capacity);
+        Serial.print(F(comma));
+        Serial.print(datacopy.d.system_state);
         Serial.print("\n");
     }
 }

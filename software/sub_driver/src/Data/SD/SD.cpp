@@ -25,7 +25,7 @@
 namespace SD_Settings
 {
     constexpr unsigned int LOG_RATE = 100u; //log rate in hertz
-    constexpr unsigned int LOG_INTERVAL_US = 1000u; 
+    constexpr unsigned int LOG_INTERVAL_US = 10000u; 
     constexpr unsigned int DATA_SIZE = sizeof(Data);
     constexpr unsigned int BUF_SIZE = 200u; //400 sections of 512 byte structs in our buffer
     constexpr unsigned long LOG_FILE_SIZE = 259200u * DATA_SIZE * LOG_RATE; //3 days (in seconds) * size of struct * data rate in hertz

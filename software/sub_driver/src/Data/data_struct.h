@@ -13,6 +13,7 @@
 
 #include <Arduino.h>
 
+#include "../Navigation/Quaternion.h"
 
 namespace GPS_data
 {
@@ -120,11 +121,6 @@ struct Vec3
     double x, y, z;
 };
 
-struct Vec4
-{
-    double w, x, y, z;
-};
-
 //To do: organize into different structs for optimization and organization
 struct Data
 {
@@ -145,8 +141,8 @@ struct Data
     Vec3 rel_ori;
     Vec3 abs_ori;
 
-    Vec4 relative;
-    Vec4 absolute;
+    Quaternion relative;
+    Quaternion absolute;
 
     double bmi_temp;
 
