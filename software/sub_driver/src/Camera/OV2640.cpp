@@ -18,6 +18,7 @@
 #include "OV2640.h"
 #include "../Data/SD/SD.h"
 #include "../Data/SD/DataFile.h"
+#include "../Data/StartInfo.h"
 #include "../debug.h"
 #include "../config.h"
 #include "../pins.h"
@@ -27,6 +28,11 @@ FsFile image_file;
 
 namespace Optics
 {
+    namespace Settings
+    {
+        constexpr uint8_t IMAGE_SIZE = OV2640_640x480;
+        constexpr uint8_t IMAGE_FORMAT = JPEG;
+    };
     ArduCAM camera(OV2640, CS_VD);
 
     Camera::Camera(const uint8_t cs_pin)
@@ -118,15 +124,16 @@ namespace Optics
                 break;
                 
             }
-
-            
-
         }
 
-        camera.set_format(JPEG);
+        camera.set_format(Settings::IMAGE_FORMAT);
         camera.InitCAM();
         camera.clear_fifo_flag();
         camera.write_reg(0x01, frame_num);
+
+        configs.img_size = Settings::IMAGE_SIZE;
+        configs.img_format = Settings::IMAGE_FORMAT;
+
         return true;
     }
     
@@ -138,7 +145,8 @@ namespace Optics
         {
             camera.flush_fifo();
             camera.clear_fifo_flag();
-            camera.OV2640_set_JPEG_size(OV2640_640x480);
+
+            camera.OV2640_set_JPEG_size(Settings::IMAGE_SIZE);
 
             camera.start_capture();
             

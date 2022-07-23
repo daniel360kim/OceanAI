@@ -18,6 +18,7 @@
 #include "RingBuffer.h"
 #include "DataFile.h"
 #include "../data_struct.h"
+#include "../../config.h"
 
 extern SdFs sd;
 extern FsFile file;
@@ -38,9 +39,8 @@ private:
     unsigned long long previous_time;
 
     unsigned long pt_cap_update;
-    bool ASCII_header_made = false;
 
-    unsigned long long iterations;
+    unsigned long iterations;
 
     static volatile bool cap_update_int;
 
@@ -48,6 +48,8 @@ private:
     unsigned int findFactors();
     static bool flush(void*);
     static bool getCapacity(void*);
+
+
 };
 
 class GPS_Logger

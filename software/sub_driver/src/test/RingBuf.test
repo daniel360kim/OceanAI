@@ -1,0 +1,41 @@
+#include "Data/SD/RingBuffer.h"
+
+#include <Arduino.h>
+void setup()
+{
+    Serial.begin(2000000);
+    while (!Serial);
+    CircularBuffer<int> buf(10);
+
+    int x[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+    for (int i = 0; i < 10; i++)
+    {
+        buf.insert(x[i]);
+    }
+
+    Serial.print("Buf full? ");
+    Serial.println(buf.full());
+
+    for (int i = 0; i < 10; i++)
+    {
+        Serial.println(buf.get());
+    }
+
+    int x_[10] = {2, 4, 6, 8, 10, 12, 14, 16, 18, 20};
+
+    for(int i = 0; i < 10; i++)
+    {
+        buf.insert(x_[i]);
+    }
+
+    Serial.print("Buf capacity: "); Serial.println(buf.capacity());
+    for (int i = 0; i < 10; i++)
+    {
+        Serial.println(buf.get());
+    }
+}
+
+void loop()
+{
+}

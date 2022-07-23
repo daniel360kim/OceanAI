@@ -21,8 +21,7 @@
 
 #include "../Data/data_struct.h"
 
-#define VREF 3.3
-
+constexpr double VREF = 3.3;
 
 class UnifiedSensors
 {
@@ -62,6 +61,8 @@ public:
 private:
     uint8_t TDS_pin, voltage_pin;
     double temp = 25;
+
+    double temp_measurements[2];
     int getMedian(int bArray[], int iFilterLen);
 
     //Using a timer we generate a fake interrupt for analog reads
@@ -71,10 +72,6 @@ private:
     //Set the flags true for the interrupt
     static inline bool TDS_drdy(void*) { TDS_flag = true; return true; }
     static inline bool voltage_drdy(void*) { voltage_flag = true; return true; }
-
-    
-    
-
 
 };
 

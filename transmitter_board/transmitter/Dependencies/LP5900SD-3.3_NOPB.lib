@@ -1,0 +1,36 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#(c) SnapEDA 2016 (snapeda.com)
+#This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA) with Design Exception 1.0
+#
+# LP5900SD-3.3/NOPB
+#
+DEF LP5900SD-3.3/NOPB U 0 40 Y Y 1 L N
+F0 "U" -500 439 50 H V L BNN
+F1 "LP5900SD-3.3/NOPB" -500 -657 50 H V L BNN
+F2 "SON65P250X220X80-7N" 0 0 50 H I L BNN
+F3 "" 0 0 50 H I L BNN
+F4 "https://snapeda.com/shop?store=DigiKey&id=19396" 0 0 50 H I L BNN "DIGIKEY-PURCHASE-URL"
+F5 "Texas Instruments" 0 0 50 H I L BNN "MF"
+F6 "LP5900SD-3.3/NOPB" 0 0 50 H I L BNN "MP"
+F7 "150-mA, low-noise, low-IQ, low-dropout voltage regulator with enable 6-WSON -40 to 125" 0 0 50 H I L BNN "DESCRIPTION"
+F8 "Good" 0 0 50 H I L BNN "AVAILABILITY"
+F9 "IPC-7351B" 0 0 50 H I L BNN "STANDARD"
+F10 "https://snapeda.com/shop?store=Mouser&id=19396" 0 0 50 H I L BNN "MOUSER-PURCHASE-URL"
+F11 "WSON-6 Texas Instruments" 0 0 50 H I L BNN "PACKAGE"
+F12 "https://snapeda.com/shop?store=Texas+Instruments&id=19396" 0 0 50 H I L BNN "TEXAS_INSTRUMENTS-PURCHASE-URL"
+F13 "R" 0 0 50 H I L BNN "PARTREV"
+F14 "None" 0 0 50 H I L BNN "PRICE"
+DRAW
+S -500 -500 500 400 0 0 10 f
+X EN 4 -700 100 200 R 40 40 0 0 I 
+X N/C_2 2 700 0 200 L 40 40 0 0 N 
+X OUT 1 700 300 200 L 40 40 0 0 O 
+X EXP 7 700 -300 200 L 40 40 0 0 W 
+X GND 3 700 -400 200 L 40 40 0 0 W 
+X N/C_5 5 700 -100 200 L 40 40 0 0 N 
+X IN 6 -700 300 200 R 40 40 0 0 I 
+ENDDRAW
+ENDDEF
+#
+# End Library

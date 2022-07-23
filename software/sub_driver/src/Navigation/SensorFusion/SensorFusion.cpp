@@ -31,9 +31,9 @@
 //-------------------------------------------------------------------------------------------
 // Definitions
 
-#define betaDef     0.1        	// 2 * proportional gain
-#define twoKpDef	(2.0 * 0.5)	// 2 * proportional gain
-#define twoKiDef	(2.0 * 0.0)	// 2 * integral gain
+constexpr double betaDef  =  0.1;        	// 2 * proportional gain
+constexpr double twoKpDef =	(2.0 * 0.5);	// 2 * proportional gain
+constexpr double twoKiDef =	(2.0 * 0.0);	// 2 * integral gain
 
  
 //============================================================================================
@@ -60,7 +60,7 @@ double SF::invSqrt(double x)
 	double halfx = 0.5 * x;
 	double y = x;
 	int64_t i = *(int64_t*) &y;
-	i = 0x5fe6eb50c7b537a9 - (i>>1);
+	i = 0x5fe6eb50c7b537a9 - (i >> 1);
 	y = *(double*)&i;
 	y = y * (1.5 - (halfx * y * y));
 	y = y * (1.5 - (halfx * y * y));
@@ -70,9 +70,9 @@ double SF::invSqrt(double x)
 //-------------------------------------------------------------------------------------------
 void SF::computeAngles()
 {
-	roll = atan2f(q0*q1 + q2*q3, 0.5 - q1*q1 - q2*q2);
-	pitch = asinf(-2.0 * (q1*q3 - q0*q2));
-	yaw = atan2f(q1*q2 + q0*q3, 0.5 - q2*q2 - q3*q3);
+	roll = atan2(q0*q1 + q2*q3, 0.5 - q1*q1 - q2*q2);
+	pitch = asin(-2.0 * (q1*q3 - q0*q2));
+	yaw = atan2(q1*q2 + q0*q3, 0.5 - q2*q2 - q3*q3);
 	anglesComputed = 1;
 }
 

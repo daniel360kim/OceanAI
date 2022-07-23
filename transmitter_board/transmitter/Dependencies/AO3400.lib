@@ -1,0 +1,45 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#(c) SnapEDA 2016 (snapeda.com)
+#This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA) with Design Exception 1.0
+#
+# AO3400
+#
+DEF AO3400 U 0 40 N N 1 L N
+F0 "U" -400 95 50 H V L BNN
+F1 "AO3400" -400 0 50 H V L BNN
+F2 "SOT23" 0 0 50 H I L BNN
+F3 "" 0 0 50 H I L BNN
+F4 "Alpha &" 0 0 50 H I L BNN "MF"
+F5 "Unavailable" 0 0 50 H I L BNN "AVAILABILITY"
+F6 "None" 0 0 50 H I L BNN "PRICE"
+F7 "AO3400" 0 0 50 H I L BNN "MP"
+F8 "SOT-23-3 Alpha &amp; Omega Semiconductor" 0 0 50 H I L BNN "PACKAGE"
+F9 "N-Channel 30V 5.8A _Ta_ 1.4W _Ta_ Surface Mount SOT-23-3" 0 0 50 H I L BNN "DESCRIPTION"
+DRAW
+P 2 0 0 10 0 -135 0 -100 N
+P 2 0 0 10 0 -100 0 0 N
+P 2 0 0 10 0 0 0 100 N
+P 2 0 0 10 0 100 0 135 N
+P 2 0 0 6 70 0 79 0 N
+P 2 0 0 6 79 0 100 0 N
+P 2 0 0 6 0 -100 100 -100 N
+P 2 0 0 6 0 100 100 100 N
+P 2 0 0 10 -40 -135 -40 -100 N
+P 2 0 0 10 -40 -100 -40 -65 N
+P 2 0 0 6 -100 -100 -40 -100 N
+P 2 0 0 6 100 -100 100 -101 N
+C -100 -100 10 0 0 0 N
+C 100 -200 10 0 0 0 N
+C 100 -100 10 0 0 0 N
+P 2 0 0 6 100 -101 100 -200 N
+P 2 0 0 6 0 0 79 0 N
+P 2 0 0 6 100 0 100 -101 N
+P 5 0 0 6 13 -2 58 -36 58 31 14 -1 13 -2 f
+X ~ 1 -200 -100 100 R 40 40 0 0 P 
+X ~ 3 100 200 100 D 40 40 0 0 P 
+X ~ 2 100 -300 100 U 40 40 0 0 P 
+ENDDRAW
+ENDDEF
+#
+# End Library

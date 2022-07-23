@@ -6,5 +6,4 @@
 
 #define OPTICS_ON false
 
-#define DELETE_IMAGES true //plz please do not enable this in rt operation!!!!!!
 #endif

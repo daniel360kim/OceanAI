@@ -13,7 +13,6 @@ public:
     SF filter;
     void update(Data &data)
     {
-    
         filter.MadgwickUpdate(data.fgyr.x, data.fgyr.y, data.fgyr.z, data.facc.x, data.facc.y, data.facc.z, data.mag.x, data.mag.y, data.mag.z, data.dt);
         data.rel_ori.x = Orientation::constrainAngle_whole(filter.getRoll());
         data.rel_ori.y = Orientation::constrainAngle_whole(filter.getPitch());

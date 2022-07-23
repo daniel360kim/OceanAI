@@ -21,15 +21,16 @@
 #include "../../time/Time.h"
 #include "../../debug.h"
 #include "../../config.h"
+#include "../StartInfo.h"
 
 namespace SD_Settings
 {
-    constexpr unsigned int LOG_RATE = 100u; //log rate in hertz
-    constexpr unsigned int LOG_INTERVAL_US = 10000u; 
+    constexpr unsigned long DURATION = 3.6e+9;
+    constexpr unsigned int LOG_INTERVAL_US = 10000u;
+    constexpr unsigned int LOG_RATE = 100u; //log rate in hertz 
     constexpr unsigned int DATA_SIZE = sizeof(Data);
     constexpr unsigned int BUF_SIZE = 200u; //400 sections of 512 byte structs in our buffer
-    constexpr unsigned long LOG_FILE_SIZE = 259200u * DATA_SIZE * LOG_RATE; //3 days (in seconds) * size of struct * data rate in hertz
-    constexpr unsigned int READ_BUF_SIZE = 600u;
+    constexpr unsigned long LOG_FILE_SIZE = DURATION * DATA_SIZE * LOG_RATE; //3 days (in seconds) * size of struct * data rate in hertz
     constexpr unsigned long FLUSH_INTERVAL_US = 60000000ul; //flush every 60 seconds
 };
 
@@ -41,6 +42,7 @@ volatile bool SD_Logger::cap_update_int = false;
 
 SdFs sd;
 FsFile file;
+cid_t cid;
 
 CircularBuffer<Data> buf(SD_Settings::BUF_SIZE);
 
@@ -51,16 +53,46 @@ SD_Logger::SD_Logger() {}
 
 bool SD_Logger::init()
 {
-    DataFile data("data", DataFile::ENDING::TXT);
+    DataFile data("data", DataFile::ENDING::DAT);
     data_filename = data.file_name;
+    configs.bin_file = data_filename;
 
     DataFile csvFile("ASCII", DataFile::ENDING::CSV);
     if(!csvFile.createFile())
     {
         return false;
     }
-
     csv_filename = csvFile.file_name;
+    configs.ascii_file = csv_filename;
+
+    if(!file.open(csv_filename, O_WRITE | O_CREAT))
+    {
+        return false;
+    }
+
+    file.print(("Time us,sys_state,dt,"));
+    file.print(("bmp_rpres, bmp_rtemp, bmp_fpres, bmp_ftemp,"));
+    file.print(("racc_x,racc_y,racc_z,facc_x,facc_y,facc_z,"));
+    file.print(("wfax,wfay,wfaz,"));
+    file.print(("vx,vy,vz,px,py,pz,"));
+    file.print(("rgx,rgy,rgz,fgx,fgy,fgz,"));
+    file.print(("rel_x,rel_y,rel_z,"));
+    file.print(("abs_x,abs_y,abs_z,"));
+    file.print(("rel_w,rel_x,rel_y,rel_z,"));
+    file.print(("abs_w,abs_x,abs_y,abs_z,"));
+    file.print(("bmi_temp,"));
+    file.print(("rmx,rmy,rmz,"));
+    file.print(("ext_rtemp,ext_rpres,ext_ftemp,ext_fpres,"));
+    file.print(("TDS,voltage,clk_speed,int_temp,"));
+    file.print(("dive_sp,dive_output,pitch_sp,pitch_output,"));
+    file.print(("dive_limit,dive_homed,dive_sleep,dive_pp,"));
+    file.print(("pitch_limit,pitch_homed,pitch_sleep,pitch_pp,"));
+    file.print(("cap_time,save_time,fifo_length,"));
+    file.print(("sd_capacity\n"));
+
+    file.close();
+
+    configs.sd_cap = sd.freeClusterCount();
 
     if(!data.createFile())
     {
@@ -83,6 +115,56 @@ bool SD_Logger::init()
             return false;
         }
     }
+
+    DataFile start("start", DataFile::ENDING::TXT);
+    if(!start.createFile())
+    {
+        return false;
+    }
+
+    if(!file.open(start.file_name, O_WRITE | O_CREAT))
+    {
+        return false;
+    }
+
+    file.println("OceanAI Start Configurations");
+    for(int i = 0; i < 255; i++)
+    {
+        file.print("*");
+    }
+    
+    file.print("\n");
+    file.println("////////// Printing to: //////////");
+    file.print("Binary File: "); file.println(data_filename);
+    file.print("ASCII File: "); file.println(csv_filename);
+    file.print("SD Capacity: "); file.print(configs.sd_cap); file.println(" bytes");
+    file.println("/////////////////////////////////\n");
+
+    file.println("////////// Conditional Compilation Configurations //////////");
+    file.println("0 = false | 1 = true");
+    file.print("Debug: "); file.println(configs.debug);
+    file.print("Live Debug: "); file.println(configs.live_debug);
+    file.print("Optics: "); file.println(configs.optics);
+    file.println("/////////////////////////////////\n");
+
+    file.println("////////// Sensor Configurations /////////");
+    file.println("BMP388: "); file.println(configs.BMP_os_p); file.println(configs.BMP_os_t); file.println(configs.BMP_ODR);
+    file.print("\n");
+    file.println("IMU Package - Accel: "); file.println(configs.accel_range); file.println(configs.accel_ODR);
+    file.print("\n");
+    file.println("IMU Package - Gyro: "); file.println(configs.gyro_range); file.println(configs.gyro_ODR);
+    file.print("X Bias: "); file.print(configs.gyro_bias.x); file.print("   ");
+    file.print("Y Bias: "); file.print(configs.gyro_bias.y); file.print("   ");
+    file.print("Z Bias: "); file.print(configs.gyro_bias.z); file.print("\n");
+    file.print("\n");
+    file.println("IMU Package - Mag: "); file.println(configs.mag_range); file.println(configs.mag_ODR);
+    
+    for(int i = 0; i < 255; i++)
+    {
+        file.print("*");
+    }
+
+    file.close();
 
 
     if(!file.open(data_filename, O_WRITE | O_CREAT))
@@ -158,9 +240,10 @@ bool SD_Logger::rewindPrint()
     long buf_size = findFactors();
 
     long write_iterator = 0;
+    CircularBuffer<Data> *read_buf = new CircularBuffer<Data>(buf_size);
+
     for(unsigned long long j = 0; j < iterations / buf_size; j++)
     {
-        CircularBuffer<Data> *read_buf = new CircularBuffer<Data>(buf_size);
         file.open(data_filename, FILE_READ);
 
         Data datacopy;
@@ -172,45 +255,14 @@ bool SD_Logger::rewindPrint()
                 read_buf->insert(datacopy);
             }
         }
-        if(read_buf->full())
-        {
-            Serial.println("Readbuf full!");
-            Serial.print("Freemem "); Serial.println(freeMemory());
-        }
-        
+
         file.close();
 
 
         if(!file.open(csv_filename, O_CREAT | O_APPEND | O_WRITE))
         {
-            Serial.println("File open failed");
+            Serial.println(F("File open failed"));
             return false;
-        }
-
-        //Print our massive header just once
-        if(!ASCII_header_made)
-        {
-            file.print(F("Time us,sys_state,dt,"));
-            file.print(F("bmp_rpres, bmp_rtemp, bmp_fpres, bmp_ftemp,"));
-            file.print(F("racc_x,racc_y,racc_z,facc_x,facc_y,facc_z,"));
-            file.print(F("wfax,wfay,wfaz,"));
-            file.print(F("vx,vy,vz,px,py,pz,"));
-            file.print(F("rgx,rgy,rgz,fgx,fgy,fgz,"));
-            file.print(F("rel_x,rel_y,rel_z,"));
-            file.print(F("abs_x,abs_y,abs_z,"));
-            file.print(F("rel_w,rel_x,rel_y,rel_z,"));
-            file.print(F("abs_w,abs_x,abs_y,abs_z,"));
-            file.print(F("bmi_temp,"));
-            file.print(F("rmx,rmy,rmz,"));
-            file.print(F("ext_rtemp,ext_rpres,ext_ftemp,ext_fpres,"));
-            file.print(F("TDS,voltage,clk_speed,int_temp,"));
-            file.print(F("dive_sp,dive_output,pitch_sp,pitch_output,"));
-            file.print(F("dive_limit,dive_homed,dive_sleep,dive_pp,"));
-            file.print(F("pitch_limit,pitch_homed,pitch_sleep,pitch_pp,"));
-            file.print(F("cap_time,save_time,fifo_length,"));
-            file.print(F("sd_capacity\n"));
-
-            ASCII_header_made = true;
         }
 
         for(long i = 0; i < buf_size; i++)
@@ -248,10 +300,8 @@ bool SD_Logger::rewindPrint()
 
         file.close();
         write_iterator++;
-        delete read_buf;
-        Serial.print("Freemem new: "); Serial.println(freeMemory());
-    
     }
+    delete read_buf;
     return true;
 }
 

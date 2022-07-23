@@ -67,20 +67,20 @@ uint8_t BMP388_DEV::begin(Mode mode, 																// Initialise BMP388 device
   }	 
 	
   readBytes(BMP388_TRIM_PARAMS, (uint8_t*)&params, sizeof(params)); // Read the trim parameters into the params structure
-	doubleParams.param_T1 = (double)params.param_T1 / pow(2.0f, -8.0f); // Calculate the doubleing point trim parameters
-	doubleParams.param_T2 = (double)params.param_T2 / pow(2.0f, 30.0f);
-	doubleParams.param_T3 = (double)params.param_T3 / pow(2.0f, 48.0f);
-	doubleParams.param_P1 = ((double)params.param_P1 - pow(2.0f, 14.0f)) / pow(2.0f, 20.0f);
-	doubleParams.param_P2 = ((double)params.param_P2 - pow(2.0f, 14.0f)) / pow(2.0f, 29.0f);
-	doubleParams.param_P3 = (double)params.param_P3 / pow(2.0f, 32.0f);
-	doubleParams.param_P4 = (double)params.param_P4 / pow(2.0f, 37.0f);
-	doubleParams.param_P5 = (double)params.param_P5 / pow(2.0f, -3.0f);
-	doubleParams.param_P6 = (double)params.param_P6 / pow(2.0f, 6.0f);
-	doubleParams.param_P7 = (double)params.param_P7 / pow(2.0f, 8.0f);
-	doubleParams.param_P8 = (double)params.param_P8 / pow(2.0f, 15.0f);
-	doubleParams.param_P9 = (double)params.param_P9 / pow(2.0f, 48.0f);
-	doubleParams.param_P10 = (double)params.param_P10 / pow(2.0f, 48.0f);
-	doubleParams.param_P11 = (double)params.param_P11 / pow(2.0f, 65.0f);
+	doubleParams.param_T1 = (double)params.param_T1 / pow(2.0, -8.0); // Calculate the doubleing point trim parameters
+	doubleParams.param_T2 = (double)params.param_T2 / pow(2.0, 30.0);
+	doubleParams.param_T3 = (double)params.param_T3 / pow(2.0, 48.0);
+	doubleParams.param_P1 = ((double)params.param_P1 - pow(2.0, 14.0)) / pow(2.0, 20.0);
+	doubleParams.param_P2 = ((double)params.param_P2 - pow(2.0, 14.0)) / pow(2.0, 29.0);
+	doubleParams.param_P3 = (double)params.param_P3 / pow(2.0, 32.0);
+	doubleParams.param_P4 = (double)params.param_P4 / pow(2.0, 37.0);
+	doubleParams.param_P5 = (double)params.param_P5 / pow(2.0, -3.0);
+	doubleParams.param_P6 = (double)params.param_P6 / pow(2.0, 6.0);
+	doubleParams.param_P7 = (double)params.param_P7 / pow(2.0, 8.0);
+	doubleParams.param_P8 = (double)params.param_P8 / pow(2.0, 15.0);
+	doubleParams.param_P9 = (double)params.param_P9 / pow(2.0, 48.0);
+	doubleParams.param_P10 = (double)params.param_P10 / pow(2.0, 48.0);
+	doubleParams.param_P11 = (double)params.param_P11 / pow(2.0, 65.0);
 	setIIRFilter(iirFilter);																					// Initialise the BMP388 IIR filter register
 	setTimeStandby(timeStandby); 																			// Initialise the BMP388 standby time register
 	setOversamplingRegister(presOversampling, tempOversampling);			// Initialise the BMP388 oversampling register	
@@ -105,7 +105,7 @@ uint8_t BMP388_DEV::begin(uint8_t addr)															// Initialise BMP388 with 
 uint8_t BMP388_DEV::reset()																					// Reset the BMP388 barometer
 {
 	writeByte(BMP388_CMD, RESET_CODE);                    						// Write the reset code to the command register 									
-  delay(10);																												// Wait for 10ms
+    delay(10);																												// Wait for 10ms
 	event.reg = readByte(BMP388_EVENT);																// Read the BMP388's event register
 	return event.bit.por_detected; 																		// Return if device reset is complete																					
 }

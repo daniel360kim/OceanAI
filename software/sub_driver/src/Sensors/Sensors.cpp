@@ -17,6 +17,8 @@
 #include "../debug.h"
 #include "LowPass.h"
 #include "../Time/Time.h"
+#include "../Data/StartInfo.h"
+
 
 BMP388_DEV baro;
 Bmi088Accel accel(Wire, 0x18);
@@ -66,17 +68,25 @@ bool UnifiedSensors::initNavSensors()
     baro.setTimeStandby(TIME_STANDBY_80MS);
     baro.startNormalConversion();
 
+    configs.BMP_os_p = (char*)"Pressure: X4";
+    configs.BMP_os_t = (char*)"Temperature: X16";
+    configs.BMP_ODR = (char*)"Standby: 80 milliseconds";
     status[1] = accel.begin();
     accel.setOdr(Bmi088Accel::ODR_800HZ_BW_140HZ);
     accel.pinModeInt1(Bmi088Accel::PUSH_PULL, Bmi088Accel::ACTIVE_HIGH);
     accel.mapDrdyInt1(true);
     accel.setRange(Bmi088Accel::RANGE_3G);
 
+    configs.accel_range = (char*)"Accel: 3G";
+    configs.accel_ODR = (char*)"Accel ODR: 800Hz";
+
     status[2] = gyro.begin();
     gyro.setOdr(Bmi088Gyro::ODR_1000HZ_BW_116HZ);
     gyro.pinModeInt3(Bmi088Gyro::PUSH_PULL,Bmi088Gyro::ACTIVE_HIGH);
     gyro.mapDrdyInt3(true);
     gyro.setRange(Bmi088Gyro::RANGE_250DPS);
+    configs.gyro_range = (char*)"Gyro: 250 degrees per second";
+    configs.gyro_ODR = (char*)"Gyro ODR: 1000Hz";
 
     if(!mag.init())
     {
@@ -85,7 +95,9 @@ bool UnifiedSensors::initNavSensors()
 
     mag.enableDefault();
 
-    
+    configs.mag_range = (char*)"Mag: +/- 4 Gauss";
+    configs.mag_ODR = (char *)"Mag ODR: 1000Hz";
+
     for(int i = 0; i < 10; i++)
     {
         if(status[i] < 0)
@@ -201,16 +213,18 @@ void UnifiedSensors::initADC()
 
 void UnifiedSensors::initTDS(uint8_t TDS_pin)
 {
+    int freq = 10000; //every 10000 us
     pinMode(TDS_pin, INPUT);
     this->TDS_pin = TDS_pin;
-    TDS_interrupt.every(10000, TDS_drdy);
+    TDS_interrupt.every(freq, TDS_drdy);
 }
 
 void UnifiedSensors::initVoltmeter(uint8_t input_pin)
 {
+    int freq = 1000000; // every 1000000 us
     pinMode(input_pin, INPUT);
     voltage_pin = input_pin;
-    voltage_interrupt.every(1000000, voltage_drdy);
+    voltage_interrupt.every(freq, voltage_drdy);
 }
 
 void UnifiedSensors::setInterrupts(uint8_t bar_int, uint8_t accel_int, uint8_t gyro_int, uint8_t mag_int)
@@ -245,6 +259,10 @@ void UnifiedSensors::setGyroBias()
     gx_bias = gxIntegration / 100;
     gy_bias = gyIntegration / 100;
     gz_bias = gzIntegration / 100;
+
+    configs.gyro_bias.x = gx_bias;
+    configs.gyro_bias.y = gy_bias;
+    configs.gyro_bias.z = gz_bias;
 }
 void UnifiedSensors::returnRawBaro(double *pres, double *temp)
 {
@@ -270,7 +288,6 @@ void UnifiedSensors::returnRawGyro(double *x, double *y, double *z)
 
 void UnifiedSensors::returnRawMag(double *x, double *y, double *z)
 {
-
     mag.read();
 
     //Convert to mTesla. Rangle is +/-4 so we divide by 6842 to get gauss, then mult. by 100 to get mtesla
@@ -325,6 +342,8 @@ void UnifiedSensors::logToStruct(Data &data)
         data.facc.y = Filter::acc_y.filt(data.racc.y, data.dt);
         data.facc.z = Filter::acc_z.filt(data.racc.z, data.dt);
 
+        temp_measurements[1] = data.bmi_temp;
+
         UnifiedSensors::accel_flag = false;
 
 
@@ -341,6 +360,7 @@ void UnifiedSensors::logToStruct(Data &data)
     if(UnifiedSensors::bar_flag)
     {
         returnRawBaro(&data.bmp_rpres, &data.bmp_rtemp);
+        temp_measurements[0] = data.bmp_rtemp;
         UnifiedSensors::bar_flag = false;
     }
 
@@ -355,6 +375,8 @@ void UnifiedSensors::logToStruct(Data &data)
         data.voltage = readVoltage();
         UnifiedSensors::voltage_flag = false;
     }
+
+    //temp_ekf.step(temp_measurements);
 
     TDS_interrupt.tick();
     voltage_interrupt.tick();
