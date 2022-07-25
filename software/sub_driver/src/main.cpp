@@ -1,30 +1,159 @@
-#include <Arduino.h>
+
+#include "Sensors/Sensors.h"
+#include "Navigation/Orientation.h"
+
 #include "pins.h"
 
+#include "Data/SD/SD.h"
 
-void setup() {
-  // Sets the two pins as Outputs
-  pinMode(STP_b,OUTPUT); 
-  pinMode(DIR_b,OUTPUT);
+#include "indication/OutputFuncs.h"
+
+#include <Arduino.h>
+#include <vector>
+#include <numeric>
+
+#include "Navigation/SensorFusion/Fusion.h"
+#include "Navigation/Postioning.h"
+#include "Sensors/GPS.h"
+#include "Camera/OV2640.h"
+
+#include "Data/RF/radio.h"
+#include "debug.h"
+#include "time/Time.h"
+
+Fusion SFori;
+
+Optics::Camera camera(CS_VD);
+GPS gps(9600);
+
+UnifiedSensors sensor;
+Orientation ori;
+
+LED signal(SIGNAL);
+
+unsigned long long previous_time;
+
+Velocity nav_v;
+Position nav_p;
+
+Radio rf(50000);
+Data data;
+GPSdata gps_data;
+
+CombinedData cdata;
+
+SD_Logger logger;
+
+bool rfInit = true;
+bool warning = false;
+
+void setup()
+{
+    output.startupSequence();
+    Serial.begin(2000000);
+
+    if (!sensor.initNavSensors())
+    {
+        output.indicateError();
+    }
+
+    sensor.initVoltmeter(v_div);
+    sensor.initTDS(TDS);
+    sensor.setInterrupts(BAR_int, ACC_int, GYR_int, MAG_int);
+    sensor.setGyroBias();
+
+    if (!rf.init())
+    {
+        warning = true;
+        rfInit = false;
+    }
+
+#if OPTICS_ON == true
+    if (!camera.begin())
+    {
+        warning = true;
+    }
+#endif
+
+    if (!logger.init())
+    {
+        output.indicateError();
+    }
+
+    output.indicateCompleteStartup();
+    Serial.println("Done initializing");
+    previous_time = micros();
 }
-void loop() {
-  digitalWrite(DIR_b,HIGH); // Enables the motor to move in a particular direction
-  // Makes 200 pulses for making one full cycle rotation
-  for(int x = 0; x < 200; x++) {
-    digitalWrite(STP_b,HIGH); 
-    delayMicroseconds(500); 
-    digitalWrite(STP_b,LOW); 
-    delayMicroseconds(500); 
-  }
-  delay(1000); // One second delay
-  
-  digitalWrite(DIR_b,LOW); //Changes the rotations direction
-  // Makes 400 pulses for making two full cycle rotation
-  for(int x = 0; x < 400; x++) {
-    digitalWrite(STP_b,HIGH);
-    delayMicroseconds(500);
-    digitalWrite(STP_b,LOW);
-    delayMicroseconds(500);
-  }
-  delay(1000);
+
+bool logged = false;
+
+void loop()
+{
+    data.time_us = micros();
+    data.dt = (data.time_us - previous_time) / 1000000.0;
+    previous_time = data.time_us;
+
+    output.loopIndication();
+    sensor.logToStruct(data);
+
+    gps.updateData(gps_data);
+
+    nav_v.updateVelocity(data);
+    nav_p.updatePosition(data);
+    SFori.update(data);
+
+    data.relative = Orientation::toQuaternion(data.rel_ori.x, data.rel_ori.y, data.rel_ori.z);
+    ori.convertAccelFrame(data.relative, data.facc.x, data.facc.y, data.facc.z, &data.wfacc.x, &data.wfacc.y, &data.wfacc.z);
+
+#if OPTICS_ON == true
+    camera.capture(1000000, &data.optical_data.capture_time, &data.optical_data.save_time, &data.optical_data.FIFO_length);
+#endif
+
+    if (!logger.logData(data))
+    {
+        output.indicateError();
+    }
+
+    if (!warning)
+    {
+        LEDb.displaySpectrum();
+    }
+    else
+    {
+        LEDb.blink(255, 0, 0, 500);
+    }
+/*
+    if(data.time_us >= 1800000000)
+    {
+      LEDa.setColor(255,255,255);
+      unsigned long start = micros();
+      buzzer.sound(784, 10000);
+      if(!logger.rewindPrint())
+      {
+        while(1)
+        {
+            Serial.println("Rewind failed");
+            delay(10);
+        }
+      }
+    
+      unsigned long finish = micros();
+      LEDa.setColor(0,255,0);
+      Serial.print("Rewind took: "); Serial.println(finish - start);
+      LEDa.LEDoff();
+      while(1);
+    }
+
+*/
+
+    Serial.print(data.bmi_temp); Serial.print("\t");
+    Serial.print(data.bmp_rtemp); Serial.print("\n");
+
+    cdata.d = data;
+    cdata.g = gps_data;
+
+    if (rfInit)
+    {
+        rf.writeData(cdata);
+    }
 }
