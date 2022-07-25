@@ -1,3 +1,16 @@
+/**
+ * @file LowPass.h
+ * @author Daniel Kim 
+ * @brief Low Pass filter
+ * @version 0.1
+ * @date 2022-07-25
+ * 
+ * @copyright Copyright (c) 2022 OceanAI (https://github.com/daniel360kim/OceanAI) 
+ * 
+ */
+#ifndef LowPass_h
+#define LowPass_h
+
 template <int order> // order is 1 or 2
 class LowPass
 {
@@ -72,3 +85,5 @@ class LowPass
       return y[0];
     }
 };
+
+#endif // LowPass_h

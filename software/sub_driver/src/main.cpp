@@ -1,6 +1,6 @@
 
 #include "Sensors/Sensors.h"
-#include "Navigation/Orientation.h"
+#include "navigation/Orientation.h"
 
 #include "pins.h"
 
@@ -15,7 +15,7 @@
 #include "Navigation/SensorFusion/Fusion.h"
 #include "Navigation/Postioning.h"
 #include "Sensors/GPS.h"
-#include "Camera/OV2640.h"
+#include "Sensors/Camera/OV2640.h"
 
 #include "Data/RF/radio.h"
 #include "debug.h"

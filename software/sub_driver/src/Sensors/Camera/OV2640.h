@@ -18,8 +18,8 @@
 #include <Arduino.h>
 #include <memorysaver.h>
 
-#include "../Data/SD/SD.h"
-#include "../Data/SD/DataFile.h"
+#include "../../data/SD/SD.h"
+#include "../../data/SD/DataFile.h"
 
 namespace Optics
 {

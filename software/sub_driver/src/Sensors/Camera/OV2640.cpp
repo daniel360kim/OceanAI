@@ -16,12 +16,12 @@
 #include <Arduino.h>
 
 #include "OV2640.h"
-#include "../Data/SD/SD.h"
-#include "../Data/SD/DataFile.h"
-#include "../Data/StartInfo.h"
-#include "../debug.h"
-#include "../config.h"
-#include "../pins.h"
+#include "../../data/SD/SD.h"
+#include "../../data/SD/DataFile.h"
+#include "../../data/StartInfo.h"
+#include "../../debug.h"
+#include "../../config.h"
+#include "../../pins.h"
 
 FsFile image_file;
 
