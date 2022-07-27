@@ -212,7 +212,6 @@
     )
   )
 
-
   (junction (at 146.05 99.06) (diameter 0) (color 0 0 0 0)
     (uuid 1b8ff297-688f-4ddc-a966-fbf4dc97b1bf)
   )
@@ -431,7 +430,7 @@
     (uuid afc70868-91fa-44ba-91ff-932034e84bef)
     (property "Reference" "U4" (id 0) (at 160.02 91.44 0))
     (property "Value" "BMP388" (id 1) (at 160.02 93.98 0))
-    (property "Footprint" "BMP388:PQFN50P200X200X80-10N" (id 2) (at 153.67 100.33 0)
+    (property "Footprint" "Sensor_Pressure:bmp388" (id 2) (at 153.67 100.33 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "" (id 3) (at 153.67 100.33 0)

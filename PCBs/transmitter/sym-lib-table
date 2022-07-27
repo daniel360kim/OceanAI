@@ -4,4 +4,5 @@
   (lib (name "LP5900SD-3.3_NOPB")(type "Legacy")(uri "${KIPRJMOD}/Dependencies/LP5900SD-3.3_NOPB.lib")(options "")(descr ""))
   (lib (name "LTC4311IDCPBF")(type "Legacy")(uri "${KIPRJMOD}/Dependencies/LTC4311IDCPBF.lib")(options "")(descr ""))
   (lib (name "LTC4311CSC6_TRPBF")(type "Legacy")(uri "${KIPRJMOD}/Dependencies/LTC4311CSC6_TRPBF.lib")(options "")(descr ""))
+  (lib (name "1054550101")(type "Legacy")(uri "${KIPRJMOD}/Dependencies/1054550101.lib")(options "")(descr ""))
 )
