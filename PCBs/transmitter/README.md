@@ -1,6 +1,5 @@
 # Transmitter Board
 ## This directory contains the PCB designs for the transmitter board.
-
 ### Since RF and GPS do not function well underwater, the submarine will feature an optional transmitter module that is floating in the water. The transmitter board is a simple, inexpensive, and easy to use module that can be used to transmit data to the submarine. Powered by the ATSAMD21G18A, the board has several features:
 ### Power:
 * 1S LiPo battery 
@@ -22,3 +21,4 @@
 * PCB layout
 * Ordering and fabrication
 * 3D models
+
