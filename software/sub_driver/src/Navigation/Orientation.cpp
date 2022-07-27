@@ -11,6 +11,7 @@
 
 #include <Arduino.h>
 #include <math.h>
+#include <stdlib.h>
 
 #include "Orientation.h"
 #include "Quaternion.h"

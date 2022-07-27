@@ -344,6 +344,10 @@
     [
       "2e8aecd4-c774-42c7-a696-d495b2c48570",
       "LEDs"
+    ],
+    [
+      "1391ae2d-de98-48f8-8686-6277f66a1bed",
+      "I2C Active Terminator"
     ]
   ],
   "text_variables": {}

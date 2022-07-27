@@ -2,4 +2,6 @@
   (lib (name "SPV1050TTR")(type "Legacy")(uri "${KIPRJMOD}/Dependencies/SPV1050TTR.lib")(options "")(descr ""))
   (lib (name "AO3400")(type "Legacy")(uri "${KIPRJMOD}/Dependencies/AO3400.lib")(options "")(descr ""))
   (lib (name "LP5900SD-3.3_NOPB")(type "Legacy")(uri "${KIPRJMOD}/Dependencies/LP5900SD-3.3_NOPB.lib")(options "")(descr ""))
+  (lib (name "LTC4311IDCPBF")(type "Legacy")(uri "${KIPRJMOD}/Dependencies/LTC4311IDCPBF.lib")(options "")(descr ""))
+  (lib (name "LTC4311CSC6_TRPBF")(type "Legacy")(uri "${KIPRJMOD}/Dependencies/LTC4311CSC6_TRPBF.lib")(options "")(descr ""))
 )

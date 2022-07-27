@@ -1,0 +1,31 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#(c) SnapEDA 2016 (snapeda.com)
+#This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA) with Design Exception 1.0
+#
+# LTC4311IDCPBF
+#
+DEF LTC4311IDCPBF U 0 40 Y Y 1 L N
+F0 "U" 714 359 50 H V L BNN
+F1 "LTC4311IDCPBF" 689 259 50 H V L BNN
+F2 "DFN-6_DC" 0 0 50 H I L BNN
+F3 "" 0 0 50 H I L BNN
+F4 "ltc4311idc#pbf" 0 0 50 H I L BNN "MANUFACTURER_PART_NUMBER"
+F5 "Copyright C 2016 Accelerated Designs. All rights reserved" 0 0 50 H I L BNN "COPYRIGHT"
+F6 "Linear Technology" 0 0 50 H I L BNN "VENDOR"
+DRAW
+P 2 0 0 6 300 200 300 -500 N
+P 2 0 0 6 300 -500 1500 -500 N
+P 2 0 0 6 1500 -500 1500 200 N
+P 2 0 0 6 1500 200 300 200 N
+X ENABLE 1 0 0 300 R 40 40 0 0 I 
+X NC 2 0 -100 300 R 40 40 0 0 N 
+X VCC 3 0 -200 300 R 40 40 0 0 W 
+X BUS1 4 1800 -300 300 L 40 40 0 0 P 
+X BUS2 5 1800 -200 300 L 40 40 0 0 P 
+X GND 6 1800 -100 300 L 40 40 0 0 W 
+X EPAD 7 1800 0 300 L 40 40 0 0 P 
+ENDDRAW
+ENDDEF
+#
+# End Library
