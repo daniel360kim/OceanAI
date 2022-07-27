@@ -33,11 +33,11 @@ The plan for OceanAI is to develop an autonomous underwater vehicle (AUV) and us
 
 
 <details>
-<summary>main_board</summary>
+<summary>PCBs</summary>
 <ul>
-  <li>Contains all the files and fabrication outputs of the PCB that controls the submarine</li>
-  <li>3D folder contains .step files of the board</li>
-  <li>The board has been fully designed, fabricated, tested, and built! It works great!</li>
+  <li>Contains all the files and fabrication outputs of the PCBs used in this porject</li>
+  <li>main_board is the pcb that controls the submarine</li>
+  <li>Transmitter is a pcb that is connected to the submarine above water to transmit and receive data</li>
 </ul>
     <img src="Resources/project_images/pcb/render.gif" alt="Girl in a jacket">
     <h3>This directory does not contain the external dependencies used in this project! These will be added later.</h3>
