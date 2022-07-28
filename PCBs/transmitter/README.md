@@ -16,9 +16,8 @@
 
 ## What's done?
 * Schematic is finished.
-
+* PCB layout is finished
 ## What's to do?
-* PCB layout
 * Ordering and fabrication
 * 3D models
 
