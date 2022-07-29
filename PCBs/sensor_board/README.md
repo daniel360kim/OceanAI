@@ -9,7 +9,7 @@
 * 10K Thermistor for water temperature readings
 ### Communication:
 * Communicated to the submarine [main_board](https://github.com/daniel360kim/OceanAI/tree/master/main_board) through I2C.
-* The board features SWD interface for debugging. 
+* The board features SWD interface for debugging and is programmed through SWD.
 
 ## What's done?
 * Schematic is finished.
@@ -17,3 +17,4 @@
 * 3D models and fabrication outputs are generated
 ## What's to do?
 * Ordering and fabrication
+
