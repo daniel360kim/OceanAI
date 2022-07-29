@@ -9,3 +9,9 @@
 * This is an optional module that is floating in the water.
 * It is connnected through a cable to the main board.
 * It is above water so it can access GPS, RF, and other radio frequencies.
+
+### sensor_board
+* This board is at the front of the submarine. 
+* It reads the underwater sensors and sends the data to the main board through I2C.
+* It is not self powered - must have a clean 3.3V power supply.
+* Programmed through SWD.
