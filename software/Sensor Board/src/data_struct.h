@@ -13,7 +13,10 @@
 
 struct Data
 {
+    unsigned long long time;
+    float loop_time;
     float temperature;
+    float pressure;
 };
 
 
