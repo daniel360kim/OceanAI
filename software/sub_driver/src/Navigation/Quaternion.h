@@ -29,7 +29,7 @@ public:
     Quaternion() { w = 1, x = 0, y = 0, z = 0; }
     Quaternion(double w, double x, double y, double z) : w(w), x(x), y(y), z(z) {}
 
-    void toAxis(double gx, double gy, double gz, double dt, Norm(*findNorm)(double, double, double, double));
+    void toAxis(double gx, double gy, double gz, double dt);
     static Quaternion hamiltonProduct(Quaternion A, Quaternion B);
     static Norm findNorm(double gx, double gy, double gz, double dt);
 

@@ -1,6 +1,6 @@
 make.exe --dry-run --always-make --keep-going --print-directory
-make: Entering directory 'e:/OceanAI/sub_driver'
-make: Leaving directory 'e:/OceanAI/sub_driver'
+make: Entering directory 'e:/OceanAI/software/sub_driver'
+make: Leaving directory 'e:/OceanAI/software/sub_driver'
  
 make: *** No targets specified and no makefile found.  Stop.
 

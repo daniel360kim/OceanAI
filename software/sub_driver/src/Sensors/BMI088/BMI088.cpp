@@ -11,7 +11,7 @@
 
 #include <Arduino.h>
 #include <math.h>
-
+#include <Wire.h>
 #include "BMI088.h"
 
 /* Macros to get and set register fields */
@@ -587,7 +587,6 @@ static const uint8_t bmi_feature_config[] = {
  */
 Bmi088Accel::Bmi088Accel(TwoWire &bus, uint8_t address)
 {
-  _i2c = &bus;        // I2C bus
   _address = address; // I2C address
   _useSPI = false;    // set to use I2C
 }

@@ -12,13 +12,13 @@
 
 #include <ADC.h>
 #include <ADC_util.h>
+#include <Wire.h>
 
 #include "../config.h"
 #include "../debug.h"
 #include "LowPass.h"
 #include "../Time/Time.h"
 #include "../Data/StartInfo.h"
-
 
 BMP388_DEV baro;
 Bmi088Accel accel(Wire, 0x18);

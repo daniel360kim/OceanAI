@@ -25,7 +25,7 @@ struct StartFile_d
 #if DEBUG_ON == true
     static constexpr bool debug = true;
 #if LIVE_DEBUG == true
-    static constexpr bool live_debug = true
+    static constexpr bool live_debug = true;
 #endif
 #else
     static constexpr bool debug = false;

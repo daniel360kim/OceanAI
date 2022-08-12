@@ -31,10 +31,10 @@ public:
         Sixteenth = 4,
     };
     
-    A4988(const uint8_t step_pin, const uint8_t dir_pin, const uint8_t ms1_pin, const uint8_t ms2_pin, const uint8_t ms3_pin, const uint8_t en, const uint8_t slp, const uint8_t rst, const uint8_t limit_pin);
+    A4988(const uint8_t step_pin, const uint8_t dir_pin, const uint8_t ms1_pin, const uint8_t ms2_pin, const uint8_t ms3_pin, const uint8_t slp, const uint8_t rst, const uint8_t limit_pin);
     void begin();
     void setResolution(Resolution resolution);
-    void setState(bool en_state, bool slp_state);
+    void setState(bool slp_state);
     void setDirection(bool dir_state); //sets the direction of the motor
     void step(); //steps the motor
 
@@ -53,7 +53,6 @@ private:
     uint8_t ms2_pin; 
     uint8_t ms3_pin;
     //power pins
-    uint8_t en;
     uint8_t slp;
     uint8_t rst;
 

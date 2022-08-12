@@ -28,7 +28,7 @@
  */
 Quaternion Orientation::update(double gx, double gy, double gz, double dt)
 {
-    B.toAxis(gx, gy, gz, dt, Quaternion::findNorm);
+    B.toAxis(gx, gy, gz, dt);
     orientation = Quaternion::hamiltonProduct(A, B);
 
     A.w = orientation.w;

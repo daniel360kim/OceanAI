@@ -25,7 +25,7 @@
 
 namespace SD_Settings
 {
-    constexpr unsigned long DURATION = 3.6e+9;
+    constexpr unsigned long DURATION = 6e+8;
     constexpr unsigned int LOG_INTERVAL_US = 10000u;
     constexpr unsigned int LOG_RATE = 100u; //log rate in hertz 
     constexpr unsigned int DATA_SIZE = sizeof(Data);

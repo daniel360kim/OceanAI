@@ -12,7 +12,7 @@
 #define BMI088_h
 
 #include <Arduino.h>
-#include <Wire.h>  // I2C library
+#include <Wire.h>
 #include <SPI.h>   // SPI library
 
 #include "../../Navigation/Quaternion.h"

@@ -14,14 +14,13 @@
 #include "A4988.h"
 #include "module_settings.h"
 
-A4988::A4988(const uint8_t step_pin, const uint8_t dir_pin, const uint8_t ms1_pin, const uint8_t ms2_pin, const uint8_t ms3_pin, const uint8_t en, const uint8_t slp, const uint8_t rst, const uint8_t limit_pin)
+A4988::A4988(const uint8_t step_pin, const uint8_t dir_pin, const uint8_t ms1_pin, const uint8_t ms2_pin, const uint8_t ms3_pin, const uint8_t slp, const uint8_t rst, const uint8_t limit_pin)
 {
     this->step_pin = step_pin;
     this->dir_pin = dir_pin;
     this->ms1_pin = ms1_pin;
     this->ms2_pin = ms2_pin;
     this->ms3_pin = ms3_pin;
-    this->en = en;
     this->slp = slp;
     this->rst = rst;
 
@@ -30,13 +29,12 @@ A4988::A4988(const uint8_t step_pin, const uint8_t dir_pin, const uint8_t ms1_pi
     pinMode(ms1_pin, OUTPUT);
     pinMode(ms2_pin, OUTPUT);
     pinMode(ms3_pin, OUTPUT);
-    pinMode(en, OUTPUT);
     pinMode(slp, OUTPUT);
     pinMode(rst, OUTPUT);
 
-    setState(true, true);
+    setState(true);
     setDirection(true);
-    setResolution(Resolution::Sixteenth);
+    setResolution(Resolution::Full);
 
     limit.begin(limit_pin);
 
@@ -48,8 +46,7 @@ A4988::A4988(const uint8_t step_pin, const uint8_t dir_pin, const uint8_t ms1_pi
  */
 void A4988::begin()
 {
-    digitalWrite(en, LOW); //enable the stepper
-    digitalWrite(slp, HIGH); //keep awake
+    //digitalWrite(slp, HIGH); //keep awake
 }
 
 void A4988::setResolution(Resolution resolution)
@@ -103,9 +100,8 @@ void A4988::setResolution(Resolution resolution)
  * @param en_state true to enable, false to disable
  * @param slp_state true to keep awake, false to sleep
  */
-void A4988::setState(bool en_state, bool slp_state)
+void A4988::setState( bool slp_state)
 {
-    digitalWrite(en, !en_state);
     digitalWrite(slp, slp_state);
 }
 
@@ -122,17 +118,13 @@ void A4988::setDirection(bool dir_state)
 
 bool A4988::calibrate()
 {
-    setDirection(false);
-    unsigned long long startMicros = micros();
-    while(limit.state() == false)
+    if(limit.state() == true)
     {
-        digitalWrite(step_pin, HIGH);
-        if(micros() - startMicros > 100000) //timeout after 100ms
-        {
-            digitalWrite(step_pin, LOW);
-            return false;
-        }
+        return true;
     }
+    setDirection(true);
+    while(limit.state() == false)
+    C
     current_position = 0;
     return true;
 }
@@ -146,19 +138,17 @@ void A4988::toPosition(uint8_t position)
 
     if(position < current_position)
     {
-        setDirection(true);
+        setDirection(false);
     }
     else
     {
-        setDirection(false);
+        setDirection(true);
     }
     int steps_to_turn = (abs(current_position - position) / Module::DISPLACEMENT_PER_CIRCLE) * steps_per_revolution;
     for(int i = 0; i < steps_to_turn; i++)
     {
         digitalWrite(step_pin, HIGH);
-        delayMicroseconds(Module::STEP_DELAY);
         digitalWrite(step_pin, LOW);
-        delayMicroseconds(Module::STEP_DELAY);
     }
 
     current_position = position; //update the current position

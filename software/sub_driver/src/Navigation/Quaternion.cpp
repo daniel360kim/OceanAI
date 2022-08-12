@@ -40,9 +40,8 @@ Quaternion::Norm Quaternion::findNorm(double gx, double gy, double gz, double dt
  * @param gy gyro measurement y
  * @param gz gyro measurement z
  * @param dt delta time seconds
- * @param findNorm function pointer 
  */
-void Quaternion::toAxis(double gx, double gy, double gz, double dt, Norm(*findNorm)(double, double, double, double))
+void Quaternion::toAxis(double gx, double gy, double gz, double dt)
 {
     Norm quat = findNorm(gx, gy, gz, dt);
 
@@ -50,8 +49,6 @@ void Quaternion::toAxis(double gx, double gy, double gz, double dt, Norm(*findNo
     x = (gx / quat.norm) * sin(quat.theta / 2);
     y = (gy / quat.norm) * sin(quat.theta / 2);
     z = (gz / quat.norm) * sin(quat.theta / 2);
-  
-
 }
 
 /**
