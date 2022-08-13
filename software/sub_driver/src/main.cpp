@@ -1,25 +1,20 @@
-#include "module/A4988.h"
-#include "pins.h"
-#include <cmath>
 #include <Arduino.h>
-A4988 motor(STP_b, DIR_b, MS1_b, MS2_b, MS3_b, SLP_b, RST_b, STOP_b);
+#include "pins.h"
+
+
+void cs_interrupt()
+{
+    Serial.println("Interrupt");
+}
+
 void setup()
 {
-  
-  motor.begin();
-  while(1)
-  {
-    if(motor.calibrate())
-    {
-      break;
-    }
-  }
- 
-
+    pinMode(CS, INPUT);
+    attachInterrupt(digitalPinToInterrupt(CS), cs_interrupt, RISING);
 }
 
 void loop()
 {
-
-
+    Serial.println(digitalRead(CS));
+    delay(1);
 }

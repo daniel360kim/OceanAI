@@ -94,13 +94,6 @@ namespace GPS_data
     };
 };
 
-
-struct PID_values
-{
-    double setpoint;
-    double output;
-};
-
 struct StepperData
 {
     bool limit_state;
@@ -121,10 +114,22 @@ struct Vec3
     double x, y, z;
 };
 
+struct ExternalData
+{
+    unsigned long long time_us;
+    double loop_time;
+    double raw_temp;
+    double raw_pres;
+
+    double filt_temp;
+    double filt_pres;
+};
+
 //To do: organize into different structs for optimization and organization
 struct Data
 {
     unsigned long long time_us;
+
     uint8_t system_state;
 
     double dt;
@@ -139,25 +144,20 @@ struct Data
     Vec3 rgyr;
     Vec3 fgyr;
     Vec3 rel_ori;
-    Vec3 abs_ori;
 
     Quaternion relative;
-    Quaternion absolute;
 
     double bmi_temp;
 
     Vec3 mag;
 
-    double ext_rtemp, ext_rpres, ext_ftemp, ext_fpres;
+    ExternalData external;
 
     double TDS;
     double voltage;
 
-    unsigned int clock_speed;
+    int clock_speed;
     double internal_temp;
-
-    PID_values dive_pid;
-    PID_values pitch_pid;
 
     StepperData dive_stepper;
     StepperData pitch_stepper;
@@ -167,6 +167,8 @@ struct Data
     unsigned long sd_capacity;
 
 };
+
+//int size = sizeof(Data);
 
 struct GPSdata
 {   

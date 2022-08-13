@@ -2,7 +2,7 @@
     "git.ignoreLimitWarning": true,
 
     "editor.tokenColorCustomizations": {
-        "[Electron]": {
+        "[SynthWave '84]": {
             "textMateRules": [
             
             {"scope": ["entity.name.namespace.cpp"],
@@ -34,15 +34,23 @@
                     "fontStyle": ""
                 }
             },
-            /*
+            
             {
-                "scope": ["variable.other.local.cpp"],
+                "scope": ["keyword.operator.delete.cpp"],
                 "settings": {
                     "foreground": "#64e5ff",
                     "fontStyle": ""
                 }
             },
-            */
+
+            {
+                "scope": ["keyword.operator.new.cpp"],
+                "settings": {
+                    "foreground": "#64e5ff",
+                    "fontStyle": ""
+                }
+            },
+            
             {
                 "scope": ["meta.body.namespace.cpp"],
                 "settings": {

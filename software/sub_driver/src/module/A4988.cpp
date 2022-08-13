@@ -123,8 +123,8 @@ bool A4988::calibrate()
         return true;
     }
     setDirection(true);
-    while(limit.state() == false)
-    C
+    while(limit.state() == false);
+
     current_position = 0;
     return true;
 }

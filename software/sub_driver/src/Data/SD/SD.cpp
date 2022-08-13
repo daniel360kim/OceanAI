@@ -77,14 +77,11 @@ bool SD_Logger::init()
     file.print(("vx,vy,vz,px,py,pz,"));
     file.print(("rgx,rgy,rgz,fgx,fgy,fgz,"));
     file.print(("rel_x,rel_y,rel_z,"));
-    file.print(("abs_x,abs_y,abs_z,"));
     file.print(("rel_w,rel_x,rel_y,rel_z,"));
-    file.print(("abs_w,abs_x,abs_y,abs_z,"));
     file.print(("bmi_temp,"));
     file.print(("rmx,rmy,rmz,"));
-    file.print(("ext_rtemp,ext_rpres,ext_ftemp,ext_fpres,"));
+    file.print(("ext_time_us, ext_loop_time,ext_rtemp,ext_rpres,ext_ftemp,ext_fpres,"));
     file.print(("TDS,voltage,clk_speed,int_temp,"));
-    file.print(("dive_sp,dive_output,pitch_sp,pitch_output,"));
     file.print(("dive_limit,dive_homed,dive_sleep,dive_pp,"));
     file.print(("pitch_limit,pitch_homed,pitch_sleep,pitch_pp,"));
     file.print(("cap_time,save_time,fifo_length,"));
@@ -282,22 +279,17 @@ bool SD_Logger::rewindPrint()
             file.print(cc.rgyr.x); file.print(F(comma)); file.print(cc.rgyr.y); file.print(F(comma)); file.print(cc.rgyr.z); file.print(F(comma));
             file.print(cc.fgyr.x); file.print(F(comma)); file.print(cc.fgyr.y); file.print(F(comma)); file.print(cc.fgyr.z); file.print(F(comma));
             file.print(cc.rel_ori.x); file.print(F(comma)); file.print(cc.rel_ori.y); file.print(F(comma)); file.print(cc.rel_ori.z); file.print(F(comma));
-            file.print(cc.abs_ori.x); file.print(F(comma)); file.print(cc.abs_ori.y); file.print(F(comma)); file.print(cc.abs_ori.z); file.print(F(comma));
             file.print(cc.relative.w); file.print(F(comma)); file.print(cc.relative.x); file.print(F(comma)); file.print(cc.relative.y); file.print(F(comma)); file.print(cc.relative.z); file.print(F(comma));
-            file.print(cc.absolute.w); file.print(F(comma)); file.print(cc.absolute.x); file.print(F(comma)); file.print(cc.absolute.y); file.print(F(comma)); file.print(cc.absolute.z); file.print(F(comma));
             file.print(cc.bmi_temp); file.print(F(comma));
             file.print(cc.mag.x); file.print(F(comma)); file.print(cc.mag.y); file.print(F(comma)); file.print(cc.mag.z); file.print(F(comma));
-            file.print(cc.ext_rtemp); file.print(F(comma)); file.print(cc.ext_rpres); file.print(F(comma)); file.print(cc.ext_ftemp); file.print(F(comma)); file.print(cc.ext_fpres); file.print(F(comma));
+            file.print(cc.external.time_us); file.print(F(comma)); file.print(cc.external.loop_time); file.print(F(comma)); file.print(cc.external.raw_temp); file.print(F(comma)); file.print(cc.external.raw_pres); file.print(F(comma)); file.print(cc.external.filt_pres); file.print(cc.external.filt_temp);
             file.print(cc.TDS); file.print(F(comma)); file.print(cc.voltage); file.print(F(comma));
             file.print(cc.clock_speed); file.print(F(comma)); file.print(cc.internal_temp); file.print(F(comma));
-            file.print(cc.dive_pid.setpoint); file.print(F(comma)); file.print(cc.dive_pid.output); file.print(F(comma));
-            file.print(cc.pitch_pid.setpoint); file.print(F(comma)); file.print(cc.pitch_pid.output); file.print(F(comma)); 
             file.print(cc.dive_stepper.limit_state); file.print(F(comma)); file.print(cc.dive_stepper.homed); file.print(F(comma)); file.print(cc.dive_stepper.sleep); file.print(F(comma)); file.print(cc.dive_stepper.predicted_position); file.print(F(comma));
             file.print(cc.pitch_stepper.limit_state); file.print(F(comma)); file.print(cc.pitch_stepper.homed); file.print(F(comma)); file.print(cc.pitch_stepper.sleep); file.print(F(comma)); file.print(cc.pitch_stepper.predicted_position); file.print(F(comma));
             file.print(cc.optical_data.capture_time); file.print(F(comma)); file.print(cc.optical_data.save_time); file.print(F(comma)); file.print(cc.optical_data.FIFO_length); file.print(F(comma));
             file.println(cc.sd_capacity);
         }   
-
         file.close();
         write_iterator++;
     }

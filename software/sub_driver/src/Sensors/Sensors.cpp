@@ -26,20 +26,24 @@ Bmi088Gyro gyro(Wire, 0x68);
 
 LIS3MDL mag;
 
+ExternalSensor ext_sensor(0x1B);
+
 Timer<1, micros> TDS_interrupt;
 Timer<1, micros> voltage_interrupt;
 
 namespace Filter
 {
-    LowPass<1> gyr_x(10); 
-    LowPass<1> gyr_y(10); 
-    LowPass<1> gyr_z(10);
+    LowPass<1> gyr_x(30); 
+    LowPass<1> gyr_y(30); 
+    LowPass<1> gyr_z(30);
 
-    LowPass<1> acc_x(10); 
-    LowPass<1> acc_y(10); 
-    LowPass<1> acc_z(10);     
+    LowPass<1> acc_x(30); 
+    LowPass<1> acc_y(30); 
+    LowPass<1> acc_z(30);
+
+    LowPass<1> ext_temp(50);
+    LowPass<1> ext_pres(50);     
 };
-
 
 ADC adc;
 
@@ -227,17 +231,19 @@ void UnifiedSensors::initVoltmeter(uint8_t input_pin)
     voltage_interrupt.every(freq, voltage_drdy);
 }
 
-void UnifiedSensors::setInterrupts(uint8_t bar_int, uint8_t accel_int, uint8_t gyro_int, uint8_t mag_int)
+void UnifiedSensors::setInterrupts(const uint8_t bar_int, const uint8_t accel_int, const uint8_t gyro_int, const uint8_t mag_int, const uint8_t ext_int)
 {
     pinMode(bar_int, INPUT);
     pinMode(accel_int, INPUT);
     pinMode(gyro_int, INPUT);
     pinMode(mag_int, INPUT);
+    pinMode(ext_int, INPUT);
 
     attachInterrupt(digitalPinToInterrupt(bar_int), bar_drdy, RISING);
     attachInterrupt(digitalPinToInterrupt(accel_int), accel_drdy, RISING);
     attachInterrupt(digitalPinToInterrupt(gyro_int), gyro_drdy, RISING);
     attachInterrupt(digitalPinToInterrupt(mag_int), mag_drdy, RISING);
+    attachInterrupt(digitalPinToInterrupt(ext_int), ext_drdy, RISING);
 }
 
 void UnifiedSensors::setGyroBias()
@@ -374,6 +380,21 @@ void UnifiedSensors::logToStruct(Data &data)
     {
         data.voltage = readVoltage();
         UnifiedSensors::voltage_flag = false;
+    }
+
+    if(UnifiedSensors::ext_flag)
+    {
+        ExternalSensor::RawData ext_data = ext_sensor.getSensorData();
+
+        data.external.time_us = ext_data.time_us;
+        data.external.loop_time = ext_data.loop_time;
+        data.external.raw_temp = (double)ext_data.temperature;
+        data.external.raw_pres = (double)ext_data.pressure;
+
+        data.external.filt_temp = Filter::ext_temp.filt(data.external.raw_temp, data.dt);
+        data.external.filt_pres = Filter::ext_pres.filt(data.external.raw_pres, data.dt);
+        
+        UnifiedSensors::ext_flag = false;
     }
 
     //temp_ekf.step(temp_measurements);
