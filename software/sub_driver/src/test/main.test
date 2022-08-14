@@ -23,7 +23,7 @@
 
 #include "data/transmit.h"
 
-Transmit transmit(0x1B, 100000, TX_GPS, RX_GPS);
+//Transmit transmit(0x1B, 100000, TX_GPS, RX_GPS);
 
 Fusion SFori;
 
@@ -55,6 +55,7 @@ bool warning = false;
 
 void setup()
 {
+    
     output.startupSequence();
     Serial.begin(2000000);
 
@@ -65,15 +66,17 @@ void setup()
 
     sensor.initVoltmeter(v_div);
     sensor.initTDS(TDS);
-    sensor.setInterrupts(BAR_int, ACC_int, GYR_int, MAG_int);
+    
+    sensor.setInterrupts(BAR_int, ACC_int, GYR_int, MAG_int, CS);
+    
     sensor.setGyroBias();
-
+/*
     if (!rf.init())
     {
         warning = true;
         rfInit = false;
     }
-
+*/
 #if OPTICS_ON == true
     if (!camera.begin())
     {
@@ -88,14 +91,15 @@ void setup()
 
     output.indicateCompleteStartup();
     Serial.println("Done initializing");
-    Wire.begin();
     previous_time = micros();
+    
 }
 
 bool logged = false;
 
 void loop()
 {
+    
     data.time_us = micros();
     data.dt = (data.time_us - previous_time) / 1000000.0;
     previous_time = data.time_us;
@@ -130,11 +134,10 @@ void loop()
         LEDb.blink(255, 0, 0, 500);
     }
 /*
-    if(data.time_us >= 1800000000)
+    if(data.time_us >= 1e+7)
     {
       LEDa.setColor(255,255,255);
       unsigned long start = micros();
-      buzzer.sound(784, 10000);
       if(!logger.rewindPrint())
       {
         while(1)
@@ -151,21 +154,17 @@ void loop()
       while(1);
     }
 
-*/
 
+*/
+/*
+    Serial.print(data.external.loop_time); Serial.print("\t");
+    Serial.print(data.external.raw_temp); Serial.print("\t");
+    Serial.print(data.external.raw_pres); Serial.print("\n");
+    */
     cdata.d = data;
     cdata.g = gps_data;
 
-    Wire.beginTransmission(0x1B);
-    Wire.write((uint8_t *)&cdata, sizeof(cdata));
-    Wire.endTransmission();
 
-    if (rfInit)
-    {
-        rf.writeData(cdata);
-    }
-
-    Serial.println(1.0 / data.dt);
-
-    transmit.transmit(data);
+    //transmit.transmit(data);
+    
 }

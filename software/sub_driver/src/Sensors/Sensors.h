@@ -58,7 +58,7 @@ public:
     static void accel_drdy()  { accel_flag = true; }
     static void gyro_drdy()  { gyro_flag = true; }
     static void mag_drdy()  { mag_flag = true; }
-    static void ext_drdy()  { ext_flag = true; }
+    static void ext_drdy()  {  ext_flag = true; }
 
     double gx_bias = 0, gy_bias = 0, gz_bias = 0;
     const double HARD_IRON_BIAS[3] = { 0.36, 0.39, 0.49 };
@@ -77,6 +77,7 @@ private:
     //Set the flags true for the interrupt
     static inline bool TDS_drdy(void*) { TDS_flag = true; return true; }
     static inline bool voltage_drdy(void*) { voltage_flag = true; return true; }
+
 
     
 

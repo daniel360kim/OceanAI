@@ -26,7 +26,7 @@ Bmi088Gyro gyro(Wire, 0x68);
 
 LIS3MDL mag;
 
-ExternalSensor ext_sensor(0x1B);
+ExternalSensor ext_sensor(0xFF);
 
 Timer<1, micros> TDS_interrupt;
 Timer<1, micros> voltage_interrupt;
@@ -54,6 +54,8 @@ volatile bool UnifiedSensors::mag_flag = true;
 
 volatile bool UnifiedSensors::TDS_flag = false;
 volatile bool UnifiedSensors::voltage_flag = false;
+
+volatile bool UnifiedSensors::ext_flag = false;
 
 UnifiedSensors::UnifiedSensors() {}
 
@@ -195,7 +197,6 @@ bool UnifiedSensors::initNavSensors()
         #endif
         
     #endif 
-
     return true;
 }
 
@@ -384,17 +385,24 @@ void UnifiedSensors::logToStruct(Data &data)
 
     if(UnifiedSensors::ext_flag)
     {
-        ExternalSensor::RawData ext_data = ext_sensor.getSensorData();
+ 
+        ExternalSensor::RawData ext_data = ext_sensor.getData();
 
-        data.external.time_us = ext_data.time_us;
         data.external.loop_time = ext_data.loop_time;
         data.external.raw_temp = (double)ext_data.temperature;
         data.external.raw_pres = (double)ext_data.pressure;
 
         data.external.filt_temp = Filter::ext_temp.filt(data.external.raw_temp, data.dt);
         data.external.filt_pres = Filter::ext_pres.filt(data.external.raw_pres, data.dt);
-        
+
+        Serial.print(data.external.loop_time); Serial.print("\t");
+        Serial.print(data.external.raw_temp); Serial.print("\t");
+        Serial.print(data.external.raw_pres); Serial.print("\n");
+
+
+
         UnifiedSensors::ext_flag = false;
+        
     }
 
     //temp_ekf.step(temp_measurements);
@@ -403,5 +411,3 @@ void UnifiedSensors::logToStruct(Data &data)
     voltage_interrupt.tick();
 
 }
-
-
