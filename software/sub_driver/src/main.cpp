@@ -1,40 +1,171 @@
-// Wire Peripheral Receiver
-// by Nicholas Zambetti <http://www.zambetti.com>
 
-// Demonstrates use of the Wire library
-// Receives data as an I2C/TWI Peripheral device
-// Refer to the "Wire Master Writer" example for use with this
+#include "Sensors/Sensors.h"
+#include "navigation/Orientation.h"
 
-// Created 29 March 2006
+#include "pins.h"
 
-// This example code is in the public domain.
+#include "Data/SD/SD.h"
 
+#include "indication/OutputFuncs.h"
 
-#include <Wire.h>
 #include <Arduino.h>
+#include <vector>
+#include <numeric>
 
-void receiveEvent(int howMany);
+#include "Navigation/SensorFusion/Fusion.h"
+#include "Navigation/Postioning.h"
+#include "Sensors/GPS.h"
+#include "Sensors/Camera/OV2640.h"
+
+#include "Data/RF/radio.h"
+#include "debug.h"
+#include "time/Time.h"
+
+#include "data/transmit.h"
+
+//Transmit transmit(0x1B, 100000, TX_GPS, RX_GPS);
+
+Fusion SFori;
+
+Optics::Camera camera(CS_VD);
+GPS gps(9600);
+
+UnifiedSensors sensor;
+Orientation ori;
+
+LED signal(SIGNAL);
+
+unsigned long long previous_time;
+
+Velocity nav_v;
+Position nav_p;
+
+Radio rf(50000);
+Data data;
+GPSdata gps_data;
+
+CombinedData cdata;
+
+SD_Logger logger;
+
+bool rfInit = true;
+bool warning = false;
+
+
+
 void setup()
 {
-  Wire.begin(4);                // join i2c bus with address #4
-  Wire.onReceive(receiveEvent); // register event
-  Serial.begin(9600);           // start serial for output
+    
+    output.startupSequence();
+    Serial.begin(2000000);
+
+    if (!sensor.initNavSensors())
+    {
+        output.indicateError();
+    }
+
+    sensor.initVoltmeter(v_div);
+    sensor.initTDS(TDS);
+    
+    sensor.setInterrupts(BAR_int, ACC_int, GYR_int, MAG_int, TX_RF);
+    
+    sensor.setGyroBias();
+/*
+    if (!rf.init())
+    {
+        warning = true;
+        rfInit = false;
+    }
+*/
+#if OPTICS_ON == true
+    if (!camera.begin())
+    {
+        warning = true;
+    }
+#endif
+
+    if (!logger.init())
+    {
+        output.indicateError();
+    }
+
+  
+    output.indicateCompleteStartup();
+    Serial.println("Done initializing");
+    previous_time = micros();
+    
 }
+
+bool logged = false;
 
 void loop()
 {
-  delay(100);
-}
+    
+    data.time_us = micros();
+    data.dt = (data.time_us - previous_time) / 1000000.0;
+    previous_time = data.time_us;
 
-// function that executes whenever data is received from master
-// this function is registered as an event, see setup()
-void receiveEvent(int howMany)
-{
-  while(1 < Wire.available()) // loop through all but the last
-  {
-    char c = Wire.read(); // receive byte as a character
-    Serial.print(c);         // print the character
-  }
-  int x = Wire.read();    // receive byte as an integer
-  Serial.println(x);         // print the integer
+    output.loopIndication();
+    sensor.logToStruct(data);
+
+    gps.updateData(gps_data);
+
+    nav_v.updateVelocity(data);
+    nav_p.updatePosition(data);
+    SFori.update(data);
+
+    data.relative = Orientation::toQuaternion(data.rel_ori.x, data.rel_ori.y, data.rel_ori.z);
+    ori.convertAccelFrame(data.relative, data.facc.x, data.facc.y, data.facc.z, &data.wfacc.x, &data.wfacc.y, &data.wfacc.z);
+
+#if OPTICS_ON == true
+    camera.capture(1000000, &data.optical_data.capture_time, &data.optical_data.save_time, &data.optical_data.FIFO_length);
+#endif
+
+    if (!logger.logData(data))
+    {
+        output.indicateError();
+    }
+
+    if (!warning)
+    {
+        LEDb.displaySpectrum();
+    }
+    else
+    {
+        LEDb.blink(255, 0, 0, 500);
+    }
+
+    if(data.time_us >= 1e+7)
+    {
+      LEDa.setColor(255,255,255);
+      unsigned long start = micros();
+      if(!logger.rewindPrint())
+      {
+        while(1)
+        {
+            Serial.println("Rewind failed");
+            delay(10);
+        }
+      }
+    
+      unsigned long finish = micros();
+      LEDa.setColor(0,255,0);
+      Serial.print("Rewind took: "); Serial.println(finish - start);
+      LEDa.LEDoff();
+      while(1);
+    }
+
+
+    Serial.println(1.0 / data.dt);
+/*
+    Serial.print(data.external.loop_time); Serial.print("\t");
+    Serial.print(data.external.raw_temp); Serial.print("\t");
+    Serial.print(data.external.raw_pres); Serial.print("\n");
+    */
+    cdata.d = data;
+    cdata.g = gps_data;
+
+
+    //transmit.transmit(data);
+    
 }

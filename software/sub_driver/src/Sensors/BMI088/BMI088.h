@@ -93,7 +93,7 @@ class Bmi088Accel
     // i2c
     uint8_t _address;
     TwoWire *_i2c;
-    const uint32_t _i2cRate = 4000000; // 400 kHz
+    const uint32_t _i2cRate = 400000; // 400 kHz
     // spi
     uint8_t _csPin;
     SPIClass *_spi;

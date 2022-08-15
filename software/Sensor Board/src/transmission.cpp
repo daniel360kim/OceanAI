@@ -14,15 +14,26 @@
 
 #include "transmission.h"
 
+float ExternalSensor::array[3] = {0, 0, 0};
+
+volatile uint8_t* ExternalSensor::arrayPointer = NULL;
+volatile uint8_t ExternalSensor::lastMasterCommand = 99;
+
 
 bool ExternalSensor::initialize()
 {
-    Wire.begin();
-    Wire.setClock(400000);
-
+    Wire.begin(i2c_address);
+    Wire.onReceive(receiveCommand);
+    Wire.onRequest(requestEvent);
     return true;
 }
 
+void ExternalSensor::sendData(RawData data)
+{
+    array[0] = data.data[0];
+    array[1] = data.data[1];
+    array[2] = data.data[2];
+}
 void ExternalSensor::writeRegister(uint8_t subAddress, uint8_t data)
 {
     Wire.beginTransmission(i2c_address);
@@ -42,28 +53,7 @@ uint8_t ExternalSensor::readRegister(uint8_t subAddress)
 
     return data;
 }
-void ExternalSensor::writeRegisters(uint8_t subAddress, RawData data)
-{
-    Wire.beginTransmission(i2c_address);
 
-    uint8_t send_data[12];
-    for(int i = 0; i < 3; i++)
-    {
-        flt.fvalue = data.data[i];
-        for(int j = 0; j < sizeof(float); j++)
-        {
-            send_data[i * sizeof(float) + j] = flt.fbytes[j];
-        }
-    }
-    for(int i = 0; i < 12; i++)
-    {
-        Wire.write(send_data[i]);
-        Serial.println(send_data[i], HEX);
-    }
-    Serial.println();
-
-    Wire.endTransmission();
-}
 
 void ExternalSensor::readRegisters(uint8_t subAddress, uint8_t count, uint8_t *dest)
 {
@@ -76,4 +66,21 @@ void ExternalSensor::readRegisters(uint8_t subAddress, uint8_t count, uint8_t *d
     {
         dest[i++] = Wire.read();
     }
+}
+
+void ExternalSensor::receiveCommand(int howMany)
+{
+    lastMasterCommand = Wire.read();
+}
+
+void ExternalSensor::requestEvent()
+{
+    uint8_t buffer[12];
+    arrayPointer = (uint8_t*) &array;
+    for(uint8_t i = 0; i < 12; i++)
+    {
+        buffer[i] = arrayPointer[i];
+    }
+    Wire.write(buffer, 12);
+
 }

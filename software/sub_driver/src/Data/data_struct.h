@@ -116,10 +116,9 @@ struct Vec3
 
 struct ExternalData
 {
-    unsigned long long time_us;
-    double loop_time;
-    double raw_temp;
-    double raw_pres;
+    float loop_time;
+    float raw_temp;
+    float raw_pres;
 
     double filt_temp;
     double filt_pres;

@@ -43,23 +43,26 @@ public:
         SUCCESS = 0x17,
         FAIL = 0x18
     };
-
-    union Send
-    {
-        uint8_t fbytes[sizeof(float)];
-        float fvalue;
-    } flt;
     
     ExternalSensor(uint8_t i2c_address) : i2c_address(i2c_address) {}
     bool initialize();
 
+    void sendData(RawData data);
+
     void writeRegister(uint8_t subAddress, uint8_t data);
     uint8_t readRegister(uint8_t subAddress);
-    void writeRegisters(uint8_t subAddress, RawData data);
     void readRegisters(uint8_t subAddress, uint8_t count, uint8_t *dest);
 
 private:
     uint8_t i2c_address;
+
+    static volatile uint8_t* arrayPointer;
+    static volatile uint8_t lastMasterCommand;
+
+    static float array[3];
+
+    static void receiveCommand(int howMany);
+    static void requestEvent();
 
 };
 

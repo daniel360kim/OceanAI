@@ -1,31 +1,73 @@
-// Wire Master Writer
-// by Nicholas Zambetti <http://www.zambetti.com>
-
-// Demonstrates use of the Wire library
-// Writes data to an I2C/TWI Peripheral device
-// Refer to the "Wire Peripheral Receiver" example for use with this
-
-// Created 29 March 2006
-
-// This example code is in the public domain.
 
 #include <Arduino.h>
 #include <Wire.h>
 
+#include "pins.h"
+#include "thermistor.h"
+#include "data_struct.h"
+#include "transducer.h"
+#include "transmission.h"
+
+ExternalSensor ext_sensor(9);
+Thermistor therm(THERM, 10000);
+Transducer pres(PRES);
+
+double dt;
+unsigned long long previous_time;
+unsigned long long previous_send;
+
+constexpr int us_interval = 2000;
+
+float pressure_sum = 0;
+float temperature_sum = 0;
+float loop_sum = 0;
+
+long iterations = 0;
+
+RawData raw_data;
+
 void setup()
 {
-  Wire.begin(); // join i2c bus (address optional for master)
+  ext_sensor.initialize();
 }
-
-byte x = 0;
 
 void loop()
 {
-  Wire.beginTransmission(4); // transmit to device #4
-  Wire.write("x is ");        // sends five bytes
-  Wire.write(x);              // sends one byte  
-  Wire.endTransmission();    // stop transmitting
+  //Getting sensor data
+  Data data;
 
-  x++;
-  delay(500);
+  data.time = micros();
+  dt = (data.time - previous_time) / 1000000.0;
+  previous_time = data.time;
+
+  data.loop_time = dt;
+  data.loop_time = 1.0 / dt;
+  
+  if(micros() - previous_send > us_interval)
+  {
+    raw_data.data[0] = loop_sum / iterations;
+    raw_data.data[1] = pressure_sum / iterations;
+    raw_data.data[2] = temperature_sum / iterations;
+    
+    loop_sum = 0.0;
+    pressure_sum = 0.0;
+    temperature_sum = 0.0;
+    iterations = 0;
+
+    previous_send = micros();
+    digitalWrite(INT, HIGH);
+    digitalWrite(INT, LOW);
+    ext_sensor.sendData(raw_data);
+  }
+  else
+  {
+    loop_sum += data.loop_time;
+    pressure_sum += pres.getPressure();
+    temperature_sum += therm.getTemperature();
+    iterations++;
+  }
+  //Send drdy signal
+
+
+  //ext_sensor.writeRegisters(ExternalSensor::SubAddress::DATA, raw_data);
 }

@@ -4,9 +4,9 @@
  * @brief Communication with external sensor
  * @version 0.1
  * @date 2022-08-12
- * 
+ *
  * @copyright Copyright (c) 2022 OceanAI (https://github.com/daniel360kim/OceanAI)
- * 
+ *
  */
 
 #include <Arduino.h>
@@ -17,36 +17,34 @@
 
 ExternalSensor::ExternalSensor(uint8_t i2c_address)
 {
+    Wire.begin();
     this->i2c_address = i2c_address;
-
 }
 
 ExternalSensor::RawData ExternalSensor::getData()
 {
-    constexpr int count = 12;
-    uint8_t data[count];
+    Wire.beginTransmission(i2c_address);
+    Wire.write((uint8_t)1);
 
-    float result[3];
-
-    readRegisters(SubAddress::DATA, count, data);
-    for(int i = 0; i < 3; i++)
+    float_to_byte ftb;
+    if(Wire.requestFrom(i2c_address, sizeof(float_to_byte)) == sizeof(float_to_byte))
     {
-        for(int j = 0; j < 4; j++)
+        for(byte i = 0; i < 3 * sizeof(float); i++)
         {
-            flt.fbytes[j] = data[(i * 4) + j];
+            ftb.rawData[i] = Wire.read();
         }
-        result[i] = flt.fvalue;
     }
 
-    RawData raw_data;
+    Wire.endTransmission();
 
-    raw_data.loop_time = result[0];
-    raw_data.temperature = result[1];
-    raw_data.pressure = result[2];
+    float data[3];
 
-    return raw_data;
+    for(byte i = 0; i < 3; i++)
+    {
+        data[i] = ftb.floatData[i];
+    }
+    return RawData{data[0], data[1], data[2]};
 }
-
 
 void ExternalSensor::writeRegister(uint8_t subAddress, uint8_t data)
 {
@@ -81,16 +79,19 @@ void ExternalSensor::writeRegisters(uint8_t subAddress, uint8_t count, const uin
 void ExternalSensor::readRegisters(uint8_t subAddress, uint8_t count, uint8_t *dest)
 {
     Wire.beginTransmission(i2c_address);
- 
-    Wire.endTransmission(false);
+    //Wire.write(subAddress);
     Wire.requestFrom(i2c_address, count);
 
-    
-    for(int i = 0; i < count; i++)
+    int i = 0;
+    if(Wire.available())
     {
-        dest[i] = Wire.read();
+        while(Wire.available())
+        {
+            dest[i] = Wire.read();
+            Serial.print("DEST "); Serial.println(dest[i]);
+            i++;
+        }
     }
-    Wire.endTransmission();
- 
     
+    Wire.endTransmission();
 }

@@ -80,7 +80,7 @@ bool SD_Logger::init()
     file.print(("rel_w,rel_x,rel_y,rel_z,"));
     file.print(("bmi_temp,"));
     file.print(("rmx,rmy,rmz,"));
-    file.print(("ext_time_us,ext_loop_time,ext_rtemp,ext_rpres,ext_ftemp,ext_fpres,"));
+    file.print(("ext_loop_time,ext_rtemp,ext_rpres,ext_ftemp,ext_fpres,"));
     file.print(("TDS,voltage,clk_speed,int_temp,"));
     file.print(("dive_limit,dive_homed,dive_sleep,dive_pp,"));
     file.print(("pitch_limit,pitch_homed,pitch_sleep,pitch_pp,"));
@@ -282,7 +282,7 @@ bool SD_Logger::rewindPrint()
             file.print(cc.relative.w); file.print(F(comma)); file.print(cc.relative.x); file.print(F(comma)); file.print(cc.relative.y); file.print(F(comma)); file.print(cc.relative.z); file.print(F(comma));
             file.print(cc.bmi_temp); file.print(F(comma));
             file.print(cc.mag.x); file.print(F(comma)); file.print(cc.mag.y); file.print(F(comma)); file.print(cc.mag.z); file.print(F(comma));
-            file.print(cc.external.time_us); file.print(F(comma)); file.print(cc.external.loop_time); file.print(F(comma)); file.print(cc.external.raw_temp); file.print(F(comma)); file.print(cc.external.raw_pres); file.print(F(comma)); file.print(cc.external.filt_pres); file.print(cc.external.filt_temp); file.print(F(comma));
+            file.print(cc.external.loop_time); file.print(F(comma)); file.print(cc.external.raw_temp); file.print(F(comma)); file.print(cc.external.raw_pres); file.print(F(comma)); file.print(cc.external.filt_pres); file.print(F(comma)); file.print(cc.external.filt_temp); file.print(F(comma));
             file.print(cc.TDS); file.print(F(comma)); file.print(cc.voltage); file.print(F(comma));
             file.print(cc.clock_speed); file.print(F(comma)); file.print(cc.internal_temp); file.print(F(comma));
             file.print(cc.dive_stepper.limit_state); file.print(F(comma)); file.print(cc.dive_stepper.homed); file.print(F(comma)); file.print(cc.dive_stepper.sleep); file.print(F(comma)); file.print(cc.dive_stepper.predicted_position); file.print(F(comma));

@@ -17,11 +17,6 @@
 
 #include "../../data/data_struct.h"
 
-struct RawData
-{
-    float data[3];
-};
-
 class ExternalSensor
 {
 public:
@@ -51,21 +46,18 @@ public:
         float pressure;
     };
 
-    union Send
+    union float_to_byte
     {
-        uint8_t fbytes[sizeof(float)];
-        float fvalue;
-    } flt;
+        float floatData[3];
+        uint8_t rawData[3 * sizeof(float)];
+    };
     
     ExternalSensor(uint8_t i2c_address);
 
     RawData getData();
-
     bool reset();
     bool chipID();
     
-
-
 private:
     uint8_t i2c_address;
 
