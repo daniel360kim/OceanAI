@@ -46,7 +46,7 @@ A4988::A4988(const uint8_t step_pin, const uint8_t dir_pin, const uint8_t ms1_pi
  */
 void A4988::begin()
 {
-    //digitalWrite(slp, HIGH); //keep awake
+    digitalWrite(slp, HIGH); //keep awake
 }
 
 void A4988::setResolution(Resolution resolution)
@@ -152,5 +152,10 @@ void A4988::toPosition(uint8_t position)
     }
 
     current_position = position; //update the current position
+}
+
+void A4988::logToStruct(Data &data)
+{
+    
 }
 

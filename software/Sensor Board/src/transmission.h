@@ -19,31 +19,12 @@ constexpr uint8_t ext_CHIPID = 0x50;
 
 struct RawData
 {
-    float data[3];
+    double data[3];
 };
 
 class ExternalSensor
 {
 public:
-    enum SubAddress
-    {
-        COMMAND = 0x00,
-        COMMAND_ACK = 0x01,
-        CHIPID = 0x02,
-        DATA = 0x03
-    };
-
-    enum Command
-    {
-        RESET = 0x15
-    };
-
-    enum Acknowledge
-    {
-        SUCCESS = 0x17,
-        FAIL = 0x18
-    };
-    
     ExternalSensor(uint8_t i2c_address) : i2c_address(i2c_address) {}
     bool initialize();
 
@@ -59,11 +40,10 @@ private:
     static volatile uint8_t* arrayPointer;
     static volatile uint8_t lastMasterCommand;
 
-    static float array[3];
+    static double array[3];
 
     static void receiveCommand(int howMany);
     static void requestEvent();
-
 };
 
 

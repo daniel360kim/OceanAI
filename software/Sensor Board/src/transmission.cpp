@@ -14,7 +14,7 @@
 
 #include "transmission.h"
 
-float ExternalSensor::array[3] = {0, 0, 0};
+double ExternalSensor::array[3] = {0.0, 0.0, 0.0};
 
 volatile uint8_t* ExternalSensor::arrayPointer = NULL;
 volatile uint8_t ExternalSensor::lastMasterCommand = 99;
@@ -73,14 +73,16 @@ void ExternalSensor::receiveCommand(int howMany)
     lastMasterCommand = Wire.read();
 }
 
+
 void ExternalSensor::requestEvent()
 {
-    uint8_t buffer[12];
+    constexpr int bufferSize = sizeof(double) * 3;
+    uint8_t buffer[bufferSize];
     arrayPointer = (uint8_t*) &array;
-    for(uint8_t i = 0; i < 12; i++)
+    for(uint8_t i = 0; i < bufferSize; i++)
     {
         buffer[i] = arrayPointer[i];
     }
-    Wire.write(buffer, 12);
+    Wire.write(buffer, bufferSize);
 
 }

@@ -26,10 +26,10 @@ ExternalSensor::RawData ExternalSensor::getData()
     Wire.beginTransmission(i2c_address);
     Wire.write((uint8_t)1);
 
-    float_to_byte ftb;
-    if(Wire.requestFrom(i2c_address, sizeof(float_to_byte)) == sizeof(float_to_byte))
+    double_to_byte ftb;
+    if(Wire.requestFrom(i2c_address, sizeof(double_to_byte)) == sizeof(double_to_byte))
     {
-        for(byte i = 0; i < 3 * sizeof(float); i++)
+        for(byte i = 0; i < 3 * sizeof(double); i++)
         {
             ftb.rawData[i] = Wire.read();
         }
@@ -37,7 +37,7 @@ ExternalSensor::RawData ExternalSensor::getData()
 
     Wire.endTransmission();
 
-    float data[3];
+    double data[3];
 
     for(byte i = 0; i < 3; i++)
     {

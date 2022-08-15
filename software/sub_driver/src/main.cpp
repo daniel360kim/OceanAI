@@ -21,10 +21,6 @@
 #include "debug.h"
 #include "time/Time.h"
 
-#include "data/transmit.h"
-
-//Transmit transmit(0x1B, 100000, TX_GPS, RX_GPS);
-
 Fusion SFori;
 
 Optics::Camera camera(CS_VD);
@@ -44,14 +40,10 @@ Radio rf(50000);
 Data data;
 GPSdata gps_data;
 
-CombinedData cdata;
-
 SD_Logger logger;
 
 bool rfInit = true;
 bool warning = false;
-
-
 
 void setup()
 {
@@ -162,10 +154,6 @@ void loop()
     Serial.print(data.external.raw_temp); Serial.print("\t");
     Serial.print(data.external.raw_pres); Serial.print("\n");
     */
-    cdata.d = data;
-    cdata.g = gps_data;
 
-
-    //transmit.transmit(data);
     
 }

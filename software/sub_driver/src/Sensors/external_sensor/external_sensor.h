@@ -20,36 +20,17 @@
 class ExternalSensor
 {
 public:
-    enum SubAddress
-    {
-        COMMAND = 0x00,
-        COMMAND_ACK = 0x01,
-        CHIPID = 0x02,
-        DATA = 0x03
-    };
-
-    enum Command
-    {
-        RESET = 0x15
-    };
-
-    enum Acknowledge
-    {
-        SUCCESS = 0x17,
-        FAIL = 0x18
-    };
-
     struct RawData
     {
-        float loop_time;
-        float temperature;
-        float pressure;
+        double loop_time;
+        double temperature;
+        double pressure;
     };
 
-    union float_to_byte
+    union double_to_byte
     {
-        float floatData[3];
-        uint8_t rawData[3 * sizeof(float)];
+        double floatData[3];
+        uint8_t rawData[3 * sizeof(double)];
     };
     
     ExternalSensor(uint8_t i2c_address);

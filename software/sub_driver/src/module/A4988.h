@@ -18,6 +18,7 @@
 #include "../pins.h"
 #include "module_settings.h"
 #include "limit.h"
+#include "../data/data_struct.h"
 
 class A4988
 {
@@ -41,6 +42,8 @@ public:
     bool calibrate(); //calibrate the motor (blocking)
 
     void toPosition(uint8_t position); //goes to a specific position (blocking)
+
+    void logToStruct(Data &data);
 
 private:
     bool is_running = false;

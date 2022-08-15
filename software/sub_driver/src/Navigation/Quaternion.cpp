@@ -10,7 +10,8 @@
  */
 
 #include <Arduino.h>
-#include <math.h>
+#include <cmath>
+#include <algorithm>
 
 #include "Quaternion.h"
 
@@ -26,8 +27,8 @@
 Quaternion::Norm Quaternion::findNorm(double gx, double gy, double gz, double dt)
 {
     Norm quat;
-    quat.norm = sqrt((gx * gx) + (gy * gy) + (gz * gz));
-    quat.norm = max(abs(quat.norm), 1e-12); //Cannot divide by zero
+    quat.norm = std::sqrt((gx * gx) + (gy * gy) + (gz * gz));
+    quat.norm = std::max<double>(std::abs(quat.norm), 1e-12); //Cannot divide by zero
 
     quat.theta = quat.norm * dt;
     return quat;
@@ -45,10 +46,10 @@ void Quaternion::toAxis(double gx, double gy, double gz, double dt)
 {
     Norm quat = findNorm(gx, gy, gz, dt);
 
-    w = cos(quat.theta / 2);
-    x = (gx / quat.norm) * sin(quat.theta / 2);
-    y = (gy / quat.norm) * sin(quat.theta / 2);
-    z = (gz / quat.norm) * sin(quat.theta / 2);
+    w = std::cos(quat.theta / 2);
+    x = (gx / quat.norm) * std::sin(quat.theta / 2);
+    y = (gy / quat.norm) * std::sin(quat.theta / 2);
+    z = (gz / quat.norm) * std::sin(quat.theta / 2);
 }
 
 /**

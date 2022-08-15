@@ -187,12 +187,4 @@ struct GPSdata
     GPS_data::Navigation navigation;
 };
 
-struct CombinedData
-{
-    Data d;
-    GPSdata g;
-}; 
-
-
-
 #endif
