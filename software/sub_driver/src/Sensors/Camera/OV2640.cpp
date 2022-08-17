@@ -137,7 +137,7 @@ namespace Optics
         return true;
     }
     
-    void Camera::capture(unsigned long delay_micros, unsigned long *capture_time, unsigned long *save_time, uint8_t *FIFO_length, bool(*closeCurrentFile)(), bool(*reopenPrevFile)(const char*), const char* filename)
+    void Camera::capture(unsigned long delay_micros, unsigned long *capture_time, unsigned long *save_time, uint32_t *FIFO_length, bool(*closeCurrentFile)(), bool(*reopenPrevFile)(const char*), const char* filename)
     {
         unsigned long long current_micros = micros();
 
@@ -172,13 +172,13 @@ namespace Optics
                 Serial.println(*save_time / 1000, DEC);
             #endif
 
-            camera.clear_fifo_flag();
             reopenPrevFile(filename);
             previous_log = current_micros;
-        };
+        }
+        
     }
     
-    uint8_t Camera::read_fifo_burst(uint8_t *fifolength)
+    uint8_t Camera::read_fifo_burst(uint32_t *fifolength)
     {
         uint8_t temp = 0, temp_last = 0;
         uint32_t length = 0;
@@ -277,7 +277,6 @@ namespace Optics
                     #if DEBUG_ON == true
                         char* message = (char*)"Failed to preallocate image file";
                         Debug::error.addToBuffer(micros(), Debug::Warning, message);
-                        
                         #if LIVE_DEBUG == true
                             Serial.println(F(message));
                         #endif

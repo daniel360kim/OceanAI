@@ -89,8 +89,7 @@ void setup()
 bool logged = false;
 
 void loop()
-{
-    
+{   
     data.time_us = micros();
     data.dt = (data.time_us - previous_time) / 1000000.0;
     previous_time = data.time_us;

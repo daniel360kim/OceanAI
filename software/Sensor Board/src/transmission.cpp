@@ -52,4 +52,5 @@ void ExternalSensor::requestEvent()
     }
     Wire.write(buffer, bufferSize);
 
+
 }

@@ -106,7 +106,7 @@ struct OpticalData
 {
     unsigned long capture_time;
     unsigned long save_time;
-    uint8_t FIFO_length;
+    uint32_t FIFO_length;
 };
 
 struct Vec3
