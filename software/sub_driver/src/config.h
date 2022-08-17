@@ -4,6 +4,6 @@
 #define DEBUG_ON false
 #define LIVE_DEBUG false
 
-#define OPTICS_ON true
+#define OPTICS_ON false
 
 #endif

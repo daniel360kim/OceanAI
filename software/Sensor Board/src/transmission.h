@@ -30,9 +30,6 @@ public:
 
     void sendData(RawData data);
 
-    void writeRegister(uint8_t subAddress, uint8_t data);
-    uint8_t readRegister(uint8_t subAddress);
-    void readRegisters(uint8_t subAddress, uint8_t count, uint8_t *dest);
 
 private:
     uint8_t i2c_address;

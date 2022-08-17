@@ -26,10 +26,10 @@
 namespace SD_Settings
 {
     constexpr unsigned long DURATION = 6e+8;
-    constexpr unsigned int LOG_INTERVAL_US = 10000u;
+    constexpr unsigned int LOG_INTERVAL_US = 25000u;
     constexpr unsigned int LOG_RATE = 100u; //log rate in hertz 
     constexpr unsigned int DATA_SIZE = sizeof(Data);
-    constexpr unsigned int BUF_SIZE = 200u; //400 sections of 512 byte structs in our buffer
+    constexpr unsigned int BUF_SIZE = 800u; //400 sections of 512 byte structs in our buffer
     constexpr unsigned long LOG_FILE_SIZE = DURATION * DATA_SIZE * LOG_RATE; //3 days (in seconds) * size of struct * data rate in hertz
     constexpr unsigned long FLUSH_INTERVAL_US = 60000000ul; //flush every 60 seconds
 };
@@ -70,7 +70,7 @@ bool SD_Logger::init()
         return false;
     }
 
-    file.print(("Time us,sys_state,dt,"));
+    file.print(("Time us,loop_time,sys_state,dt,"));
     file.print(("bmp_rpres, bmp_rtemp, bmp_fpres, bmp_ftemp,"));
     file.print(("racc_x,racc_y,racc_z,facc_x,facc_y,facc_z,"));
     file.print(("wfax,wfay,wfaz,"));
@@ -267,7 +267,7 @@ bool SD_Logger::rewindPrint()
             char* comma = (char*)",";
             Data cc;
             cc = read_buf->get();
-            file.print(cc.time_us); file.print(comma);
+            file.print(cc.time_us); file.print(comma); file.print(cc.loop_time); file.print(comma);
             file.print(cc.system_state); file.print(comma);
             file.print(cc.dt,15); file.print(comma);
             file.print(cc.bmp_rpres); file.print(comma); file.print(cc.bmp_rtemp); file.print(comma); file.print(cc.bmp_fpres); file.print(comma); file.print(cc.bmp_ftemp);file.print(comma);
@@ -339,4 +339,9 @@ bool SD_Logger::getCapacity(void*)
 {
     SD_Logger::cap_update_int = true;
     return true;
+}
+
+bool SD_Logger::reopenFile(const char* filename)
+{
+    return file.open(filename, O_WRITE | O_CREAT | O_APPEND);
 }

@@ -137,12 +137,13 @@ namespace Optics
         return true;
     }
     
-    void Camera::capture(unsigned long delay_micros, unsigned long *capture_time, unsigned long *save_time, uint8_t *FIFO_length)
+    void Camera::capture(unsigned long delay_micros, unsigned long *capture_time, unsigned long *save_time, uint8_t *FIFO_length, bool(*closeCurrentFile)(), bool(*reopenPrevFile)(const char*), const char* filename)
     {
         unsigned long long current_micros = micros();
 
         if(current_micros - previous_log >= delay_micros)
         {
+            closeCurrentFile();
             camera.flush_fifo();
             camera.clear_fifo_flag();
 
@@ -172,7 +173,7 @@ namespace Optics
             #endif
 
             camera.clear_fifo_flag();
-
+            reopenPrevFile(filename);
             previous_log = current_micros;
         };
     }
@@ -224,7 +225,7 @@ namespace Optics
                 i = 0;
             
             }
-             if (is_header == true)
+            if (is_header == true)
             {
             //Write image data to buffer if not full
                 if (i < 256)
@@ -270,7 +271,7 @@ namespace Optics
                     #endif
                 }
 
-                if(!image_file.preAllocate(11000u))
+                if(!image_file.preAllocate(15000))
                 {
                     file.close();
                     #if DEBUG_ON == true

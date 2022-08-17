@@ -17,7 +17,6 @@
 #include "Sensors/GPS.h"
 #include "Sensors/Camera/OV2640.h"
 
-#include "Data/RF/radio.h"
 #include "debug.h"
 #include "time/Time.h"
 
@@ -36,7 +35,6 @@ unsigned long long previous_time;
 Velocity nav_v;
 Position nav_p;
 
-Radio rf(50000);
 Data data;
 GPSdata gps_data;
 
@@ -97,6 +95,8 @@ void loop()
     data.dt = (data.time_us - previous_time) / 1000000.0;
     previous_time = data.time_us;
 
+    data.loop_time = 1.0 / data.dt;
+
     output.loopIndication();
     sensor.logToStruct(data);
 
@@ -110,7 +110,7 @@ void loop()
     ori.convertAccelFrame(data.relative, data.facc.x, data.facc.y, data.facc.z, &data.wfacc.x, &data.wfacc.y, &data.wfacc.z);
 
 #if OPTICS_ON == true
-    camera.capture(1000000, &data.optical_data.capture_time, &data.optical_data.save_time, &data.optical_data.FIFO_length);
+    camera.capture(1000000, &data.optical_data.capture_time, &data.optical_data.save_time, &data.optical_data.FIFO_length, logger.closeFile, logger.reopenFile, logger.data_filename);
 #endif
 
     if (!logger.logData(data))
@@ -147,13 +147,11 @@ void loop()
       while(1);
     }
 
+    Serial.println(data.loop_time);
 
-    Serial.println(1.0 / data.dt);
 /*
-    Serial.print(data.external.loop_time); Serial.print("\t");
     Serial.print(data.external.raw_temp); Serial.print("\t");
-    Serial.print(data.external.raw_pres); Serial.print("\n");
-    */
+    Serial.print(data.external.filt_temp); Serial.print("\n");
 
-    
+    */
 }

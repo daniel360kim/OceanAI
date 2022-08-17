@@ -41,7 +41,7 @@ namespace Optics
 
         bool begin();
         void setFrameCount(uint8_t frame_num) { this->frame_num = frame_num; }
-        void capture(unsigned long delay_micros, unsigned long *capture_time, unsigned long *save_time, uint8_t *FIFO_length);
+        void capture(unsigned long delay_micros, unsigned long *capture_time, unsigned long *save_time, uint8_t *FIFO_length, bool(*closeCurrentFile)(), bool(*reopenPrevFile)(const char*), const char* filename);
 
     private:
 

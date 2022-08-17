@@ -128,6 +128,7 @@ struct ExternalData
 struct Data
 {
     unsigned long long time_us;
+    unsigned long loop_time;
 
     uint8_t system_state;
 

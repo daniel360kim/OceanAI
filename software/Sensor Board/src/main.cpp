@@ -18,9 +18,9 @@ unsigned long long previous_send;
 
 constexpr int us_interval = 2000;
 
-float pressure_sum = 0;
-float temperature_sum = 0;
-float loop_sum = 0;
+double pressure_sum = 0;
+double temperature_sum = 0;
+double loop_sum = 0;
 
 long iterations = 0;
 
@@ -54,10 +54,13 @@ void loop()
 		temperature_sum = 0.0;
 		iterations = 0;
 
-		previous_send = micros();
+		
+		//send a drdy signal
 		digitalWrite(INT, HIGH);
 		digitalWrite(INT, LOW);
+		
 		ext_sensor.sendData(raw_data);
+		previous_send = micros();
 	}
 	else
 	{
@@ -66,7 +69,5 @@ void loop()
 		temperature_sum += therm.getTemperature();
 		iterations++;
 	}
-	// Send drdy signal
 
-	// ext_sensor.writeRegisters(ExternalSensor::SubAddress::DATA, raw_data);
 }

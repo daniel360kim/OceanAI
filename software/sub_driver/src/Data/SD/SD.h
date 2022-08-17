@@ -31,10 +31,21 @@ public:
     bool init();
     bool logData(Data data);
 
+    /**
+     * @brief closes current file
+     * 
+     * @return true file close successful
+     * @return false file close unsuccessful
+     */
+    static bool closeFile() { return file.close(); }
+
+    static bool reopenFile(const char* filename);
+
     bool rewindPrint();
 
-private:
     char* data_filename;
+
+private:
     char* csv_filename;
     unsigned long long previous_time;
 
@@ -52,12 +63,7 @@ private:
 
 };
 
-class GPS_Logger
-{
-public:
 
-private:
-};
 
 
 
