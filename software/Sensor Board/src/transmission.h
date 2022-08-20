@@ -29,13 +29,13 @@ public:
     bool initialize();
 
     void sendData(RawData data);
-
+    static volatile uint8_t lastMasterCommand;
 
 private:
     uint8_t i2c_address;
 
     static volatile uint8_t* arrayPointer;
-    static volatile uint8_t lastMasterCommand;
+    
 
     static double array[3];
 
