@@ -41,7 +41,8 @@ public:
 
     bool calibrate(); //calibrate the motor (blocking)
 
-    void toPosition(uint8_t position); //goes to a specific position (blocking)
+    void toPosition(int position); //goes to a specific position (blocking)
+    void runSteps(long steps); //runs a number of steps (blocking)
 
     void logToStruct(Data &data);
 

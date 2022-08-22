@@ -15,9 +15,8 @@
 namespace Module
 {
     constexpr int THREAD_ROD_LENGTH = 250; //in mm: length of the threaded rod
-    constexpr int DISPLACEMENT_PER_CIRCLE = 8; //in mm: how much the nut moves every circle of the thread rod
+    constexpr double DISPLACEMENT_PER_CIRCLE = 1.25; //in mm: how much the nut moves every circle of the thread rod
     constexpr int END_STOP_LENGTH = 0; //in mm: how far away from the end of the thread rod the end stop is. 0 means that the nut should go to the very end of the rod
-    constexpr int STEP_DELAY = 1; //in us: how long the motor should wait between steps
 };
 
 

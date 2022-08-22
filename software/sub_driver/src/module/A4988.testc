@@ -10,6 +10,7 @@
  */
 
 #include <Arduino.h>
+#include <cmath>
 
 #include "A4988.h"
 #include "module_settings.h"
@@ -30,7 +31,7 @@ A4988::A4988(const uint8_t step_pin, const uint8_t dir_pin, const uint8_t ms1_pi
     pinMode(ms2_pin, OUTPUT);
     pinMode(ms3_pin, OUTPUT);
     pinMode(slp, OUTPUT);
-    pinMode(rst, OUTPUT);
+    pinMode(rst, INPUT);
 
     setState(true);
     setDirection(true);
@@ -114,6 +115,7 @@ void A4988::setDirection(bool dir_state)
 {
     digitalWrite(dir_pin, dir_state);
     direction = dir_state;
+    delayNanoseconds(200);
 }
 
 bool A4988::calibrate()
@@ -123,14 +125,30 @@ bool A4988::calibrate()
         return true;
     }
     setDirection(true);
-    while(limit.state() == false);
-
+   
+    while(limit.state() == false)
+    {
+        step();
+    }
+    setDirection(false);
+    setResolution(Resolution::Sixteenth);
+    for(int i = 0; i < 5000; i++)
+    {
+        step();
+    }
+    setDirection(true);
+    while(limit.state() == false)
+    {
+        step();
+    }
     current_position = 0;
+
     return true;
 }
 
-void A4988::toPosition(uint8_t position)
+void A4988::toPosition(int position)
 {
+    Serial.print("Current Position: "); Serial.println(current_position);
     if(position == current_position)
     {
         return;
@@ -138,24 +156,36 @@ void A4988::toPosition(uint8_t position)
 
     if(position < current_position)
     {
-        setDirection(false);
-    }
-    else
-    {
         setDirection(true);
     }
-    int steps_to_turn = (abs(current_position - position) / Module::DISPLACEMENT_PER_CIRCLE) * steps_per_revolution;
-    for(int i = 0; i < steps_to_turn; i++)
+
+    else
     {
-        digitalWrite(step_pin, HIGH);
-        digitalWrite(step_pin, LOW);
+        setDirection(false);
     }
+    int steps_to_turn = (std::abs(current_position - position) / Module::DISPLACEMENT_PER_CIRCLE) * steps_per_revolution;
+
+    Serial.print("Steps to turn: "); Serial.println(steps_to_turn);
+    for(int i = 0; i < steps_to_turn; i++)
+    {   
+        Serial.println(analogRead(rst));
+        step();
+    }
+
 
     current_position = position; //update the current position
 }
+
 
 void A4988::logToStruct(Data &data)
 {
     
 }
 
+void A4988::step()
+{
+    digitalWrite(step_pin, HIGH);
+    delayMicroseconds(75);
+    digitalWrite(step_pin, LOW);
+    delayMicroseconds(75);
+}

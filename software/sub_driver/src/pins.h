@@ -27,7 +27,7 @@ constexpr uint8_t SLP_b = 26;
 
 constexpr uint8_t MS1_b = 9;
 constexpr uint8_t MS2_b = 7;
-constexpr uint8_t MS3_b = 8;
+constexpr uint8_t ERR_b = 8;
 
 //Pitexprch Manipulation Engine
 constexpr uint8_t RST_p = 40;
@@ -37,7 +37,7 @@ constexpr uint8_t SLP_p = 41;
 
 constexpr uint8_t MS1_p = 28;
 constexpr uint8_t MS2_p = 29;
-constexpr uint8_t MS3_p = 30;
+constexpr uint8_t ERR_p = 30;
 
 /////expr Limit Switches /////
 constexpr uint8_t STOP_b = 32; //buoyancy engine limit switch
