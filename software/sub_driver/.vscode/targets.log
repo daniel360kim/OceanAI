@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Thu Aug 11 19:34:13 2022
+# Make data base, printed on Tue Aug 30 14:17:50 2022
 
 # Variables
 
@@ -39,7 +39,7 @@ MAKE_COMMAND := C:/ProgramData/chocolatey/lib/make/tools/install/bin/make.exe
 # automatic
 @D = $(patsubst %/,%,$(patsubst %\,%,$(dir $@)))
 # environment
-CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_20676_HWIDIKUHNSZLOQFH
+CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_10876_JDTDDETOTYSNFGRX
 # environment
 VSCODE_HANDLES_UNCAUGHT_ERRORS = true
 # environment
@@ -53,7 +53,7 @@ VK_SDK_PATH = C:\VulkanSDK\1.3.211.0
 # automatic
 %F = $(notdir $%)
 # environment
-VSCODE_CODE_CACHE_PATH = C:\Users\danie\AppData\Roaming\Code\CachedData\6d9b74a70ca9c7733b29f0456fd8195364076dda
+VSCODE_CODE_CACHE_PATH = C:\Users\danie\AppData\Roaming\Code\CachedData\e4503b30fc78200f846c62cf8091b76ff5547662
 # environment
 LANG = C
 # default
@@ -71,7 +71,7 @@ ONEDRIVE = C:\Users\danie\OneDrive
 # makefile
 CURDIR := e:/OceanAI/software/sub_driver
 # environment
-APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
 # automatic
 *D = $(patsubst %/,%,$(patsubst %\,%,$(dir $*)))
 # environment
@@ -91,7 +91,7 @@ MAKEFILE_LIST :=
 # automatic
 @F = $(notdir $@)
 # environment
-VSCODE_PID = 20676
+VSCODE_PID = 10876
 # environment
 CUDA_PATH = C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6
 # automatic
@@ -167,8 +167,6 @@ GNUMAKEFLAGS :=
 # environment
 OS = Windows_NT
 # environment
-__COMPAT_LAYER = DetectorsAppHealth
-# environment
 PLATFORMIO_PATH = C:\Users\danie\.platformio\python3;C:\VulkanSDK\1.3.211.0\Bin;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\bin;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\libnvvp;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\Razer Chroma SDK\bin;C:\Program Files\Razer Chroma SDK\bin;C:\Program Files (x86)\Razer\ChromaBroadcast\bin;C:\Program Files\Razer\ChromaBroadcast\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Windows\system32\config\systemprofile\AppData\Local\Microsoft\WindowsApps;C:\Program Files\Git\cmd;C:\Program Files\MATLAB\R2021b\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\TDM-GCC-32\bin;C:\Program Files\NVIDIA Corporation\Nsight Compute 2022.1.1\;C:\ProgramData\chocolatey\bin;C:\Program Files\dotnet\;C:\Program Files\electricui-arc\;C:\Program Files\nodejs\;C:\Program Files (x86)\processing-java;C:\Users\danie\AppData\Local\Programs\Python\Python37\Scripts\;C:\Users\danie\AppData\Local\Programs\Python\Python37\;C:\Users\danie\AppData\Local\Programs\Python\Python39\Scripts\;C:\Users\danie\AppData\Local\Programs\Python\Python39\;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\Razer Chroma SDK\bin;C:\Program Files\Razer Chroma SDK\bin;C:\Program Files (x86)\Razer\ChromaBroadcast\bin;C:\Program Files\Razer\ChromaBroadcast\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Windows\system32\config\systemprofile\AppData\Local\Microsoft\WindowsApps;C:\Program Files\Git\cmd;C:\Program Files\MATLAB\R2021b\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\dotnet\;C:\TDM-GCC-32\bin;C:\Program Files (x86)\dotnet\;C:\Program Files\nodejs\;C:\Program Files\electricui-arc\;C:\Users\danie\AppData\;C:\Users\danie\AppData\Local\Programs\Microsoft VS Code\bin;E:\Coding Projects\OpenCV\opencv\build\x64\vc15\bin;C:\Program Files\CMake\bin;E:\Coding Projects\OpenCV\opencv\build\x64\vc15\lib;E:\Coding Projects\bui\install\bin;C:\Users\danie\.dotnet\tools;E:\Coding Projects\TensorFlow;E:\Coding Projects\TensorFlow\Tools\usr\bin;E:\Coding Projects\TensorFlow\bazel.exe;E:\AppData\Anaconda\Library\bin;E:\AppData\Anaconda\Scripts;E:\AppData\Anaconda;C:\Users\danie\AppData\Roaming\npm;C:\Users\danie\Downloads\processing-3.5.4-windows32\processing-3.5.4;C:\Users\danie\Downloads\processing-3.5.4-windows32\processing-3.5.4;C:\Program Files (x86)\processing-java;;C:\VulkanSDK\1.3.211.0\Bin;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\bin;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\libnvvp;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\Razer Chroma SDK\bin;C:\Program Files\Razer Chroma SDK\bin;C:\Program Files (x86)\Razer\ChromaBroadcast\bin;C:\Program Files\Razer\ChromaBroadcast\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Windows\system32\config\systemprofile\AppData\Local\Microsoft\WindowsApps;C:\Program Files\Git\cmd;C:\Program Files\MATLAB\R2021b\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\TDM-GCC-32\bin;C:\Program Files\NVIDIA Corporation\Nsight Compute 2022.1.1\;C:\ProgramData\chocolatey\bin;C:\Program Files\dotnet\;C:\Program Files\electricui-arc\;C:\Program Files\nodejs\;C:\Program Files (x86)\processing-java;C:\Users\danie\AppData\Local\Programs\Python\Python37\Scripts\;C:\Users\danie\AppData\Local\Programs\Python\Python37\;C:\Users\danie\AppData\Local\Programs\Python\Python39\Scripts\;C:\Users\danie\AppData\Local\Programs\Python\Python39\;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\Razer Chroma SDK\bin;C:\Program Files\Razer Chroma SDK\bin;C:\Program Files (x86)\Razer\ChromaBroadcast\bin;C:\Program Files\Razer\ChromaBroadcast\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Windows\system32\config\systemprofile\AppData\Local\Microsoft\WindowsApps;C:\Program Files\Git\cmd;C:\Program Files\MATLAB\R2021b\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\dotnet\;C:\TDM-GCC-32\bin;C:\Program Files (x86)\dotnet\;C:\Program Files\nodejs\;C:\Program Files\electricui-arc\;C:\Users\danie\AppData\;C:\Users\danie\AppData\Local\Programs\Microsoft VS Code\bin;E:\Coding Projects\OpenCV\opencv\build\x64\vc15\bin;C:\Program Files\CMake\bin;E:\Coding Projects\OpenCV\opencv\build\x64\vc15\lib;E:\Coding Projects\bui\install\bin;C:\Users\danie\.dotnet\tools;E:\Coding Projects\TensorFlow;E:\Coding Projects\TensorFlow\Tools\usr\bin;E:\Coding Projects\TensorFlow\bazel.exe;E:\AppData\Anaconda\Library\bin;E:\AppData\Anaconda\Scripts;E:\AppData\Anaconda;C:\Users\danie\AppData\Roaming\npm;C:\Users\danie\Downloads\processing-3.5.4-windows32\processing-3.5.4;C:\Users\danie\Downloads\processing-3.5.4-windows32\processing-3.5.4;C:\Program Files (x86)\processing-java;
 # environment
 CUDA_PATH_V11_6 = C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6
@@ -195,7 +193,7 @@ PROCESSOR_ARCHITECTURE = x86
 # environment
 VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
 # environment
-PLATFORMIO_IDE = 2.5.1
+PLATFORMIO_IDE = 2.5.2
 # environment
 COMMONPROGRAMFILES(X86) = C:\Program Files (x86)\Common Files
 # environment
@@ -203,7 +201,7 @@ ELECTRON_RUN_AS_NODE = 1
 # environment
 TEMP = C:\Users\danie\AppData\Local\Temp
 # environment
-VSCODE_IPC_HOOK = \\.\pipe\db7f7f1f1f0b104f0877904584eb4bc7-1.70.1-main-sock
+VSCODE_IPC_HOOK = \\.\pipe\db7f7f1f1f0b104f0877904584eb4bc7-1.70.2-main-sock
 # default
 .RECIPEPREFIX := 
 # automatic
@@ -221,7 +219,7 @@ PROCESSOR_REVISION = a502
 # environment
 PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 165 Stepping 2, GenuineIntel
 # variable set hash-table stats:
-# Load=104/1024=10%, Rehash=0, Collisions=12/128=9%
+# Load=103/1024=10%, Rehash=0, Collisions=12/127=9%
 
 # Pattern-specific Variable Values
 
@@ -229,7 +227,7 @@ PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 165 Stepping 2, GenuineIntel
 
 # Directories
 
-# . (key e:/OceanAI/software/sub_driver, mtime 1659130422): 11 files, no impossibilities.
+# . (key e:/OceanAI/software/sub_driver, mtime 1661223419): 11 files, no impossibilities.
 
 # 11 files, no impossibilities in 1 directories.
 
@@ -294,6 +292,6 @@ GNUmakefile:
 # strcache performance: lookups = 21 / hit rate = 14%
 # hash-table stats:
 # Load=18/8192=0%, Rehash=0, Collisions=0/21=0%
-# Finished Make data base on Thu Aug 11 19:34:13 2022
+# Finished Make data base on Tue Aug 30 14:17:50 2022
 
  

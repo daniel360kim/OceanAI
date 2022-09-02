@@ -120,13 +120,12 @@ void Stepper::goTo(long absolute)
     {
         return;
     }
-    Serial.println("GOTO: " + String(absolute));
     move(absolute);
 }
 
 void Stepper::move_mm(int mm)
 {
-    goTo(currentPosition() + (mm * steps_per_mm));
+    goTo(mm * steps_per_mm);
 }
 
 bool Stepper::update()
@@ -145,8 +144,8 @@ bool Stepper::update()
 void Stepper::recheckLimit()
 {
     setCurrentPosition(0);
-    move(1000);
-    while(currentPosition() != 1000)
+    move(500);
+    while(currentPosition() != 500)
     {
         run();
     }
