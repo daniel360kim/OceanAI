@@ -75,7 +75,6 @@ void OS::LowAlarmISR()
     low_temp_alarm = false;
     InternalTemperature.attachHighTempInterruptCelsius (OS_Settings::HIGH_TEMP, &HighAlarmISR);
 }
-
-#endif\
-
 */
+#endif
+

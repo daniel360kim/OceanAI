@@ -72,7 +72,7 @@ void Stepper::calibrate()
         return;
     }
 
-    move(-100000000); //just move a lot lol
+    move(100000000); //just move a lot lol
     while(limit.state() == false)
     {
         run();
