@@ -25,7 +25,6 @@ Fusion SFori;
 Optics::Camera camera(CS_VD);
 GPS gps(9600);
 
-UnifiedSensors sensor;
 Orientation ori;
 
 LED signal(SIGNAL);
@@ -49,17 +48,17 @@ void setup()
     output.startupSequence();
     Serial.begin(2000000);
 
-    if (!sensor.initNavSensors())
+    if (UnifiedSensors::getInstance().initNavSensors())
     {
         output.indicateError();
     }
 
-    sensor.initVoltmeter(v_div);
-    sensor.initTDS(TDS);
-    
-    sensor.setInterrupts(BAR_int, ACC_int, GYR_int, MAG_int, TX_RF);
-    
-    sensor.setGyroBias();
+    UnifiedSensors::getInstance().initVoltmeter(v_div);
+    UnifiedSensors::getInstance().initTDS(TDS);
+
+    UnifiedSensors::getInstance().setInterrupts(BAR_int, ACC_int, GYR_int, MAG_int, TX_RF);
+
+    UnifiedSensors::getInstance().setGyroBias();
 /*
     if (!rf.init())
     {
@@ -97,7 +96,7 @@ void loop()
     data.loop_time = 1.0 / data.dt;
 
     output.loopIndication();
-    sensor.logToStruct(data);
+    UnifiedSensors::getInstance().logToStruct(data);
 
     gps.updateData(gps_data);
 

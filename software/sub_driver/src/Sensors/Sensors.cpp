@@ -20,6 +20,8 @@
 #include "../Time/Time.h"
 #include "../Data/StartInfo.h"
 
+UnifiedSensors UnifiedSensors::instance;
+
 BMP388_DEV baro;
 Bmi088Accel accel(Wire, 0x18);
 Bmi088Gyro gyro(Wire, 0x68);

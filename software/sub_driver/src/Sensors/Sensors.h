@@ -29,7 +29,10 @@ constexpr double VREF = 3.3;
 class UnifiedSensors
 {
 public:
-    UnifiedSensors();
+    static UnifiedSensors& getInstance()
+    {
+        return instance;
+    }
     bool initNavSensors();
     void initADC();
     void initTDS(uint8_t TDS_pin);
@@ -64,6 +67,9 @@ public:
     const double HARD_IRON_BIAS[3] = { 0.36, 0.39, 0.49 };
 
 private:
+    UnifiedSensors();
+
+    static UnifiedSensors instance;
     uint8_t TDS_pin, voltage_pin;
     double temp = 25;
 
