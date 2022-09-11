@@ -28,14 +28,18 @@ namespace OS_Settings
     constexpr unsigned int log_millis = 3000u; //log every three seconds
 };
 
-
 class OS
 {
 public:
-    OS();
+    static OS& getInstance()
+    {
+        return instance;
+    }
     void log_cpu_state(Data &data);
 
 private:
+    OS();
+    static OS instance;
     static volatile bool high_temp_alarm;
     static volatile bool low_temp_alarm;
 

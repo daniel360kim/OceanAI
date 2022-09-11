@@ -19,6 +19,7 @@
 
 #include "debug.h"
 #include "time/Time.h"
+#include "core/OS.h"
 
 Fusion SFori;
 
@@ -44,11 +45,10 @@ bool warning = false;
 
 void setup()
 {
-    
     output.startupSequence();
     Serial.begin(2000000);
 
-    if (UnifiedSensors::getInstance().initNavSensors())
+    if (!UnifiedSensors::getInstance().initNavSensors())
     {
         output.indicateError();
     }
@@ -97,6 +97,7 @@ void loop()
 
     output.loopIndication();
     UnifiedSensors::getInstance().logToStruct(data);
+    OS::getInstance().log_cpu_state(data);
 
     gps.updateData(gps_data);
 

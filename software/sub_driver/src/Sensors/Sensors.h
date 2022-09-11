@@ -67,7 +67,7 @@ public:
     const double HARD_IRON_BIAS[3] = { 0.36, 0.39, 0.49 };
 
 private:
-    UnifiedSensors();
+    UnifiedSensors() {}
 
     static UnifiedSensors instance;
     uint8_t TDS_pin, voltage_pin;

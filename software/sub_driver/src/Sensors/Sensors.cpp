@@ -59,8 +59,6 @@ volatile bool UnifiedSensors::voltage_flag = false;
 
 volatile bool UnifiedSensors::ext_flag = false;
 
-UnifiedSensors::UnifiedSensors() {}
-
 bool UnifiedSensors::initNavSensors()
 {
     int status[10];

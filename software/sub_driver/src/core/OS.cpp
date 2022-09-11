@@ -13,6 +13,8 @@
 
 #include <InternalTemperature.h>
 
+OS OS::instance;
+
 volatile bool OS::high_temp_alarm = false;
 volatile bool OS::low_temp_alarm = false;
 
