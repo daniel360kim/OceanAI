@@ -13,6 +13,7 @@
 #include <SPI.h>
 #include <SdFat.h>
 #include <vector>
+#include <queue>
 
 #include "SD.h"
 #include "DataFile.h"
@@ -22,6 +23,7 @@
 #include "../../debug.h"
 #include "../../config.h"
 #include "../StartInfo.h"
+#include "StaticQueue.h"
 
 namespace SD_Settings
 {
@@ -29,7 +31,7 @@ namespace SD_Settings
     constexpr unsigned int LOG_INTERVAL_US = 25000u;
     constexpr unsigned int LOG_RATE = 100u; //log rate in hertz 
     constexpr unsigned int DATA_SIZE = sizeof(Data);
-    constexpr unsigned int BUF_SIZE = 800u; //400 sections of 512 byte structs in our buffer
+    constexpr unsigned int BUF_SIZE = 400u; //400 sections of 512 byte structs in our buffer
     constexpr unsigned long LOG_FILE_SIZE = DURATION * DATA_SIZE * LOG_RATE; //3 days (in seconds) * size of struct * data rate in hertz
     constexpr unsigned long FLUSH_INTERVAL_US = 60000000ul; //flush every 60 seconds
 };
@@ -44,7 +46,7 @@ SdFs sd;
 FsFile file;
 cid_t cid;
 
-CircularBuffer<Data> buf(SD_Settings::BUF_SIZE);
+StaticCircularBuffer<Data, SD_Settings::BUF_SIZE> buf;
 
 Timer<1, micros> flusher;
 Timer<1, micros> cap_update;
@@ -219,7 +221,7 @@ bool SD_Logger::logData(Data data)
         }
         previous_time = micros();
     }
-    if(buf.full())
+    if(buf.is_full())
     {
         Serial.println("Buff full!");
         return false;

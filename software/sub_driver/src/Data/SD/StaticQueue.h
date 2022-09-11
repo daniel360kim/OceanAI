@@ -1,5 +1,5 @@
-#ifndef RingBuffer_h
-#define RingBuffer_h
+#ifndef StaticQueue_h
+#define StaticQueue_h
 
 #include <stddef.h>
 #include <array>
@@ -14,7 +14,7 @@ public:
     T get();
     void reset();
     bool empty() const;
-    bool full() const;
+    bool is_full() const;
     size_t capacity() const;
     size_t size() const;
 
@@ -22,7 +22,7 @@ private:
     std::array<T, N> buf; 
     size_t head_ = 0;
     size_t tail_ = 0;
-    bool full = false;
+    bool full;
 
 };
 
@@ -61,7 +61,7 @@ bool StaticCircularBuffer<T, N>::empty() const
 }
 
 template<typename T, size_t N>
-bool StaticCircularBuffer<T, N>::full() const
+bool StaticCircularBuffer<T, N>::is_full() const
 {
     //If tail is ahead the head by 1, we are full
     return full;

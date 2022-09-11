@@ -144,7 +144,7 @@ bool Stepper::update()
 void Stepper::recheckLimit()
 {
     setCurrentPosition(0);
-    move(500);
+    move(800);
     while(currentPosition() != 500)
     {
         run();
