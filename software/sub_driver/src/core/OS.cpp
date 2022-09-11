@@ -1,5 +1,5 @@
 /**
- * @file OS.h
+ * @file OS.cpp
  * @author Daniel Kim
  * @brief operating the cpu on the teensy 4.1
  * @version 0.1
@@ -9,41 +9,12 @@
  * 
  */
 
-#ifndef OS_H
-#define OS_H
+#include "OS.h"
 
-
-/*
-#include <Arduino.h>
 #include <InternalTemperature.h>
 
-#include "Data/data_struct.h"
-
-extern "C" uint32_t set_arm_clock(uint32_t frequency); // required prototype
-
-namespace OS_Settings
-{
-    constexpr uint8_t HIGH_TEMP = 80; //temp in Celsius to trigger ISR
-    constexpr uint8_t LOW_TEMP = 70;
-    constexpr unsigned int log_millis = 3000u; //log every three seconds
-};
-
-
-class OS
-{
-public:
-    OS();
-    void log_cpu_state(Data &data);
-
-private:
-    static volatile bool high_temp_alarm;
-    static volatile bool low_temp_alarm;
-
-    static void HighAlarmISR();
-    static void LowAlarmISR();
-
-    unsigned long previous_millis;
-};
+volatile bool OS::high_temp_alarm = false;
+volatile bool OS::low_temp_alarm = false;
 
 OS::OS()
 {
@@ -75,6 +46,3 @@ void OS::LowAlarmISR()
     low_temp_alarm = false;
     InternalTemperature.attachHighTempInterruptCelsius (OS_Settings::HIGH_TEMP, &HighAlarmISR);
 }
-*/
-#endif
-

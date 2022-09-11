@@ -321,7 +321,7 @@ unsigned int SD_Logger::findFactors()
     //Reverse iterate to find largest factor
     for(auto i = factors.rbegin(); i != factors.rend(); i++)
     {
-        if(*i * sizeof(Data) <= free_mem - 1000) //leave 1000 bytes free to ensure we dont over do it
+        if(*i * sizeof(Data) <= free_mem - 200) //leave 200 bytes free to ensure we dont over do it
         {
             factor_to_use = *i;
             break;
