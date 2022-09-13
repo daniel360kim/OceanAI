@@ -43,6 +43,9 @@ namespace Filter
     LowPass<1> acc_y(30);
     LowPass<1> acc_z(30);
 
+    LowPass<1> bmp_pres(10);
+    LowPass<1> bmp_temp(5);
+
     LowPass<1> ext_temp(50);
     LowPass<1> ext_pres(50);
 };
@@ -361,6 +364,10 @@ void UnifiedSensors::logToStruct(Data &data)
     {
         returnRawBaro(&data.bmp_rpres, &data.bmp_rtemp);
         temp_measurements[0] = data.bmp_rtemp;
+
+        data.bmp_fpres = Filter::bmp_pres.filt(data.bmp_rpres, data.dt);
+        data.bmp_ftemp = Filter::bmp_temp.filt(data.bmp_rtemp, data.dt);
+
         UnifiedSensors::bar_flag = false;
     }
 
