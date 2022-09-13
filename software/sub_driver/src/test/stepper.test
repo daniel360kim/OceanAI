@@ -26,7 +26,7 @@ StepperProperties properties {
 
 
 unsigned long previousPrintmicros;
-Stepper stepper(pins_b, Stepper::Resolution::HALF, properties);
+Stepper stepper(pins_p, Stepper::Resolution::HALF, properties);
 
 long target = 0;
 
@@ -40,23 +40,20 @@ void setup() {
 	stepper.setAcceleration(6000);
 	stepper.setResolution(Stepper::Resolution::HALF);
 	Serial.println(F("Calibrated"));
-	stepper.move(83000);
 }
 
 void loop() {
-	/*
-	if(Serial.available() > 0 && (stepper.currentPosition() >= target - 1 && stepper.currentPosition() <= target + 1)) {
+	if(Serial.available() > 0 && (stepper.currentPosition_mm() >= target - 1 && stepper.currentPosition_mm() <= target + 1)) {
 		Serial.println("Target reached");
 		long move = Serial.parseInt();
 		target += move;
-		stepper.move(move);
-		Serial.print("Current position: "); Serial.println(stepper.currentPosition());
+		stepper.move_mm(move);
+		Serial.print("Current position: "); Serial.println(stepper.currentPosition_mm());
 	}
 	// Move the motor one step
 	if(micros() - previousPrintmicros > 1000000) {
 		previousPrintmicros = micros();
-		Serial.print("Current position: "); Serial.println(stepper.currentPosition());
+		Serial.print("Current position: "); Serial.println(stepper.currentPosition_mm());
 	}
-	*/
 	stepper.update();
 }

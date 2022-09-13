@@ -72,7 +72,7 @@ void Stepper::calibrate()
         return;
     }
 
-    move(100000000); //just move a lot lol
+    move(-100000000); //just move a lot lol
     while(limit.state() == false)
     {
         run();
@@ -144,7 +144,7 @@ bool Stepper::update()
 void Stepper::recheckLimit()
 {
     setCurrentPosition(0);
-    move(800);
+    move(500);
     while(currentPosition() != 500)
     {
         run();

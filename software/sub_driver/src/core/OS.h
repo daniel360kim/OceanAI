@@ -17,7 +17,7 @@
 #include <Arduino.h>
 #include <InternalTemperature.h>
 
-#include "Data/data_struct.h"
+#include "../Data/data_struct.h"
 
 extern "C" uint32_t set_arm_clock(uint32_t frequency); // required prototype
 
