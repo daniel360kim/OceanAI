@@ -14,6 +14,8 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <InternalTemperature.h>
+#include <vector>
+#include <stdint.h>
 
 #include "BMP388/BMP388_DEV.h"
 #include "BMI088/BMI088.h"
@@ -33,6 +35,7 @@ public:
     {
         return instance;
     }
+    void scanAddresses();
     bool initNavSensors();
     void initADC();
     void initTDS(uint8_t TDS_pin);
@@ -65,6 +68,8 @@ public:
 
     double gx_bias = 0, gy_bias = 0, gz_bias = 0;
     const double HARD_IRON_BIAS[3] = { 0.36, 0.39, 0.49 };
+
+    std::vector<uint8_t> address;
 
 private:
     UnifiedSensors() {}

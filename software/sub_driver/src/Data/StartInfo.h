@@ -12,6 +12,8 @@
 #define StartInfo_h
 
 #include <Arduino.h>
+#include <vector>
+#include <stdint.h>
 
 #include "data_struct.h"
 
@@ -45,6 +47,11 @@ struct StartFile_d
     //SD
     unsigned long sd_cap;
 
+    //I2C Data
+    std::vector<uint8_t> addresses;
+    std::vector<uint8_t> errors;
+    int num_devices;
+
     /////////////Sensors////////////
     //BMP388 Oversampling
     char* BMP_os_t;
@@ -61,6 +68,7 @@ struct StartFile_d
     char* mag_ODR;
 
     Vec3 gyro_bias;
+    Vec3 mag_bias;
 };
 
 extern StartFile_d configs;

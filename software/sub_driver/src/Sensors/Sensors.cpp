@@ -13,6 +13,8 @@
 #include <ADC.h>
 #include <ADC_util.h>
 #include <Wire.h>
+#include <stdint.h>
+#include <tuple>
 
 #include "../config.h"
 #include "../debug.h"
@@ -62,6 +64,31 @@ volatile bool UnifiedSensors::voltage_flag = false;
 
 volatile bool UnifiedSensors::ext_flag = false;
 
+void UnifiedSensors::scanAddresses()
+{
+    uint8_t error = 0;
+    uint8_t address = 0;
+    int nDevices = 0;
+
+    for(address = 1; address < 127; address++ )
+    {
+        Wire.beginTransmission(address);
+        error = Wire.endTransmission();
+
+        if (error == 0)
+        {
+            configs.addresses.push_back(address);
+            nDevices++;
+        }
+        else if (error == 4)
+        {
+            configs.errors.push_back(address);
+        }
+    }
+
+    configs.num_devices = nDevices;
+}
+
 bool UnifiedSensors::initNavSensors()
 {
     int status[10];
@@ -106,6 +133,7 @@ bool UnifiedSensors::initNavSensors()
 
     configs.mag_range = (char *)"Mag: +/- 4 Gauss";
     configs.mag_ODR = (char *)"Mag ODR: 1000Hz";
+    configs.mag_bias = { HARD_IRON_BIAS[0], HARD_IRON_BIAS[1], HARD_IRON_BIAS[2] };
 
     for (int i = 0; i < 10; i++)
     {

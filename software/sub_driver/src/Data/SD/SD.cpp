@@ -163,6 +163,46 @@ bool SD_Logger::init()
     file.print("Optics: "); file.println(configs.optics);
     file.println("/////////////////////////////////\n");
 
+    file.println("////////// I2C Device Data //////////");
+    file.println("I2C Addresses Detected:");
+    if(configs.num_devices == 0)
+    {
+        file.print("No I2C devices detected "); file.print("("); file.print(configs.num_devices); file.println(")");
+    }
+    else
+    {           
+        for(unsigned int i = 0; i < configs.addresses.size(); i++)
+        {
+            file.print("0x");
+            if(configs.addresses[i] < 16)
+            {
+                file.print("0");
+            }
+            file.print(configs.addresses[i], HEX);
+            file.print("\n");
+        }
+        file.print("\n");
+        file.println("I2C Errors:");
+        if(configs.errors.empty())
+        {
+            file.println("No I2C errors detected");
+        }
+        else
+        {
+            for(unsigned int i = 0; i < configs.errors.size(); i++)
+            {
+                file.print("0x");
+                if(configs.errors[i] < 16)
+                {
+                    file.print("0");
+                }
+                file.print(configs.errors[i], HEX);
+                file.print("\n");
+            }
+        }
+    }
+    file.print("\n");
+
     file.println("////////// Sensor Configurations /////////");
     file.println("BMP388: "); file.println(configs.BMP_os_p); file.println(configs.BMP_os_t); file.println(configs.BMP_ODR);
     file.print("\n");
@@ -174,6 +214,9 @@ bool SD_Logger::init()
     file.print("Z Bias: "); file.print(configs.gyro_bias.z); file.print("\n");
     file.print("\n");
     file.println("IMU Package - Mag: "); file.println(configs.mag_range); file.println(configs.mag_ODR);
+    file.print("X Bias: "); file.print(configs.mag_bias.x); file.print("   ");
+    file.print("Y Bias: "); file.print(configs.mag_bias.y); file.print("   ");
+    file.print("Z Bias: "); file.print(configs.mag_bias.z); file.print("\n");
     
     for(int i = 0; i < 255; i++)
     {

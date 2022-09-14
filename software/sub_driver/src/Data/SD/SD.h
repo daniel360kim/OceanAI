@@ -14,6 +14,9 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <SdFat.h>
+#include <tuple>
+#include <stdint.h>
+#include <vector>
 
 #include "RingBuffer.h"
 #include "DataFile.h"

@@ -48,6 +48,12 @@ void setup()
     output.startupSequence();
     Serial.begin(2000000);
 
+    std::vector<uint8_t> addresses;
+    std::vector<uint8_t> errors;
+    int num_devices = 0;
+
+    UnifiedSensors::getInstance().scanAddresses();
+
     if (!UnifiedSensors::getInstance().initNavSensors())
     {
         output.indicateError();
@@ -77,8 +83,7 @@ void setup()
     {
         output.indicateError();
     }
-
-  
+ 
     output.indicateCompleteStartup();
     Serial.println("Done initializing");
     previous_time = micros();
@@ -144,7 +149,7 @@ void loop()
       Serial.print("Rewind took: "); Serial.println(finish - start);
       LEDa.LEDoff();
       while(1);
-    
+    }
 
     
 }
