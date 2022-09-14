@@ -25,6 +25,10 @@
 #include "../StartInfo.h"
 #include "StaticQueue.h"
 
+/**
+ * @brief Settings for SD card
+ * 
+ */
 namespace SD_Settings
 {
     constexpr unsigned long DURATION = 6e+8;
@@ -46,19 +50,28 @@ SdFs sd;
 FsFile file;
 cid_t cid;
 
+//Stack allocated queue to allow for buffered prints
 StaticCircularBuffer<Data, SD_Settings::BUF_SIZE> buf;
 
+//Flush and update sd capacity at certain intervals
 Timer<1, micros> flusher;
 Timer<1, micros> cap_update;
 
 SD_Logger::SD_Logger() {}
-
+/**
+ * @brief create initial headers and start file
+ * 
+ * @return true creation succesful  
+ * @return false creation unsuccesful
+ */
 bool SD_Logger::init()
 {
+    //Creating binary file 
     DataFile data("data", DataFile::ENDING::DAT);
     data_filename = data.file_name;
     configs.bin_file = data_filename;
 
+    //Creating CSV file
     DataFile csvFile("ASCII", DataFile::ENDING::CSV);
     if(!csvFile.createFile())
     {
@@ -72,6 +85,7 @@ bool SD_Logger::init()
         return false;
     }
 
+    //Creating header for CSV file
     file.print(("Time us,loop_time,sys_state,dt,"));
     file.print(("bmp_rpres, bmp_rtemp, bmp_fpres, bmp_ftemp,"));
     file.print(("racc_x,racc_y,racc_z,facc_x,facc_y,facc_z,"));
@@ -91,6 +105,7 @@ bool SD_Logger::init()
 
     file.close();
 
+    //Updating SD Capacity
     configs.sd_cap = sd.freeClusterCount();
 
     if(!data.createFile())
@@ -98,6 +113,7 @@ bool SD_Logger::init()
         return false;
     }
 
+    //Creating directory for our images
     if(!sd.exists("Images"))
     {
         if(!sd.mkdir("Images"))
@@ -126,6 +142,7 @@ bool SD_Logger::init()
         return false;
     }
 
+    //Creating header file
     file.println("OceanAI Start Configurations");
     for(int i = 0; i < 255; i++)
     {
@@ -178,21 +195,30 @@ bool SD_Logger::init()
         return false;
     }
 
+    //Flushing our data every several seconds
     flusher.every(SD_Settings::FLUSH_INTERVAL_US, SD_Logger::flush);
-    cap_update.every(3600000000, SD_Logger::getCapacity);
+    cap_update.every(3600000000, SD_Logger::getCapacity); //update our sd capacity every once in a while (expensive function)
 
     return true;
 }
 
+/**
+ * @brief logs our data to the SD card
+ * 
+ * @param data strucutre with our logged data
+ * @return true 
+ * @return false 
+ */
 bool SD_Logger::logData(Data data)
 {
-    
+    //Updating capacity every once in a while   
     if(SD_Logger::cap_update_int == true)
     {
         data.sd_capacity = sd.freeClusterCount();
         SD_Logger::cap_update_int = false;
     }
 
+    //Logging at a certain interval
     unsigned long long current_time = micros();
     if(current_time - previous_time >= SD_Settings::LOG_INTERVAL_US)
     {
@@ -221,6 +247,7 @@ bool SD_Logger::logData(Data data)
         }
         previous_time = micros();
     }
+    //For debugging. Should conditional compile this but too lazy lol
     if(buf.is_full())
     {
         Serial.println("Buff full!");
@@ -234,24 +261,40 @@ bool SD_Logger::logData(Data data)
     
 }
 
+/**
+ * @brief converts binary file to csv file
+ * reads a line of the binary file, saves it to a buffer several times
+ * closes binary file, opens csv file, writes buffer to csv file
+ * keep doing till all data is converted
+ * 
+ * We do this since writing as binary is wayyyyyyyyyy faster than writing as ASCII
+ * So once the mission is complete, we can spend several minutes converting
+ * 
+ * @return true conversion successful
+ * @return false conversion unsuccessful
+ */
 bool SD_Logger::rewindPrint()
 {
-    long buf_size = findFactors();
+    //finding a buffer size based on available memory and how much data we logged
+    //this allows us to create the largest buffer possible for less opens and closed of files
+    //pretty nifty tbh
+    long buf_size = findFactors(); 
 
     long write_iterator = 0;
-    CircularBuffer<Data> *read_buf = new CircularBuffer<Data>(buf_size);
+    CircularBuffer<Data> *read_buf = new CircularBuffer<Data>(buf_size); //creating heap allocated buffer for reading data from sd card
 
+    //Since the findFactors() function automatically makes sure we have the greatest common factor of the iterations, we can just divide the iterations by buf_size
     for(unsigned long long j = 0; j < iterations / buf_size; j++)
     {
         file.open(data_filename, FILE_READ);
 
-        Data datacopy;
+        Data datacopy; //creating a copy of our data to read into
         for(long i = 0; i < buf_size + (write_iterator * buf_size); i++)
         {
             file.read((uint8_t *)&datacopy, sizeof(datacopy));
             if(i >= buf_size + ((write_iterator - 1) * buf_size))
             {
-                read_buf->insert(datacopy);
+                read_buf->insert(datacopy); //inserting data into our buffer
             }
         }
 
@@ -264,9 +307,10 @@ bool SD_Logger::rewindPrint()
             return false;
         }
 
+        //Printing the copied data into the csv fie
         for(long i = 0; i < buf_size; i++)
         {
-            char* comma = (char*)",";
+            char* comma = (char*)","; //We use comma so much, better to use as a variable
             Data cc;
             cc = read_buf->get();
             file.print(cc.time_us); file.print(comma); file.print(cc.loop_time); file.print(comma);
@@ -295,17 +339,29 @@ bool SD_Logger::rewindPrint()
         file.close();
         write_iterator++;
     }
-    delete read_buf;
+    delete read_buf; //deleting the buffer to free up memory
     return true;
 }
 
+/**
+ * @brief Finds how much heap memory we have
+ * 
+ * @return unsigned int free memory amount
+ */
 unsigned int SD_Logger::freeMemory()
 {
-    return (char *)&_heap_end - __brkval;
+    return (char *)&_heap_end - __brkval; 
 }
 
+/**
+ * @brief finds the greatest common factor of our iterations based on free memory available
+ * 
+ * @return unsigned int greates common factor
+ */
 unsigned int SD_Logger::findFactors()
 {
+    //We save all the factors found into a vector
+    //Honestly could optimize this for larger numbers... Will do!
     std::vector<unsigned int> factors;
     for(unsigned int i = 1; i <= iterations; i++)
     {
