@@ -18,7 +18,6 @@
 #include <stdint.h>
 #include <vector>
 
-#include "RingBuffer.h"
 #include "DataFile.h"
 #include "../data_struct.h"
 #include "../../config.h"

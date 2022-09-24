@@ -9,8 +9,6 @@
 #include "indication/OutputFuncs.h"
 
 #include <Arduino.h>
-#include <vector>
-#include <numeric>
 
 #include "Navigation/SensorFusion/Fusion.h"
 #include "Navigation/Postioning.h"
@@ -20,6 +18,8 @@
 #include "debug.h"
 #include "time/Time.h"
 #include "core/OS.h"
+
+#include "module/stepper.h"
 
 Fusion SFori;
 
@@ -47,10 +47,6 @@ void setup()
 {
     output.startupSequence();
     Serial.begin(2000000);
-
-    std::vector<uint8_t> addresses;
-    std::vector<uint8_t> errors;
-    int num_devices = 0;
 
     UnifiedSensors::getInstance().scanAddresses();
 

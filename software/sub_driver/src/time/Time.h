@@ -38,7 +38,7 @@
 #include <limits.h>
 
 #ifndef TIMER_MAX_TASKS
-    #define TIMER_MAX_TASKS 0x10
+#define TIMER_MAX_TASKS 0x10
 #endif
 
 #define _timer_foreach_task(T, task) \
@@ -51,14 +51,14 @@
     _timer_foreach_task(const struct task *, T)
 
 template <
-    size_t max_tasks = TIMER_MAX_TASKS, /* max allocated tasks */
+    std::size_t max_tasks = TIMER_MAX_TASKS,    /* max allocated tasks */
     unsigned long long (*time_func)() = micros, /* time function for timer */
-    typename T = void * /* handler argument type */
->
-class Timer {
-  public:
-
-    typedef uintptr_t Task; /* public task handle */
+    typename T = void *                         /* handler argument type */
+    >
+class Timer
+{
+public:
+    typedef uintptr_t Task;              /* public task handle */
     typedef bool (*handler_t)(T opaque); /* task handler func signature */
 
     /* Calls handler with opaque as argument in delay units of time */
@@ -87,10 +87,13 @@ class Timer {
     void
     cancel(Task &task)
     {
-        if (!task) return;
+        if (!task)
+            return;
 
-        timer_foreach_task(t) {
-            if (t->handler && task_id(t) == task) {
+        timer_foreach_task(t)
+        {
+            if (t->handler && task_id(t) == task)
+            {
                 remove(t);
                 break;
             }
@@ -103,7 +106,8 @@ class Timer {
     void
     cancel()
     {
-        timer_foreach_task(t) {
+        timer_foreach_task(t)
+        {
             remove(t);
         }
     }
@@ -116,19 +120,25 @@ class Timer {
         return ticks();
     }
 
-    template <typename R> void
+    template <typename R>
+    void
     tick()
     {
-        timer_foreach_task(task) {
-            if (task->handler) {
+        timer_foreach_task(task)
+        {
+            if (task->handler)
+            {
                 const unsigned long t = time_func();
                 const unsigned long duration = t - task->start;
 
-                if (duration >= task->expires) {
+                if (duration >= task->expires)
+                {
                     task->repeat = task->handler(task->opaque) && task->repeat;
 
-                    if (task->repeat) task->start = t;
-                    else remove(task);
+                    if (task->repeat)
+                        task->start = t;
+                    else
+                        remove(task);
                 }
             }
         }
@@ -141,15 +151,20 @@ class Timer {
         unsigned long ticks = ULONG_MAX, elapsed;
         const unsigned long start = time_func();
 
-        timer_foreach_const_task(task) {
-            if (task->handler) {
+        timer_foreach_const_task(task)
+        {
+            if (task->handler)
+            {
                 const unsigned long t = time_func();
                 const unsigned long duration = t - task->start;
 
-                if (duration >= task->expires) {
+                if (duration >= task->expires)
+                {
                     ticks = 0;
                     break;
-                } else {
+                }
+                else
+                {
                     const unsigned long remaining = task->expires - duration;
                     ticks = remaining < ticks ? remaining : ticks;
                 }
@@ -158,20 +173,24 @@ class Timer {
 
         elapsed = time_func() - start;
 
-        if (elapsed >= ticks || ticks == ULONG_MAX) ticks = 0;
-        else ticks -= elapsed;
+        if (elapsed >= ticks || ticks == ULONG_MAX)
+            ticks = 0;
+        else
+            ticks -= elapsed;
 
         return ticks;
     }
 
     /* Number of active tasks in the timer */
-    size_t
+    std::size_t
     size() const
     {
-        size_t s = 0;
+        std::size_t s = 0;
 
-        timer_foreach_const_task(task) {
-            if (task->handler) ++s;
+        timer_foreach_const_task(task)
+        {
+            if (task->handler)
+                ++s;
         }
 
         return s;
@@ -181,8 +200,10 @@ class Timer {
     bool
     empty() const
     {
-        timer_foreach_const_task(task) {
-            if (task->handler) return false;
+        timer_foreach_const_task(task)
+        {
+            if (task->handler)
+                return false;
         }
 
         return true;
@@ -190,21 +211,20 @@ class Timer {
 
     Timer() : ctr(0), tasks{} {}
 
-  private:
+private:
+    std::size_t ctr;
 
-    size_t ctr;
-
-    struct task {
+    struct task
+    {
         handler_t handler; /* task handler callback func */
-        T opaque; /* argument given to the callback handler */
+        T opaque;          /* argument given to the callback handler */
         unsigned long start,
-                      expires; /* when the task expires */
-        size_t repeat, /* repeat task */
-               id;
+            expires;        /* when the task expires */
+        std::size_t repeat, /* repeat task */
+            id;
     } tasks[max_tasks];
 
-    inline
-    void
+    inline void
     remove(struct task *task)
     {
         task->handler = NULL;
@@ -215,36 +235,37 @@ class Timer {
         task->id = 0;
     }
 
-    inline
-    Task
-    task_id(const struct task * const t)
+    inline Task
+    task_id(const struct task *const t)
     {
         const Task id = reinterpret_cast<Task>(t);
 
         return id ? id ^ t->id : id;
     }
 
-    inline
-    struct task *
+    inline struct task *
     next_task_slot()
     {
-        timer_foreach_task(slot) {
-            if (slot->handler == NULL) return slot;
+        timer_foreach_task(slot)
+        {
+            if (slot->handler == NULL)
+                return slot;
         }
 
         return NULL;
     }
 
-    inline
-    struct task *
+    inline struct task *
     add_task(unsigned long start, unsigned long expires,
              handler_t h, T opaque, bool repeat = 0)
     {
-        struct task * const slot = next_task_slot();
+        struct task *const slot = next_task_slot();
 
-        if (!slot) return NULL;
+        if (!slot)
+            return NULL;
 
-        if (++ctr == 0) ++ctr; // overflow
+        if (++ctr == 0)
+            ++ctr; // overflow
 
         slot->id = ctr;
         slot->handler = h;

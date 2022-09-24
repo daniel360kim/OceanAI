@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <array>
 
-template<typename T, size_t N>
+template<typename T, std::size_t N>
 class StaticCircularBuffer
 {
 public:
@@ -15,18 +15,18 @@ public:
     void reset();
     bool empty() const;
     bool is_full() const;
-    size_t capacity() const;
-    size_t size() const;
+    std::size_t capacity() const;
+    std::size_t size() const;
 
 private:
     std::array<T, N> buf; 
-    size_t head_ = 0;
-    size_t tail_ = 0;
+    std::size_t head_ = 0;
+    std::size_t tail_ = 0;
     bool full;
 
 };
 
-template<typename T, size_t N>
+template<typename T, std::size_t N>
 void StaticCircularBuffer<T, N>::insert(T item)
 {
     buf[head_] = item;
@@ -37,7 +37,7 @@ void StaticCircularBuffer<T, N>::insert(T item)
     }
 }
 
-template<typename T, size_t N>
+template<typename T, std::size_t N>
 T StaticCircularBuffer<T, N>::get()
 {
     T item = buf[tail_];
@@ -46,37 +46,37 @@ T StaticCircularBuffer<T, N>::get()
     return item;
 }
 
-template<typename T, size_t N>
+template<typename T, std::size_t N>
 void StaticCircularBuffer<T, N>::reset()
 {
     head_ = tail_;
     full = false;
 }
 
-template<typename T, size_t N>
+template<typename T, std::size_t N>
 bool StaticCircularBuffer<T, N>::empty() const
 {
     //if head and tail are equal, we are empty
     return (!full && (head_ == tail_));
 }
 
-template<typename T, size_t N>
+template<typename T, std::size_t N>
 bool StaticCircularBuffer<T, N>::is_full() const
 {
     //If tail is ahead the head by 1, we are full
     return full;
 }
 
-template<typename T, size_t N>
-size_t StaticCircularBuffer<T, N>::capacity() const
+template<typename T, std::size_t N>
+std::size_t StaticCircularBuffer<T, N>::capacity() const
 {
     return N;
 }
 
-template<typename T, size_t N>
-size_t StaticCircularBuffer<T, N>::size() const
+template<typename T, std::size_t N>
+std::size_t StaticCircularBuffer<T, N>::size() const
 {
-    size_t size = N;
+    std::size_t size = N;
 
     if (!full)
     {

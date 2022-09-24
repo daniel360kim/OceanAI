@@ -142,44 +142,46 @@ bool UnifiedSensors::initNavSensors()
             switch (i)
             {
             case 0:
-#if DEBUG_ON == true
-                char *message = (char *)"Sensors: Barometer initialization error";
-                Debug::error.addToBuffer(micros(), Debug::Critical_Error, message);
+            {
+                #if DEBUG_ON == true
+                                char* bar_message = (char *)"Sensors: Barometer initialization error";
+                                Debug::error.addToBuffer(micros(), Debug::Critical_Error, bar_message);
 
-#if LIVE_DEBUG == true
-                Serial.println(F(message));
-#endif
+                #if LIVE_DEBUG == true
+                                Serial.println(F(bar_message));
+                #endif
 
-#endif
+                #endif
 
                 return false;
                 break;
+            }
             case 1:
             {
-#if DEBUG_ON == true
-                message = (char *)"Sensors: Accelerometer initialization error";
-                Debug::error.addToBuffer(micros(), Debug::Critical_Error, message);
+                #if DEBUG_ON == true
+                                char* acc_message = (char *)"Sensors: Accelerometer initialization error";
+                                Debug::error.addToBuffer(micros(), Debug::Critical_Error, acc_message);
 
-#if LIVE_DEBUG == true
-                Serial.println(F(message));
-#endif
+                #if LIVE_DEBUG == true
+                                Serial.println(F(acc_message));
+                #endif
 
-#endif
+                #endif
 
                 return false;
                 break;
             }
             case 2:
             {
-#if DEBUG_ON == true
-                message = (char *)"Sensors: Gyroscope initialization error";
-                Debug::error.addToBuffer(micros(), Debug::Critical_Error, message);
+                #if DEBUG_ON == true
+                                char* gyr_message = (char *)"Sensors: Gyroscope initialization error";
+                                Debug::error.addToBuffer(micros(), Debug::Critical_Error, gyr_message);
 
-#if LIVE_DEBUG == true
-                Serial.println(F(message));
-#endif
+                #if LIVE_DEBUG == true
+                                Serial.println(F(gyr_message));
+                #endif
 
-#endif
+                #endif
 
                 return false;
                 break;
@@ -187,30 +189,30 @@ bool UnifiedSensors::initNavSensors()
 
             case 3:
             {
-#if DEBUG_ON == true
-                message = (char *)"Sensors: Magentometer initialization error";
-                Debug::error.addToBuffer(micros(), Debug::Critical_Error, message);
+                #if DEBUG_ON == true
+                                char* mag_message = (char *)"Sensors: Magentometer initialization error";
+                                Debug::error.addToBuffer(micros(), Debug::Critical_Error, mag_message);
 
-#if LIVE_DEBUG == true
-                Serial.println(F(message));
-#endif
+                #if LIVE_DEBUG == true
+                                Serial.println(F(mag_message));
+                #endif
 
-#endif
+                #endif
 
                 return false;
                 break;
             }
             default:
             {
-#if DEBUG_ON == true
-                message = (char *)"Sensors: Unknown sensor error initialization error";
-                Debug::error.addToBuffer(micros(), Debug::Critical_Error, message);
+                #if DEBUG_ON == true
+                                char* unk_message = (char *)"Sensors: Unknown sensor error initialization error";
+                                Debug::error.addToBuffer(micros(), Debug::Critical_Error, unk_message);
 
-#if LIVE_DEBUG == true
-                Serial.println(F(message));
-#endif
+                #if LIVE_DEBUG == true
+                                Serial.println(F(unk_message));
+                #endif
 
-#endif
+                #endif
                 return false;
             }
             }
