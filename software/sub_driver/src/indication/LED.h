@@ -64,6 +64,10 @@ public:
     void on();
     void off();
     void blink(unsigned long interval);
+
+    void show(bool state);
+
+    bool state() const { return LED_state; }
 private:
     uint8_t pin = 0;
     bool LED_state = false;

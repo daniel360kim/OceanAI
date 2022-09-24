@@ -289,3 +289,15 @@ void LED::blink(unsigned long interval)
         }
     }
 }
+
+void LED::show(bool state)
+{
+    if(state == true)
+    {
+        on();
+    }
+    else
+    {
+        off();
+    }
+}

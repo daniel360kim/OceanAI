@@ -13,59 +13,89 @@
 
 #include <Arduino.h>
 
-#include "navigation/Quaternion.h"
+
+class Quaternion
+{
+public:
+    double w;
+    double x;
+    double y;
+    double z;
+
+    struct Norm
+    {
+        double norm;
+        double theta;
+    };
+    
+    Quaternion() { w = 1, x = 0, y = 0, z = 0; }
+    Quaternion(double w, double x, double y, double z) : w(w), x(x), y(y), z(z) {}
+
+    void toAxis(double gx, double gy, double gz, double dt);
+    static Quaternion hamiltonProduct(Quaternion A, Quaternion B);
+    static Norm findNorm(double gx, double gy, double gz, double dt);
+
+};
 namespace GPS_data
 {
     struct Coordinates
     {
-        float degrees, coordinate;
+        double degrees, coordinate;
     }; 
     struct Location
     {
+        double age;
         Coordinates latitude;
         Coordinates longitude; 
     };
 
     struct Date
     {
-        uint16_t year;
-        uint8_t month;
-        uint8_t day;
+        uint32_t age;
+        double year;
+        double month;
+        double day;
     };
 
     struct Time
     {
-        uint8_t hour;
-        uint8_t minute;
-        uint8_t second;
-        uint8_t centisecond;
+        uint32_t age;
+        double hour;
+        double minute;
+        double second;
+        double centisecond;
     };
 
     struct Speed
     {
-        float knots;
-        float mph;
-        float mps;
+        uint32_t age;
+        double knots;
+        double mph;
+        double mps;
     };
 
     struct Course
     {
-        float deg;
+        uint32_t age;
+        double deg;
     };
 
     struct Altitude
     {
-        float meters;
+        uint32_t age;
+        double meters;
     };
 
     struct Satellites
     {
+        uint32_t age;
         uint32_t value;
     };
 
     struct HDOP
     {
-        float hdop;
+        uint32_t age;
+        double hdop;
     };
 
     struct Metadata
@@ -74,6 +104,14 @@ namespace GPS_data
         uint32_t sentencesWithFix;
         uint32_t failedChecksum;
         uint32_t passedChecksum;
+    };
+
+    struct Navigation
+    {
+        double dest_latitude, dest_longitude;
+        double distance_between, course_to;
+        bool course_set;
+        bool data_valid;
     };
 };
 
@@ -165,7 +203,9 @@ struct Data
 
 struct GPSdata
 {   
+    unsigned long long time_us;
     bool GPS_activated;
+
     //GPS Data
     GPS_data::Location location;    
     GPS_data::Date date;
@@ -176,81 +216,7 @@ struct GPSdata
     GPS_data::Satellites satellites;
     GPS_data::HDOP hdop;
     GPS_data::Metadata metadata;
+    GPS_data::Navigation navigation;
 };
-
-struct TransmissionPacket
-{
-    float ax; 
-    float ay;
-    float az;
-
-    float x;
-    float y;
-    float z;
-
-    bool limit_state_p;
-    bool homed_p;
-    float current_position_p;
-    float current_position_mm_p;
-
-    float target_position_p;
-    float target_position_mm_p;
-
-    float speed_p;
-    float acceleration_p;
-    float max_speed_p;
-
-    bool limit_state_b;
-    bool homed_b;
-    float current_position_b;
-    float current_position_mm_b;
-
-    float target_position_b;
-    float target_position_mm_b;
-
-    float speed_b;
-    float acceleration_b;
-    float max_speed_b;
-
-    bool sinking;
-    bool rising;
-
-    //converts data to the transmission packet
-    void set(Data data)
-    {
-        ax = data.wfacc.x;
-        ay = data.wfacc.y;
-        az = data.wfacc.z;
-
-        x = data.rel_ori.x;
-        y = data.rel_ori.y;
-        z = data.rel_ori.z;
-
-        limit_state_b = data.dive_stepper.limit_state;
-        homed_b = data.dive_stepper.homed;
-        current_position_b = data.dive_stepper.current_position;
-        current_position_mm_b = data.dive_stepper.current_position_mm;
-        target_position_b = data.dive_stepper.target_position;
-        target_position_mm_b = data.dive_stepper.target_position_mm;
-        speed_b = data.dive_stepper.speed;
-        acceleration_b = data.dive_stepper.acceleration;
-        max_speed_b = data.dive_stepper.max_speed;
-
-        limit_state_p = data.pitch_stepper.limit_state;
-        homed_p = data.pitch_stepper.homed;
-        current_position_p = data.pitch_stepper.current_position;
-        current_position_mm_p = data.pitch_stepper.current_position_mm;
-        target_position_p = data.pitch_stepper.target_position;
-        target_position_mm_p = data.pitch_stepper.target_position_mm;
-        speed_p = data.pitch_stepper.speed;
-        acceleration_p = data.pitch_stepper.acceleration;
-        max_speed_p = data.pitch_stepper.max_speed;
-
-        sinking = data.sinking;
-        rising = data.rising;
-    }
-};
-
-
 
 #endif

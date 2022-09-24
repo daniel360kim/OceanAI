@@ -7,12 +7,12 @@
 #include "Data/SD/SD.h"
 
 #include "indication/OutputFuncs.h"
+#include "indication/LED.h"
 
 #include <Arduino.h>
 
 #include "Navigation/SensorFusion/Fusion.h"
 #include "Navigation/Postioning.h"
-#include "Sensors/GPS.h"
 #include "Sensors/Camera/OV2640.h"
 
 #include "debug.h"
@@ -21,10 +21,14 @@
 
 #include "module/stepper.h"
 
+#include <EasyTransferI2C.h>
+
+
+EasyTransferI2C ET;
+
 Fusion SFori;
 
 Optics::Camera camera(CS_VD);
-GPS gps(9600);
 
 Orientation ori;
 
@@ -43,29 +47,30 @@ SD_Logger logger;
 bool rfInit = true;
 bool warning = false;
 
-StepperPins pins_p
-{
+StepperPins pins_p{
     STP_p,
     DIR_p,
     MS1_p,
     MS2_p,
     ERR_p,
-    STOP_p
-};
+    STOP_p};
 
-StepperPins pins_b
-{
+StepperPins pins_b{
     STP_b,
     DIR_b,
     MS1_b,
     MS2_b,
     ERR_b,
-    STOP_b
-};
+    STOP_b};
 
 Buoyancy buoyancy(pins_b, Stepper::Resolution::HALF, StepperProperties(81.0, 52670));
-//Stepper pitch(pins_p, Stepper::Resolution::HALF, StepperProperties(81.0, 52670)); no pitch for now
+// Stepper pitch(pins_p, Stepper::Resolution::HALF, StepperProperties(81.0, 52670)); no pitch for now
 
+
+void receive(int byteCount)
+{
+}
+TransmissionPacket packet;
 void setup()
 {
     output.startupSequence();
@@ -102,14 +107,15 @@ void setup()
     {
         output.indicateError();
     }
- 
+
+
     output.indicateCompleteStartup();
 
-    //Indicate that the stepper is homing
+    // Indicate that the stepper is homing
     LEDb.blink(255, 0, 0, 1000);
     LEDa.blink(255, 0, 0, 1000);
 
-    //buoyancy.calibrate();
+    // buoyancy.calibrate();
 
     data.dive_stepper.homed = true;
 
@@ -121,13 +127,12 @@ void setup()
     output.indicateCompleteStartup();
     Serial.println("Done initializing");
     previous_time = micros();
-    
 }
 
 bool logged = false;
 
 void loop()
-{   
+{
     data.time_us = micros();
     data.dt = (data.time_us - previous_time) / 1000000.0;
     previous_time = data.time_us;
@@ -135,10 +140,9 @@ void loop()
     data.loop_time = 1.0 / data.dt;
 
     output.loopIndication();
+
     UnifiedSensors::getInstance().logToStruct(data);
     OS::getInstance().log_cpu_state(data);
-
-    gps.updateData(gps_data);
 
     nav_v.updateVelocity(data);
     nav_p.updatePosition(data);
@@ -151,6 +155,7 @@ void loop()
     camera.capture(1000000, &data.optical_data.capture_time, &data.optical_data.save_time, &data.optical_data.FIFO_length, logger.closeFile, logger.reopenFile, logger.data_filename);
 #endif
 
+    signal.blink(80);
     if (!logger.logData(data))
     {
         output.indicateError();
@@ -165,26 +170,30 @@ void loop()
         LEDb.blink(255, 0, 0, 500);
     }
 
-    if(data.time_us >= 1e+7)
+    if (data.time_us >= 1e+10)
     {
-      LEDa.setColor(255,255,255);
-      unsigned long start = micros();
-      if(!logger.rewindPrint())
-      {
-        while(1)
+        signal.on();
+        LEDa.setColor(255, 255, 255);
+        unsigned long start = micros();
+        if (!logger.rewindPrint())
         {
-            Serial.println("Rewind failed");
-            delay(10);
+            while (1)
+            {
+                Serial.println("Rewind failed");
+                delay(10);
+            }
         }
-      }
-    
-      unsigned long finish = micros();
-      LEDa.setColor(0,255,0);
-      Serial.print("Rewind took: "); Serial.println(finish - start);
-      LEDa.LEDoff();
-      while(1);
+
+        unsigned long finish = micros();
+        LEDa.setColor(0, 255, 0);
+        Serial.print("Rewind took: ");
+        Serial.println(finish - start);
+        LEDa.LEDoff();
+        while (1);
     }
 
+    
     buoyancy.forward();
     buoyancy.logToStruct(data);
+
 }

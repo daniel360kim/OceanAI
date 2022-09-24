@@ -368,7 +368,7 @@ double UnifiedSensors::readVoltage()
 
 void UnifiedSensors::logToStruct(Data &data)
 {
-
+    
     if (UnifiedSensors::mag_flag)
     {
         returnRawMag(&data.mag.x, &data.mag.y, &data.mag.z);

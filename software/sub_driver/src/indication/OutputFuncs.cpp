@@ -8,9 +8,6 @@
  * @copyright Copyright (c) 2022 OceanAI (https://github.com/daniel360kim/OceanAI)
  * 
  */
-
-
-
 #include "LED.h"
 #include "OutputFuncs.h"
 #include "../pins.h"
