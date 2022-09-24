@@ -97,8 +97,10 @@ bool SD_Logger::init()
     file.print(("rmx,rmy,rmz,"));
     file.print(("ext_loop_time,ext_rtemp,ext_rpres,ext_ftemp,ext_fpres,"));
     file.print(("TDS,voltage,clk_speed,int_temp,"));
-    file.print(("dive_limit,dive_homed,dive_sleep,dive_pp,"));
-    file.print(("pitch_limit,pitch_homed,pitch_sleep,pitch_pp,"));
+    file.print(("dive_limit,dive_homed,dive_current_pos,dive_current_pos_mm,dive_target_pos,dive_target_pos_mm,"));
+    file.print(("dive_speed,dive_accel,dive_max_speed,"));
+    file.print(("pitch_limit,pitch_homed,pitch_current_pos,pitch_current_pos_mm,dive_target_pos,dive_target_pos_mm,"));
+    file.print(("pitch_speed,pitch_accel,pitch_max_speed,"));
     file.print(("cap_time,save_time,fifo_length,"));
     file.print(("sd_capacity\n"));
 
@@ -373,8 +375,12 @@ bool SD_Logger::rewindPrint()
             file.print(cc.external.loop_time); file.print(comma); file.print(cc.external.raw_temp); file.print(comma); file.print(cc.external.raw_pres); file.print(comma); file.print(cc.external.filt_pres); file.print(comma); file.print(cc.external.filt_temp); file.print(comma);
             file.print(cc.TDS); file.print(comma); file.print(cc.voltage); file.print(comma);
             file.print(cc.clock_speed); file.print(comma); file.print(cc.internal_temp); file.print(comma);
-            file.print(cc.dive_stepper.limit_state); file.print(comma); file.print(cc.dive_stepper.homed); file.print(comma); file.print(cc.dive_stepper.sleep); file.print(comma); file.print(cc.dive_stepper.predicted_position); file.print(comma);
-            file.print(cc.pitch_stepper.limit_state); file.print(comma); file.print(cc.pitch_stepper.homed); file.print(comma); file.print(cc.pitch_stepper.sleep); file.print(comma); file.print(cc.pitch_stepper.predicted_position); file.print(comma);
+            file.print(cc.dive_stepper.limit_state); file.print(comma); file.print(cc.dive_stepper.homed); file.print(comma); 
+            file.print(cc.dive_stepper.current_position); file.print(comma); file.print(cc.dive_stepper.current_position_mm); file.print(comma); file.print(cc.dive_stepper.target_position); file.print(comma); file.print(cc.dive_stepper.target_position_mm); file.print(comma);
+            file.print(cc.dive_stepper.speed); file.print(comma); file.print(cc.dive_stepper.acceleration); file.print(comma); file.print(cc.dive_stepper.max_speed); file.print(comma);
+            file.print(cc.pitch_stepper.limit_state); file.print(comma); file.print(cc.pitch_stepper.homed); file.print(comma);
+            file.print(cc.pitch_stepper.current_position); file.print(comma); file.print(cc.pitch_stepper.current_position_mm); file.print(comma); file.print(cc.pitch_stepper.target_position); file.print(comma); file.print(cc.pitch_stepper.target_position_mm); file.print(comma);
+            file.print(cc.pitch_stepper.speed); file.print(comma); file.print(cc.pitch_stepper.acceleration); file.print(comma); file.print(cc.pitch_stepper.max_speed); file.print(comma);
             file.print(cc.optical_data.capture_time); file.print(comma); file.print(cc.optical_data.save_time); file.print(comma); file.print(cc.optical_data.FIFO_length); file.print(comma);
             file.println(cc.sd_capacity);
         }   

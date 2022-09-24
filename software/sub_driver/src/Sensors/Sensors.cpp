@@ -14,7 +14,7 @@
 #include <ADC_util.h>
 #include <Wire.h>
 #include <stdint.h>
-#include <tuple>
+#include <array>
 
 #include "../config.h"
 #include "../debug.h"
@@ -91,12 +91,16 @@ void UnifiedSensors::scanAddresses()
 
 bool UnifiedSensors::initNavSensors()
 {
-    int status[10];
+    std::array<int, 3> status;
 
-    uint8_t baro_stat = baro.begin(BMP388_I2C_ALT_ADDR); // returns 0 for error 1 for success
+    int baro_stat = baro.begin(BMP388_I2C_ALT_ADDR); // returns 0 for error 1 for success
     if (baro_stat == 0)
     {
         status[0] = -1;
+    }
+    else
+    {
+        status[0] = 1;
     }
     baro.setPresOversampling(OVERSAMPLING_X4);
     baro.setTempOversampling(OVERSAMPLING_X16);
@@ -128,6 +132,10 @@ bool UnifiedSensors::initNavSensors()
     {
         status[3] = -1;
     }
+    else
+    {
+        status[3] = 1;
+    }
 
     mag.enableDefault();
 
@@ -135,7 +143,7 @@ bool UnifiedSensors::initNavSensors()
     configs.mag_ODR = (char *)"Mag ODR: 1000Hz";
     configs.mag_bias = { HARD_IRON_BIAS[0], HARD_IRON_BIAS[1], HARD_IRON_BIAS[2] };
 
-    for (int i = 0; i < 10; i++)
+    for (uint8_t i = 0; i < status.size(); i++)
     {
         if (status[i] < 0)
         {

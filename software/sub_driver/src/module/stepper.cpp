@@ -66,6 +66,14 @@ void Stepper::calibrate()
     setSpeed(6000);
     setResolution(Resolution::HALF);
 
+    calibrate_noCheck();
+
+    recheckLimit();
+
+}
+
+void Stepper::calibrate_noCheck()
+{
     if(limit.state() == true)
     {
         recheckLimit();
@@ -79,14 +87,16 @@ void Stepper::calibrate()
     }
     
     setCurrentPosition(0);
-
-    recheckLimit();
-
 }
 
 double Stepper::currentPosition_mm()
 {
     return currentPosition() / steps_per_mm;
+}
+
+double Stepper::targetPosition_mm()
+{
+    return targetPosition() / steps_per_mm;
 }
 
 /**
@@ -161,4 +171,81 @@ void Stepper::recheckLimit()
     }
 
     setCurrentPosition(0);
+}
+
+//END OF STEPPER
+
+//BEGINNING OF BUOYANCY
+
+/**
+ * @brief pulls in water to sink. WILL NOT RUN; MUST CALL an updating function
+ * 
+ */
+void Buoyancy::sink()
+{
+    //set to max speed
+    setSpeed(6000);
+    setAcceleration(6000);
+    setMaxSpeed(6000);
+    setResolution(Resolution::HALF); 
+
+    goTo(-1 * currentPosition()); //go to the other side of the carriage
+
+    sinking = true;
+    rising = false;
+
+    //this calibrates the stepper so might as well get rid of errors and set postion to 0
+    setCurrentPosition(0);
+}
+
+/**
+ * @brief pushes all water out to float. WILL NOT RUN; MUST CALL an updating function
+ * 
+ */
+void Buoyancy::rise()
+{
+    //set to max speed
+    setSpeed(6000);
+    setAcceleration(6000);
+    setMaxSpeed(6000);
+    setResolution(Resolution::HALF); 
+
+    goTo(properties.halves_length - currentPosition()); //moves to the very end of the carriage
+
+    sinking = false;
+    rising = true;
+}
+
+/**
+ * @brief moves syringe back and forth to go up and down, thus going forward
+ * Must be called in main loop and updated consistently
+ * 
+ */
+void Buoyancy::forward()
+{
+    if(sinking && currentPosition() == targetPosition())
+    {
+        rise();
+    }
+    else if(rising && currentPosition() == targetPosition())
+    {
+        sink();
+    }
+
+    update();
+}
+
+void Buoyancy::logToStruct(Data &data)
+{
+    data.dive_stepper.current_position = currentPosition();
+    data.dive_stepper.target_position = targetPosition();
+
+    data.dive_stepper.current_position_mm = currentPosition_mm();
+    data.dive_stepper.target_position_mm = targetPosition_mm();
+
+    data.dive_stepper.limit_state = limit.state();
+
+    data.dive_stepper.speed = speed();
+    data.dive_stepper.max_speed = maxSpeed();
+    data.dive_stepper.acceleration = acceleration();
 }

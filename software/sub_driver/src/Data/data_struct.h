@@ -98,8 +98,15 @@ struct StepperData
 {
     bool limit_state;
     bool homed;
-    bool sleep;
-    double predicted_position;
+    double current_position;
+    double current_position_mm;
+
+    double target_position;
+    double target_position_mm;
+
+    double speed;
+    double acceleration;
+    double max_speed;
 };
 
 struct OpticalData
@@ -161,6 +168,9 @@ struct Data
 
     StepperData dive_stepper;
     StepperData pitch_stepper;
+
+    bool sinking;
+    bool rising;
 
     OpticalData optical_data;
 

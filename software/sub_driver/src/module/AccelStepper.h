@@ -61,6 +61,10 @@ public:
 
     double currentPosition();
 
+    double acceleration() const { return _acceleration; }
+    double maxSpeed() const { return _maxSpeed; }
+    double speed() const { return _speed; }
+
     void setCurrentPosition(long position);
 
     void runToPosition();

@@ -17,6 +17,7 @@
 #define pins_h
 
 #include <Arduino.h>
+#include <stdint.h>
 
 ///// Stepper Motors /////
 //Buoyancy Engine

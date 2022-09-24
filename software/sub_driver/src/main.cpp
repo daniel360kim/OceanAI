@@ -43,6 +43,29 @@ SD_Logger logger;
 bool rfInit = true;
 bool warning = false;
 
+StepperPins pins_p
+{
+    STP_p,
+    DIR_p,
+    MS1_p,
+    MS2_p,
+    ERR_p,
+    STOP_p
+};
+
+StepperPins pins_b
+{
+    STP_b,
+    DIR_b,
+    MS1_b,
+    MS2_b,
+    ERR_b,
+    STOP_b
+};
+
+Buoyancy buoyancy(pins_b, Stepper::Resolution::HALF, StepperProperties(81.0, 52670));
+//Stepper pitch(pins_p, Stepper::Resolution::HALF, StepperProperties(81.0, 52670)); no pitch for now
+
 void setup()
 {
     output.startupSequence();
@@ -80,6 +103,21 @@ void setup()
         output.indicateError();
     }
  
+    output.indicateCompleteStartup();
+
+    //Indicate that the stepper is homing
+    LEDb.blink(255, 0, 0, 1000);
+    LEDa.blink(255, 0, 0, 1000);
+
+    //buoyancy.calibrate();
+
+    data.dive_stepper.homed = true;
+
+    buoyancy.setMaxSpeed(6000);
+    buoyancy.setSpeed(6000);
+    buoyancy.setAcceleration(6000);
+    buoyancy.setResolution(Stepper::Resolution::HALF);
+
     output.indicateCompleteStartup();
     Serial.println("Done initializing");
     previous_time = micros();
@@ -127,7 +165,7 @@ void loop()
         LEDb.blink(255, 0, 0, 500);
     }
 
-    if(data.time_us >= 6e+8)
+    if(data.time_us >= 1e+7)
     {
       LEDa.setColor(255,255,255);
       unsigned long start = micros();
@@ -147,5 +185,6 @@ void loop()
       while(1);
     }
 
-    
+    buoyancy.forward();
+    buoyancy.logToStruct(data);
 }
