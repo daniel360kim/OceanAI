@@ -14,6 +14,7 @@
 #include <SdFat.h>
 #include <vector>
 #include <queue>
+#include <CrashReport.h>
 
 #include "SD.h"
 #include "DataFile.h"
@@ -57,6 +58,31 @@ Timer<1, micros> flusher;
 Timer<1, micros> cap_update;
 
 SD_Logger::SD_Logger() {}
+
+bool SD_Logger::log_crash_report()
+{
+    if(!sd.begin(SdioConfig(FIFO_SDIO)))
+    {
+        return false;
+    }
+
+    if(!sd.exists("logs"))
+    {
+        if(!sd.mkdir("logs"))
+        {
+            return false;
+        }
+    }
+    DataFile crash_file("logs/crash", DataFile::ENDING::TXT);
+    if(!crash_file.createFile())
+    {
+        return false;
+    }
+
+    file.open(crash_file.file_name, O_WRITE | O_CREAT);
+    CrashReport.printTo(file);
+    file.close();
+}
 /**
  * @brief create initial headers and start file
  * 

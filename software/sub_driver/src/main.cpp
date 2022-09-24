@@ -66,15 +66,18 @@ StepperPins pins_b{
 Buoyancy buoyancy(pins_b, Stepper::Resolution::HALF, StepperProperties(81.0, 52670));
 // Stepper pitch(pins_p, Stepper::Resolution::HALF, StepperProperties(81.0, 52670)); no pitch for now
 
-
-void receive(int byteCount)
-{
-}
 TransmissionPacket packet;
 void setup()
 {
     output.startupSequence();
     Serial.begin(2000000);
+    if(CrashReport)
+    {
+        if(!logger.log_crash_report())
+        {
+          output.indicateError();
+        }
+    }
 
     UnifiedSensors::getInstance().scanAddresses();
 

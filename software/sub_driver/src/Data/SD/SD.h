@@ -17,6 +17,7 @@
 #include <tuple>
 #include <stdint.h>
 #include <vector>
+#include <CrashReport.h>
 
 #include "DataFile.h"
 #include "../data_struct.h"
@@ -30,6 +31,7 @@ class SD_Logger
 public:
     SD_Logger();
 
+    bool log_crash_report();
     bool init();
     bool logData(Data data);
 
