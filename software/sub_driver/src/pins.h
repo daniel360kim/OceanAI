@@ -52,13 +52,13 @@ constexpr uint8_t MAG_int = 36; //LIS3MDLTR Magnetometer
 
 /////expr Indication /////
 //RGBexpr A
-constexpr uint8_t RED_a = 0;
-constexpr uint8_t GRN_a = 1;
+constexpr uint8_t RED_a = 1;
+constexpr uint8_t GRN_a = 0;
 constexpr uint8_t BLU_a = 2;
 
 //RGBexpr B
-constexpr uint8_t RED_b = 22;
-constexpr uint8_t GRN_b = 23;
+constexpr uint8_t RED_b = 23;
+constexpr uint8_t GRN_b = 22;
 constexpr uint8_t BLU_b = 15;
 
 //Sigexprnal
