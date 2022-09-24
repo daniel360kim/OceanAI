@@ -131,7 +131,7 @@ void loop()
         LEDb.blink(255, 0, 0, 500);
     }
 
-    if(data.time_us >= 1e+7)
+    if(data.time_us >= 6e+8)
     {
       LEDa.setColor(255,255,255);
       unsigned long start = micros();

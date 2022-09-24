@@ -324,8 +324,7 @@ bool SD_Logger::rewindPrint()
     long buf_size = findFactors(); 
 
     long write_iterator = 0;
-    CircularBuffer<Data> *read_buf = new CircularBuffer<Data>(buf_size); //creating heap allocated buffer for reading data from sd card
-
+    std::queue<Data> read_buf;
     //Since the findFactors() function automatically makes sure we have the greatest common factor of the iterations, we can just divide the iterations by buf_size
     for(unsigned long long j = 0; j < iterations / buf_size; j++)
     {
@@ -337,7 +336,7 @@ bool SD_Logger::rewindPrint()
             file.read((uint8_t *)&datacopy, sizeof(datacopy));
             if(i >= buf_size + ((write_iterator - 1) * buf_size))
             {
-                read_buf->insert(datacopy); //inserting data into our buffer
+                read_buf.push(datacopy); //inserting data into our buffer
             }
         }
 
@@ -355,7 +354,8 @@ bool SD_Logger::rewindPrint()
         {
             char* comma = (char*)","; //We use comma so much, better to use as a variable
             Data cc;
-            cc = read_buf->get();
+            cc = read_buf.front();
+            read_buf.pop();
             file.print(cc.time_us); file.print(comma); file.print(cc.loop_time); file.print(comma);
             file.print(cc.system_state); file.print(comma);
             file.print(cc.dt,15); file.print(comma);
@@ -381,8 +381,9 @@ bool SD_Logger::rewindPrint()
         }   
         file.close();
         write_iterator++;
+
+        std::queue<Data>().swap(read_buf); //clearing the buffer
     }
-    delete read_buf; //deleting the buffer to free up memory
     return true;
 }
 
