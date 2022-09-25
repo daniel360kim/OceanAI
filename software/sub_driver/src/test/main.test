@@ -31,7 +31,7 @@ Orientation ori;
 
 LED signal(SIGNAL);
 
-unsigned long long previous_time;
+uint64_t previous_time;
 
 Velocity nav_v;
 Position nav_p;

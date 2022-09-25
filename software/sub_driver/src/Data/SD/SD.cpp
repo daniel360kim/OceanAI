@@ -15,6 +15,7 @@
 #include <vector>
 #include <queue>
 #include <CrashReport.h>
+#include <stdint.h>
 
 #include "SD.h"
 #include "DataFile.h"
@@ -24,21 +25,7 @@
 #include "../../config.h"
 #include "../StartInfo.h"
 #include "StaticQueue.h"
-
-/**
- * @brief Settings for SD card
- * 
- */
-namespace SD_Settings
-{
-    constexpr unsigned long DURATION = 6e+8;
-    constexpr unsigned int LOG_INTERVAL_US = 25000u;
-    constexpr unsigned int LOG_RATE = 100u; //log rate in hertz 
-    constexpr unsigned int DATA_SIZE = sizeof(Data);
-    constexpr unsigned int BUF_SIZE = 400u; //400 sections of 512 byte structs in our buffer
-    constexpr unsigned long LOG_FILE_SIZE = DURATION * DATA_SIZE * LOG_RATE; //3 days (in seconds) * size of struct * data rate in hertz
-    constexpr unsigned long FLUSH_INTERVAL_US = 60000000ul; //flush every 60 seconds
-};
+#include "../../mission.h"
 
 extern unsigned long _heap_start;
 extern unsigned long _heap_end;
@@ -50,14 +37,22 @@ SdFs sd;
 FsFile file;
 cid_t cid;
 
-//Stack allocated queue to allow for buffered prints
-StaticCircularBuffer<Data, SD_Settings::BUF_SIZE> buf;
-
 //Flush and update sd capacity at certain intervals
 Timer<1, micros> flusher;
 Timer<1, micros> cap_update;
 
-SD_Logger::SD_Logger() {}
+/**
+ * @brief Construct a new sd logger::sd logger object
+ * 
+ * @param mission mission information
+ * @param log_interval how many microseconds between each log 
+ */
+SD_Logger::SD_Logger(Duration mission, uint32_t log_interval) 
+{
+    m_log_file_size = sizeof(Data) * (mission.mission_time / 1e+6) * log_interval;
+    this->log_interval = log_interval;
+    
+}
 
 bool SD_Logger::log_crash_report()
 {
@@ -82,6 +77,7 @@ bool SD_Logger::log_crash_report()
     file.open(crash_file.file_name, O_WRITE | O_CREAT);
     CrashReport.printTo(file);
     file.close();
+    return true;
 }
 /**
  * @brief create initial headers and start file
@@ -259,14 +255,14 @@ bool SD_Logger::init()
     }
     
     //file must be preallocated to prevent spending lots of time searching for free clusters
-    if(!file.preAllocate(SD_Settings::LOG_FILE_SIZE))
+    if(!file.preAllocate(m_log_file_size + 10000))
     {
         file.close();
         return false;
     }
 
     //Flushing our data every several seconds
-    flusher.every(SD_Settings::FLUSH_INTERVAL_US, SD_Logger::flush);
+    flusher.every(6e+8, SD_Logger::flush);
     cap_update.every(3600000000, SD_Logger::getCapacity); //update our sd capacity every once in a while (expensive function)
 
     return true;
@@ -290,13 +286,13 @@ bool SD_Logger::logData(Data data)
 
     //Logging at a certain interval
     unsigned long long current_time = micros();
-    if(current_time - previous_time >= SD_Settings::LOG_INTERVAL_US)
+    if(current_time - previous_time >= log_interval)
     {
+        
         //If our sd card is busy we add to our buffer
         if(file.isBusy())
         {
             buf.insert(data);
-            Serial.println("File busy!");
         }
         else
         {
@@ -320,7 +316,6 @@ bool SD_Logger::logData(Data data)
     //For debugging. Should conditional compile this but too lazy lol
     if(buf.is_full())
     {
-        Serial.println("Buff full!");
         return false;
     }
 
@@ -345,16 +340,21 @@ bool SD_Logger::logData(Data data)
  */
 bool SD_Logger::rewindPrint()
 {
+    file.close();
     //finding a buffer size based on available memory and how much data we logged
     //this allows us to create the largest buffer possible for less opens and closed of files
     //pretty nifty tbh
     long buf_size = findFactors(); 
-
     long write_iterator = 0;
     std::queue<Data> read_buf;
+
+    Serial.print("Iterations: "); Serial.println(iterations);
+    Serial.print("Buffer Size: "); Serial.println(buf_size);
+
     //Since the findFactors() function automatically makes sure we have the greatest common factor of the iterations, we can just divide the iterations by buf_size
-    for(unsigned long long j = 0; j < iterations / buf_size; j++)
+    for(uint64_t j = 0; j < iterations / buf_size; j++)
     {
+
         file.open(data_filename, FILE_READ);
 
         Data datacopy; //creating a copy of our data to read into
@@ -366,7 +366,6 @@ bool SD_Logger::rewindPrint()
                 read_buf.push(datacopy); //inserting data into our buffer
             }
         }
-
         file.close();
 
 
@@ -385,7 +384,7 @@ bool SD_Logger::rewindPrint()
             read_buf.pop();
             file.print(cc.time_us); file.print(comma); file.print(cc.loop_time); file.print(comma);
             file.print(cc.system_state); file.print(comma);
-            file.print(cc.dt,15); file.print(comma);
+            file.print(cc.dt,10); file.print(comma);
             file.print(cc.bmp_rpres); file.print(comma); file.print(cc.bmp_rtemp); file.print(comma); file.print(cc.bmp_fpres); file.print(comma); file.print(cc.bmp_ftemp);file.print(comma);
             file.print(cc.racc.x); file.print(comma); file.print(cc.racc.y); file.print(comma); file.print(cc.racc.z); file.print(comma);
             file.print(cc.facc.x); file.print(comma); file.print(cc.facc.y); file.print(comma); file.print(cc.facc.z); file.print(comma);

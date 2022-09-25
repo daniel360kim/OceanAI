@@ -21,8 +21,8 @@ namespace Debug
      */
     struct Message
     {
-        Message(unsigned long long timestamp, Severity severity, char* message) : timestamp(timestamp), severity(severity), message(message) {}
-        unsigned long long timestamp;
+        Message(uint64_t timestamp, Severity severity, char* message) : timestamp(timestamp), severity(severity), message(message) {}
+        uint64_t timestamp;
         Severity severity;
         char* message;
     };
@@ -36,7 +36,7 @@ namespace Debug
     public:
         Print() {}
         std::vector<Message> printBuffer;
-        void addToBuffer(unsigned long long timestamp, Severity severity, char* message);
+        void addToBuffer(uint64_t timestamp, Severity severity, char* message);
         void printBuffer_vec();
        
     };

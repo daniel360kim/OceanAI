@@ -22,6 +22,8 @@
 #include "DataFile.h"
 #include "../data_struct.h"
 #include "../../config.h"
+#include "StaticQueue.h"
+#include "../../mission.h"
 
 extern SdFs sd;
 extern FsFile file;
@@ -29,7 +31,8 @@ extern FsFile file;
 class SD_Logger
 {
 public:
-    SD_Logger();
+    SD_Logger() {}
+    SD_Logger(Duration mission, uint32_t log_interval);
 
     bool log_crash_report();
     bool init();
@@ -51,11 +54,11 @@ public:
 
 private:
     char* csv_filename;
-    unsigned long long previous_time;
+    uint64_t previous_time;
 
     unsigned long pt_cap_update;
 
-    unsigned long iterations;
+    uint64_t iterations;
 
     static volatile bool cap_update_int;
 
@@ -63,6 +66,12 @@ private:
     unsigned int findFactors();
     static bool flush(void*);
     static bool getCapacity(void*);
+
+
+    StaticCircularBuffer<Data, 500> buf;
+
+    uint64_t m_log_file_size;
+    uint32_t log_interval;
 
 
 };

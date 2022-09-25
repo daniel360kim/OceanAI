@@ -139,7 +139,7 @@ namespace Optics
     
     void Camera::capture(unsigned long delay_micros, unsigned long *capture_time, unsigned long *save_time, uint32_t *FIFO_length, bool(*closeCurrentFile)(), bool(*reopenPrevFile)(const char*), const char* filename)
     {
-        unsigned long long current_micros = micros();
+        uint64_t current_micros = micros();
 
         if(current_micros - previous_log >= delay_micros)
         {
@@ -151,7 +151,7 @@ namespace Optics
 
             camera.start_capture();
             
-            unsigned long long total_time = micros();
+            uint64_t total_time = micros();
             while ( !camera.get_bit(ARDUCHIP_TRIG, CAP_DONE_MASK));
 
             *capture_time = total_time - micros();

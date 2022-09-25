@@ -52,7 +52,7 @@ namespace Optics
         uint8_t read_fifo_burst(uint32_t *fifolength);
 
 
-        unsigned long long previous_log;
+        uint64_t previous_log;
     };
 };
 

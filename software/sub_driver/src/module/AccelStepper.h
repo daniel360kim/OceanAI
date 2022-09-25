@@ -89,7 +89,7 @@ public:
 
     bool isRunning();
 
-    unsigned long long step_iterations;
+    uint64_t step_iterations;
 
 
 protected:

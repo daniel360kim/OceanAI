@@ -45,7 +45,7 @@ LED signal(SIGNAL);
 
 Buzzer buzz(BUZZ);
 
-unsigned long long previous_time;
+uint64_t previous_time;
 
 Data data;
 

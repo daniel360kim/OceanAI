@@ -21,10 +21,7 @@
 
 #include "module/stepper.h"
 
-#include <EasyTransferI2C.h>
-
-
-EasyTransferI2C ET;
+#include "mission.h"
 
 Fusion SFori;
 
@@ -34,7 +31,7 @@ Orientation ori;
 
 LED signal(SIGNAL);
 
-unsigned long long previous_time;
+uint64_t previous_time;
 
 Velocity nav_v;
 Position nav_p;
@@ -42,26 +39,32 @@ Position nav_p;
 Data data;
 GPSdata gps_data;
 
-SD_Logger logger;
+Duration mission;
+
+SD_Logger logger(mission, 5000);
 
 bool rfInit = true;
 bool warning = false;
 
-StepperPins pins_p{
+StepperPins pins_p
+{
     STP_p,
     DIR_p,
     MS1_p,
     MS2_p,
     ERR_p,
-    STOP_p};
+    STOP_p
+};
 
-StepperPins pins_b{
+StepperPins pins_b
+{
     STP_b,
     DIR_b,
     MS1_b,
     MS2_b,
     ERR_b,
-    STOP_b};
+    STOP_b
+};
 
 Buoyancy buoyancy(pins_b, Stepper::Resolution::HALF, StepperProperties(81.0, 52670));
 // Stepper pitch(pins_p, Stepper::Resolution::HALF, StepperProperties(81.0, 52670)); no pitch for now
@@ -71,6 +74,7 @@ void setup()
 {
     output.startupSequence();
     Serial.begin(2000000);
+    
     if(CrashReport)
     {
         if(!logger.log_crash_report())
@@ -92,13 +96,7 @@ void setup()
     UnifiedSensors::getInstance().setInterrupts(BAR_int, ACC_int, GYR_int, MAG_int, TX_RF);
 
     UnifiedSensors::getInstance().setGyroBias();
-/*
-    if (!rf.init())
-    {
-        warning = true;
-        rfInit = false;
-    }
-*/
+    
 #if OPTICS_ON == true
     if (!camera.begin())
     {
@@ -173,7 +171,7 @@ void loop()
         LEDb.blink(255, 0, 0, 500);
     }
 
-    if (data.time_us >= 1e+10)
+    if (Duration::time_remaining_mission() <= 0)
     {
         signal.on();
         LEDa.setColor(255, 255, 255);
@@ -194,6 +192,7 @@ void loop()
         LEDa.LEDoff();
         while (1);
     }
+
 
     
     buoyancy.forward();

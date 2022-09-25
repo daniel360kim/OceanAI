@@ -9,7 +9,7 @@ namespace Debug
 Print error;
 Print success;
 
-void Print::addToBuffer(unsigned long long timestamp, Severity severity, char* message)
+void Print::addToBuffer(uint64_t timestamp, Severity severity, char* message)
 {
     Message *metadata = new Message(timestamp, severity, message);
 
