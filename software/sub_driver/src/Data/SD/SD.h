@@ -68,7 +68,7 @@ private:
     static bool getCapacity(void*);
 
 
-    StaticCircularBuffer<Data, 500> buf;
+    StaticCircularBuffer<Data, 10> buf;
 
     uint64_t m_log_file_size;
     uint32_t log_interval;

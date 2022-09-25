@@ -21,8 +21,8 @@ public:
     Duration() {}
     static constexpr uint8_t days = 0;
     static constexpr uint16_t hours = 0;
-    static constexpr uint32_t minutes = 0;
-    static constexpr uint32_t seconds = 10;
+    static constexpr uint32_t minutes = 5;
+    static constexpr uint32_t seconds = 0;
 
     static constexpr uint16_t reset_interval_hours = 3; //interval between resets
     //resets are when the sub will resurface, save all the data, and restart the mission
