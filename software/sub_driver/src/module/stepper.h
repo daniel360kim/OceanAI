@@ -44,7 +44,7 @@ public:
     void calibrate();
     void calibrate_noCheck(); //calibrate without checking if the limit switch is pressed a second time
 
-    double currentPosition_mm();\
+    double currentPosition_mm();
     double targetPosition_mm();
 
     void goTo(long absolute);
@@ -61,10 +61,9 @@ protected:
     StepperPins pins;
 
     double steps_per_mm;
+    bool calibrated = true; //change to false when calibration impl.
 
     void recheckLimit();
-    
-    
 };
 
 //Singleton class for buoyancy driver

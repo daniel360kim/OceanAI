@@ -70,6 +70,8 @@ void Stepper::calibrate()
 
     recheckLimit();
 
+    calibrated = true;
+
 }
 
 void Stepper::calibrate_noCheck()
@@ -183,11 +185,10 @@ void Stepper::recheckLimit()
  */
 void Buoyancy::sink()
 {
-    //set to max speed
-    setSpeed(6000);
-    setAcceleration(6000);
-    setMaxSpeed(6000);
-    setResolution(Resolution::HALF); 
+    if(!calibrated)
+    {
+        calibrate();
+    }
 
     goTo(-1 * currentPosition()); //go to the other side of the carriage
 
@@ -204,12 +205,6 @@ void Buoyancy::sink()
  */
 void Buoyancy::rise()
 {
-    //set to max speed
-    setSpeed(6000);
-    setAcceleration(6000);
-    setMaxSpeed(6000);
-    setResolution(Resolution::HALF); 
-
     goTo(properties.halves_length - currentPosition()); //moves to the very end of the carriage
 
     sinking = false;

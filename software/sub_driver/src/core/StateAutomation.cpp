@@ -12,19 +12,20 @@
 #include "StateAutomation.h"
 #include "States.h"
 
-Fsm::StateAutomation::StateAutomation()
+StateAutomation::StateAutomation()
 {
-    m_currentState = &State1::getInstance();
+    m_currentState = &Initialization::getInstance();
+    m_currentState->enter(this);
 }
 
-void Fsm::StateAutomation::setState(State& newState)
+void StateAutomation::setState(State& newState)
 {
     m_currentState->exit(this);
     m_currentState = &newState;
     m_currentState->enter(this);
 }
 
-void Fsm::StateAutomation::toggle()
+void StateAutomation::run()
 {
-    m_currentState->toggle(this);
+    m_currentState->run(this);
 }

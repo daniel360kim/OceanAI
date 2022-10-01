@@ -4,82 +4,152 @@
  * @brief finite state automation driver - states classes
  * @version 0.1
  * @date 2022-09-30
- * 
+ *
  * @copyright Copyright (c) 2022 OceanAI (https://github.com/daniel360kim/OceanAI)
- * 
+ *
  */
+
+/*
+Refer to Resources/project_images/StatesDiagram/StatesDiagram.png for diagram
+No remote control functionality yet
+*/
+#ifndef STATES_H
+#define STATES_H
 
 #include "StateAutomation.h"
 
-namespace Fsm
+#include "../pins.h"
+#include "../module/stepper.h"
+
+
+class Initialization : public State
 {
-    class Idle : public State
-    {
-    public:
-        void enter(StateAutomation* state) {}
-        void toggle(StateAutomation* state);
-        void exit(StateAutomation* state) {}
-        static Idle& getInstance()
-        {
-            static Idle instance;
-            return instance;
-        }
-    private:
-        Idle() {}
-        Idle(const Idle& other);
-        Idle& operator=(const State1& other);
-    };
+public:
+    void enter(StateAutomation *state);
+    void run(StateAutomation *state);
+    void exit(StateAutomation *state);
+    static Initialization &getInstance();
 
-    class Diving : public State
-    {
-    public:
-        void enter(StateAutomation* state) {}
-        void toggle(StateAutomation* state);
-        void exit(StateAutomation* state) {}
-        static Diving& getInstance()
-        {
-            static Diving instance;
-            return instance;
-        }
-    private:
-        Diving() {}
-        Diving(const Diving& other);
-        Diving& operator=(const Diving& other);
-    };
+private:
+    Initialization() {}
+    Initialization(const Initialization &);
+    Initialization &operator=(const Initialization &);
 
-    class Resurfacing : public State
-    {
-    public:
-        void enter(StateAutomation* state) {}
-        void toggle(StateAutomation* state);
-        void exit(StateAutomation* state) {}
-        static Resurfacing& getInstance()
-        {
-            static Resurfacing instance;
-            return instance;
-        }
-    private:
-        Resurfacing() {}
-        Resurfacing(const Resurfacing& other);
-        Resurfacing& operator=(const Resurfacing& other);
-    };
-    
-    class TranslatingData : public State
-    {
-    public:
-        void enter(StateAutomation* state) {}
-        void toggle(StateAutomation* state);
-        void exit(StateAutomation* state) {}
-        static TranslatingData& getInstance()
-        {
-            static TranslatingData instance;
-            return instance;
-        }
-    private:       
-        TranslatingData() {}
-        TranslatingData(const TranslatingData& other);
-        TranslatingData& operator=(const TranslatingData& other);
-    };
+    static Initialization instance;
 };
-       
-       
+
+class ErrorIndication : public State
+{
+public:
+    void enter(StateAutomation *state);
+    void run(StateAutomation *state);
+    void exit(StateAutomation *state);
+    static ErrorIndication &getInstance();
+
+private:
+    ErrorIndication() {}
+    ErrorIndication(const ErrorIndication &);
+    ErrorIndication &operator=(const ErrorIndication &);
+
+    static ErrorIndication instance;
+};
+
+class IdleMode : public State
+{
+public:
+    void enter(StateAutomation *state) {}
+    void run(StateAutomation *state) {}
+    void exit(StateAutomation *state) {}
+    static IdleMode &getInstance();
+
+private:
+    IdleMode() {}
+    IdleMode(const IdleMode &);
+    IdleMode &operator=(const IdleMode &);
+
+    static IdleMode instance;
+};
+
+class Diving : public State
+{
+public:
+    void enter(StateAutomation *state);
+    void run(StateAutomation *state);
+    void exit(StateAutomation *state);
+    static Diving &getInstance();
+
+private:
+    Diving() {}
+    Diving(const Diving &);
+    Diving &operator=(const Diving &);
+
+    static Diving instance;
+};
+
+class Resurfacing : public State
+{
+public:
+    void enter(StateAutomation *state);
+    void run(StateAutomation *state);
+    void exit(StateAutomation *state);
+    static Resurfacing &getInstance();
+
+private:
+    Resurfacing() {}
+    Resurfacing(const Resurfacing &);
+    Resurfacing &operator=(const Resurfacing &);
+
+    static Resurfacing instance;
+};
+
+class Surfaced : public State
+{
+public:
+    void enter(StateAutomation *state);
+    void run(StateAutomation *state);
+    void exit(StateAutomation *state);
+    static Surfaced &getInstance();
+
+private:
+    Surfaced() {}
+    Surfaced(const Surfaced &);
+    Surfaced &operator=(const Surfaced &);
+
+    static Surfaced instance;
+};
+
+class SD_translate : public State
+{
+public:
+    void enter(StateAutomation *state);
+    void run(StateAutomation *state);
+    void exit(StateAutomation *state);
+    static SD_translate &getInstance();
+
+private:
+    SD_translate() {}
+    SD_translate(const SD_translate &);
+    SD_translate &operator=(const SD_translate &);
+
+    static SD_translate instance;
+};
+
+class SD_reinitialize : public State
+{
+public:
+    void enter(StateAutomation *state) {}
+    void run(StateAutomation *state) {}
+    void exit(StateAutomation *state) {}
+    static SD_reinitialize &getInstance();
+
+private:
+    SD_reinitialize() {}
+    SD_reinitialize(const SD_reinitialize &);
+    SD_reinitialize &operator=(const SD_reinitialize &);
+
+    static SD_reinitialize instance;
+};
+
+
+
+#endif

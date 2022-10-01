@@ -12,35 +12,45 @@
 #ifndef STATE_AUTOMATION_H
 #define STATE_AUTOMATION_H
 
-namespace Fsm
+
+class StateAutomation;
+
+/**
+ * @brief Abstract class that allows for reference to generic state w/o having to specify true type of state
+ * 
+ */
+class State
 {
-    class StateAutomation;
+public:
+    virtual ~State() {}
+    virtual void enter(StateAutomation* state) = 0;
+    virtual void run(StateAutomation* state) = 0;
+    virtual void exit(StateAutomation* state) = 0;
+};
 
-    /**
-     * @brief Abstract class that allows for reference to generic state w/o having to specify true type of state
-     * 
-     */
-    class State
-    {
-    public:
-        virtual void enter(StateAutomation* state) = 0;
-        virtual void toggle(StateAutomation* state) = 0;
-        virtual void exit(StateAutomation* state) = 0;
-        virtual ~State() {}
-    };
+enum class CurrentState
+{
+    INITIALIZATION,
+    ERROR_INDICATION,
+    IDLE_MODE,
+    DIVING_MODE,
+    RESURFACING,
+    SURFACED,
+    SD_TRANSLATE,
+    SD_REINITIALIZE
+};
 
-    class StateAutomation
-    {
-    public:
-        StateAutomation();
+class StateAutomation
+{
+public:
+    StateAutomation();
 
-        inline State* getCurrentState() { return m_currentState; }
-        void toggle();
-        void setState(State& newState);
+    inline State* getCurrentState() { return m_currentState; }
+    void run();
+    void setState(State& newState);
 
-    private:
-        State* m_currentState;
-    };
+private:
+    State* m_currentState;
 };
 
 #endif

@@ -382,8 +382,42 @@ bool SD_Logger::rewindPrint()
             Data cc;
             cc = read_buf.front();
             read_buf.pop();
+
+            char* system_state = nullptr;
+
+            //Translating integer system state into readable characters
+            switch(cc.system_state)
+            {
+                case 0:
+                    system_state = (char*)"Initialization";
+                    break;
+                case 1:
+                    system_state = (char*)"Error Indication";
+                    break;
+                case 2:
+                    system_state = (char*)"Idle Mode";
+                    break;
+                case 3:
+                    system_state = (char*)"Diving Mode";
+                    break;
+                case 4:
+                    system_state = (char*)"Resurfacing Mode";
+                    break;
+                case 5:
+                    system_state = (char*)"Surfaced";
+                    break;
+                case 6:
+                    system_state = (char*)"SD_translating";
+                    break;
+                case 7:
+                    system_state = (char*)"SD_reinitializing";
+                    break;
+                default:
+                    system_state = (char*)"Unknown";
+                    break;
+            }
             file.print(cc.time_ns); file.print(comma); file.print(cc.loop_time); file.print(comma);
-            file.print(cc.system_state); file.print(comma);
+            file.print(system_state); file.print(comma);
             file.print(cc.dt,10); file.print(comma);
             file.print(cc.bmp_rpres); file.print(comma); file.print(cc.bmp_rtemp); file.print(comma); file.print(cc.bmp_fpres); file.print(comma); file.print(cc.bmp_ftemp);file.print(comma);
             file.print(cc.racc.x); file.print(comma); file.print(cc.racc.y); file.print(comma); file.print(cc.racc.z); file.print(comma);
