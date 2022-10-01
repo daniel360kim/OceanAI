@@ -18,7 +18,7 @@ No remote control functionality yet
 
 #include "StateAutomation.h"
 
-#include "../pins.h"
+#include "../core/pins.h"
 #include "../module/stepper.h"
 
 

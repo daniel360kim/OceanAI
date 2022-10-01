@@ -389,11 +389,13 @@ void SD_translate::run(StateAutomation* state)
     }
     int64_t elapsed = rewind_timer.elapsed();
     LEDa.setColor(0, 255, 0);
+    Serial.print(F("Rewind time(ns): ")); Serial.println(elapsed);
     while(1)
     {
         //just stop the program for now. add reinitialization state later
         delay(100);
     }
+    
 }
 
 void SD_translate::exit(StateAutomation* state)

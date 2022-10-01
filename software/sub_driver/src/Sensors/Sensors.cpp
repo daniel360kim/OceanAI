@@ -16,8 +16,8 @@
 #include <stdint.h>
 #include <array>
 
-#include "../config.h"
-#include "../debug.h"
+#include "../core/config.h"
+#include "../core/debug.h"
 #include "LowPass.h"
 #include "../Time/Time.h"
 #include "../Data/StartInfo.h"

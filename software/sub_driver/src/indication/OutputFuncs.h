@@ -13,7 +13,7 @@
 #define OutputFuncs_h
 
 #include "LED.h"
-#include "../pins.h"
+#include "../core/pins.h"
 
 #include <Buzzer.h>
 
@@ -34,13 +34,6 @@ public:
 };
 
 extern OutputFuncs output;
-
-
-
-
-
-
-
 
 
 #endif

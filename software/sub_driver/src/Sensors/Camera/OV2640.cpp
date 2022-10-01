@@ -19,9 +19,9 @@
 #include "../../data/SD/SD.h"
 #include "../../data/SD/DataFile.h"
 #include "../../data/StartInfo.h"
-#include "../../debug.h"
-#include "../../config.h"
-#include "../../pins.h"
+#include "../../core/debug.h"
+#include "../../core/config.h"
+#include "../../core/pins.h"
 
 FsFile image_file;
 

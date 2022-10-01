@@ -10,7 +10,7 @@
  */
 #include "LED.h"
 #include "OutputFuncs.h"
-#include "../pins.h"
+#include "../core/pins.h"
 #include "utility/pitches.h"
 
 #include <Buzzer.h>

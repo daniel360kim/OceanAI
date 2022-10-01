@@ -9,8 +9,8 @@
  * 
  */
 #include "DataFile.h"
-#include "../../config.h"
-#include "../../debug.h"
+#include "../../core/config.h"
+#include "../../core/debug.h"
 #include "SD.h"
 
 

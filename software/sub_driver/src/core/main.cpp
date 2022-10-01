@@ -1,13 +1,11 @@
 #include "core/States.h"
 #include "core/StateAutomation.h"
 
-StateAutomation submarine;
+StateAutomation* submarine;
 
-void setup()
-{
-}
+void setup() {}
 
 void loop()
 {
-    submarine.run();
+    submarine->run();
 }

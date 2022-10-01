@@ -21,7 +21,7 @@
 
 #include "DataFile.h"
 #include "../data_struct.h"
-#include "../../config.h"
+#include "../../core/config.h"
 #include "StaticQueue.h"
 #include "../../core/Timer.h"
 
