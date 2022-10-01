@@ -13,72 +13,72 @@
 
 namespace Fsm
 {
-    class State1 : public State
+    class Idle : public State
     {
     public:
         void enter(StateAutomation* state) {}
         void toggle(StateAutomation* state);
         void exit(StateAutomation* state) {}
-        static State1& getInstance()
+        static Idle& getInstance()
         {
-            static State1 instance;
+            static Idle instance;
             return instance;
         }
     private:
-        State1() {}
-        State1(const State1& other);
-        State1& operator=(const State1& other);
+        Idle() {}
+        Idle(const Idle& other);
+        Idle& operator=(const State1& other);
     };
 
-    class State2 : public State
+    class Diving : public State
     {
     public:
         void enter(StateAutomation* state) {}
         void toggle(StateAutomation* state);
         void exit(StateAutomation* state) {}
-        static State2& getInstance()
+        static Diving& getInstance()
         {
-            static State2 instance;
+            static Diving instance;
             return instance;
         }
     private:
-        State2() {}
-        State2(const State2& other);
-        State2& operator=(const State2& other);
+        Diving() {}
+        Diving(const Diving& other);
+        Diving& operator=(const Diving& other);
     };
 
-    class State3 : public State
+    class Resurfacing : public State
     {
     public:
         void enter(StateAutomation* state) {}
         void toggle(StateAutomation* state);
         void exit(StateAutomation* state) {}
-        static State3& getInstance()
+        static Resurfacing& getInstance()
         {
-            static State3 instance;
+            static Resurfacing instance;
             return instance;
         }
     private:
-        State3() {}
-        State3(const State3& other);
-        State3& operator=(const State3& other);
+        Resurfacing() {}
+        Resurfacing(const Resurfacing& other);
+        Resurfacing& operator=(const Resurfacing& other);
     };
     
-    class State4 : public State
+    class TranslatingData : public State
     {
     public:
         void enter(StateAutomation* state) {}
         void toggle(StateAutomation* state);
         void exit(StateAutomation* state) {}
-        static State4& getInstance()
+        static TranslatingData& getInstance()
         {
-            static State4 instance;
+            static TranslatingData instance;
             return instance;
         }
     private:       
-        State4() {}
-        State4(const State4& other);
-        State4& operator=(const State4& other);
+        TranslatingData() {}
+        TranslatingData(const TranslatingData& other);
+        TranslatingData& operator=(const TranslatingData& other);
     };
 };
        
