@@ -43,15 +43,6 @@ The plan for OceanAI is to develop an autonomous underwater vehicle (AUV) and us
     <h3>This directory does not contain the external dependencies used in this project! These will be added later.</h3>
 </details>
 
-<details>
-<summary>Vision</summary>
-<ul>
-  <li>Contains the Notebook that guides you in creating a custom YOLOv5 model</li>
-   <h3>See the <a href="https://github.com/daniel360kim/OceanAI/blob/master/Vision/README.md">README</a> for more info and a tutorial!</h3>
-</ul>
-    <img src="Resources\project_images\object_detection\Run 1\44a9e4ca-a3bc-4e35-8018-6accfdf4da92.jpg" alt="Girl in a jacket">
-   
-</details>
 
 <details>
 <summary>software</summary>
