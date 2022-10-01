@@ -144,13 +144,13 @@ namespace Time
         static constexpr uint16_t days = 0;
         static constexpr uint16_t hours = 0;
         static constexpr uint32_t minutes = 0;
-        static constexpr uint32_t seconds = 0;
+        static constexpr uint32_t seconds = 20;
 
-        static constexpr uint64_t mission_time = (days * 24 * 60 * 60 * 1000 * 1000) + (hours * 60 * 60 * 1000 * 1000) + (minutes * 60 * 1000 * 1000) + (seconds * 1000 * 1000);
+        static constexpr uint64_t mission_time = ((uint64_t)(days * (uint64_t)8.64e+13) + (uint64_t)(hours * (uint64_t)3.6e+12) + (uint64_t)(minutes * (uint64_t)6e+10) + (uint64_t)(seconds * (uint64_t)1e+9));
 
         //Making this signed so that inaccurate comparators work
         
-        static int64_t time_remaining_mission(int64_t(*elapsed_nanos)()) { return mission_time - elapsed_nanos(); }
+        static int64_t time_remaining_mission(int64_t elapsed_nanos) { return mission_time - elapsed_nanos; }
 
     };
 

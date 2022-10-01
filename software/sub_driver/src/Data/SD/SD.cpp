@@ -45,11 +45,11 @@ Timer<1, micros> cap_update;
  * @brief Construct a new sd logger::sd logger object
  * 
  * @param mission mission information
- * @param log_interval how many microseconds between each log 
+ * @param log_interval how many nanoseconds between each log 
  */
 SD_Logger::SD_Logger(Time::Mission mission, uint32_t log_interval) 
 {
-    m_log_file_size = sizeof(Data) * (mission.mission_time / 1e+6) * log_interval;
+    m_log_file_size = sizeof(Data) * (mission.mission_time / 1e+9) * (log_interval / 1e+9);
     this->log_interval = log_interval;
     
 }
@@ -285,7 +285,7 @@ bool SD_Logger::logData(Data data)
     }
 
     //Logging at a certain interval
-    unsigned long long current_time = scoped_timer.elapsed();
+    uint64_t current_time = scoped_timer.elapsed();
     if(current_time - previous_time >= log_interval)
     {
         

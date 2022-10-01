@@ -47,7 +47,7 @@ public:
 	
 	double deltatUpdate (){
 		Now = scoped_timer.elapsed();
-		deltat = ((Now - lastUpdate) / 1000000.0); // set integration time by time elapsed since last filter update
+		deltat = ((Now - lastUpdate) / 1000000000.0); // set integration time by time elapsed since last filter update
 		lastUpdate = Now;
 		return deltat;
 	}

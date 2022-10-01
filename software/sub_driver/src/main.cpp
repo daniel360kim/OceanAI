@@ -43,7 +43,7 @@ Position nav_p;
 Data data;
 GPSdata gps_data;
 
-SD_Logger logger(mission_duration, 10000);
+SD_Logger logger(mission_duration, 33333333);
 
 bool rfInit = true;
 bool warning = false;
@@ -134,7 +134,6 @@ void loop()
     data.dt = (scoped_timer.elapsed() - previous_time) / 1000000000.0;
     previous_time = scoped_timer.elapsed();
     
-    
     data.loop_time = 1.0 / data.dt;
 
     output.loopIndication();
@@ -192,6 +191,6 @@ void loop()
     buoyancy.forward();
     buoyancy.logToStruct(data);
 
-    Serial.print(scoped_timer.elapsed()/1000); Serial.print("\t"); Serial.println(scoped_timer.elapsed());
+
 
 }
