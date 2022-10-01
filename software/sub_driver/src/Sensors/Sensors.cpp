@@ -19,7 +19,7 @@
 #include "../core/config.h"
 #include "../core/debug.h"
 #include "LowPass.h"
-#include "../Time/Time.h"
+#include "../core/Time.h"
 #include "../Data/StartInfo.h"
 #include "../core/Timer.h"
 
