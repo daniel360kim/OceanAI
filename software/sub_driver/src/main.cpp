@@ -108,8 +108,6 @@ void setup()
         output.indicateError();
     }
 
-    output.indicateCompleteStartup();
-
     // Indicate that the stepper is homing
     LEDb.blink(255, 0, 0, 1000);
     LEDa.blink(255, 0, 0, 1000);
@@ -187,7 +185,10 @@ void loop()
         Serial.print("Rewind took: ");
         Serial.println(rewind_timer.elapsed());
         LEDa.LEDoff();
-        while (1);
+        while (1)
+        {
+            delay(100);
+        }
     }
 
     buoyancy.forward();

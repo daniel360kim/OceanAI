@@ -44,22 +44,17 @@ void OutputFuncs::startupSequence()
     LEDa.setColor(255, 0, 0);
     LEDb.setColor(255, 0, 0);
 
-    buzzer.sound(NOTE_C5, 600);
+    buzzer.sound(NOTE_C5, 350);
 
-    LEDa.LEDoff();
-    LEDb.LEDoff();
-    delay(100);
+    LEDa.setColor(0, 255, 0);
+    LEDb.setColor(0, 255, 0);
 
-    LEDa.setColor(255, 255, 0);
-    LEDb.setColor(255, 255, 0);
+    buzzer.sound(NOTE_G4, 300);
 
-    buzzer.sound(NOTE_G4, 350);
-    delay(100);
+    LEDa.setColor(0, 0, 255);
+    LEDb.setColor(0, 0, 255);
 
-    LEDa.setColor(0, 255, 255);
-    LEDb.setColor(0, 255, 255);
-
-    buzzer.sound(NOTE_G5, 700);
+    buzzer.sound(NOTE_G5, 500);
 
     LEDa.setColor(255, 255, 255);
     LEDb.setColor(255, 255, 255);
@@ -74,9 +69,17 @@ void OutputFuncs::indicateError()
 {
     while(1)
     {
-        LEDa.blink(0, 0, 255, 100);
-        LEDb.blink(0, 0, 255, 100);
-        buzzer.sound (NOTE_C7, 100);
+        
+        for(int i = 0; i < 3; i++)
+        {
+            buzzer.sound (NOTE_E6, 10);
+            LEDa.setColor(255, 0, 0);
+            LEDb.setColor(255, 0, 0);
+            delay(100);
+            LEDa.LEDoff();
+            LEDb.LEDoff();
+        }
+        delay(300);
 
     }
 }
