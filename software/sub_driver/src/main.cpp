@@ -71,6 +71,14 @@ Buoyancy buoyancy(pins_b, Stepper::Resolution::HALF, StepperProperties(81.0, 526
 void setup()
 {
 	start_time = teensy_clock::now();
+
+    if(CrashReport)
+    {
+        if(!logger.log_crash_report())
+        {
+            output.indicateError();
+        }
+    }
     output.startupSequence();
     Serial.begin(2000000);
 
@@ -87,13 +95,7 @@ void setup()
     UnifiedSensors::getInstance().setInterrupts(BAR_int, ACC_int, GYR_int, MAG_int, TX_RF);
 
     UnifiedSensors::getInstance().setGyroBias();
-/*
-    if (!rf.init())
-    {
-        warning = true;
-        rfInit = false;
-    }
-*/
+
 #if OPTICS_ON == true
     if (!camera.begin())
     {
@@ -190,7 +192,5 @@ void loop()
 
     buoyancy.forward();
     buoyancy.logToStruct(data);
-
-
 
 }

@@ -10,28 +10,32 @@
 #include "indication/LED.h"
 
 #include <Arduino.h>
+#include <teensy_clock/teensy_clock.h>
+#include <stdint.h>
+#include <chrono>
 
 #include "Navigation/SensorFusion/Fusion.h"
 #include "Navigation/Postioning.h"
-#include "Sensors/GPS.h"
 #include "Sensors/Camera/OV2640.h"
+
 
 #include "debug.h"
 #include "time/Time.h"
 #include "core/OS.h"
-
+#include "core/Timer.h"
 #include "module/stepper.h"
 
+Time::Mission mission_duration;
 Fusion SFori;
 
 Optics::Camera camera(CS_VD);
-GPS gps(9600);
 
 Orientation ori;
 
 LED signal(SIGNAL);
 
-uint64_t previous_time;
+int64_t previous_time;
+teensy_clock::time_point start_time;
 
 Velocity nav_v;
 Position nav_p;
@@ -39,7 +43,7 @@ Position nav_p;
 Data data;
 GPSdata gps_data;
 
-SD_Logger logger;
+SD_Logger logger(mission_duration, 33333333);
 
 bool rfInit = true;
 bool warning = false;
@@ -63,8 +67,18 @@ StepperPins pins_b{
 Buoyancy buoyancy(pins_b, Stepper::Resolution::HALF, StepperProperties(81.0, 52670));
 // Stepper pitch(pins_p, Stepper::Resolution::HALF, StepperProperties(81.0, 52670)); no pitch for now
 
+
 void setup()
 {
+	start_time = teensy_clock::now();
+
+    if(CrashReport)
+    {
+        if(!logger.log_crash_report())
+        {
+            output.indicateError();
+        }
+    }
     output.startupSequence();
     Serial.begin(2000000);
 
@@ -81,13 +95,7 @@ void setup()
     UnifiedSensors::getInstance().setInterrupts(BAR_int, ACC_int, GYR_int, MAG_int, TX_RF);
 
     UnifiedSensors::getInstance().setGyroBias();
-/*
-    if (!rf.init())
-    {
-        warning = true;
-        rfInit = false;
-    }
-*/
+
 #if OPTICS_ON == true
     if (!camera.begin())
     {
@@ -124,18 +132,16 @@ bool logged = false;
 
 void loop()
 {
-    data.time_us = scoped_timer.elapsed();
-    data.dt = (data.time_us - previous_time) / 1000000.0;
-    previous_time = data.time_us;
-
+    data.time_ns = scoped_timer.elapsed(); //scoped timer is a global object to measure time since program epoch
+    data.dt = (scoped_timer.elapsed() - previous_time) / 1000000000.0;
+    previous_time = scoped_timer.elapsed();
+    
     data.loop_time = 1.0 / data.dt;
 
     output.loopIndication();
 
     UnifiedSensors::getInstance().logToStruct(data);
     OS::getInstance().log_cpu_state(data);
-
-    gps.updateData(gps_data);
 
     nav_v.updateVelocity(data);
     nav_p.updatePosition(data);
@@ -163,11 +169,11 @@ void loop()
         LEDb.blink(255, 0, 0, 500);
     }
 
-    if (data.time_us >= 1e+7)
+    if (mission_duration.time_remaining_mission(scoped_timer.elapsed()) <= 0)
     {
         signal.on();
         LEDa.setColor(255, 255, 255);
-        unsigned long start = scoped_timer.elapsed();
+        Time::Timer rewind_timer;
         if (!logger.rewindPrint())
         {
             while (1)
@@ -177,14 +183,16 @@ void loop()
             }
         }
 
-        unsigned long finish = scoped_timer.elapsed();
         LEDa.setColor(0, 255, 0);
         Serial.print("Rewind took: ");
-        Serial.println(finish - start);
+        Serial.println(rewind_timer.elapsed());
         LEDa.LEDoff();
         while (1);
     }
 
     buoyancy.forward();
     buoyancy.logToStruct(data);
+
+
+
 }
