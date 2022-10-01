@@ -21,6 +21,7 @@
 #include "LowPass.h"
 #include "../Time/Time.h"
 #include "../Data/StartInfo.h"
+#include "../core/Timer.h"
 
 UnifiedSensors UnifiedSensors::instance;
 
@@ -153,7 +154,7 @@ bool UnifiedSensors::initNavSensors()
             {
                 #if DEBUG_ON == true
                                 char* bar_message = (char *)"Sensors: Barometer initialization error";
-                                Debug::error.addToBuffer(micros(), Debug::Critical_Error, bar_message);
+                                Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Critical_Error, bar_message);
 
                 #if LIVE_DEBUG == true
                                 Serial.println(F(bar_message));
@@ -168,7 +169,7 @@ bool UnifiedSensors::initNavSensors()
             {
                 #if DEBUG_ON == true
                                 char* acc_message = (char *)"Sensors: Accelerometer initialization error";
-                                Debug::error.addToBuffer(micros(), Debug::Critical_Error, acc_message);
+                                Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Critical_Error, acc_message);
 
                 #if LIVE_DEBUG == true
                                 Serial.println(F(acc_message));
@@ -183,7 +184,7 @@ bool UnifiedSensors::initNavSensors()
             {
                 #if DEBUG_ON == true
                                 char* gyr_message = (char *)"Sensors: Gyroscope initialization error";
-                                Debug::error.addToBuffer(micros(), Debug::Critical_Error, gyr_message);
+                                Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Critical_Error, gyr_message);
 
                 #if LIVE_DEBUG == true
                                 Serial.println(F(gyr_message));
@@ -199,7 +200,7 @@ bool UnifiedSensors::initNavSensors()
             {
                 #if DEBUG_ON == true
                                 char* mag_message = (char *)"Sensors: Magentometer initialization error";
-                                Debug::error.addToBuffer(micros(), Debug::Critical_Error, mag_message);
+                                Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Critical_Error, mag_message);
 
                 #if LIVE_DEBUG == true
                                 Serial.println(F(mag_message));
@@ -214,7 +215,7 @@ bool UnifiedSensors::initNavSensors()
             {
                 #if DEBUG_ON == true
                                 char* unk_message = (char *)"Sensors: Unknown sensor error initialization error";
-                                Debug::error.addToBuffer(micros(), Debug::Critical_Error, unk_message);
+                                Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Critical_Error, unk_message);
 
                 #if LIVE_DEBUG == true
                                 Serial.println(F(unk_message));
@@ -229,7 +230,7 @@ bool UnifiedSensors::initNavSensors()
 
 #if DEBUG_ON == true
     char *message = (char *)"Sensors: All sensors successfully initialized";
-    Debug::success.addToBuffer(micros(), Debug::Success, message);
+    Debug::success.addToBuffer(scoped_timer.elapsed(), Debug::Success, message);
 
 #if LIVE_DEBUG == true
     Serial.println(F(message));

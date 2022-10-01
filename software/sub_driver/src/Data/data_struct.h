@@ -12,6 +12,7 @@
 #define Data_struct_h
 
 #include <Arduino.h>
+#include <chrono>
 
 #include "navigation/Quaternion.h"
 namespace GPS_data
@@ -117,7 +118,7 @@ struct ExternalData
 //To do: organize into different structs for optimization and organization
 struct Data
 {
-    uint64_t time_us;
+    int64_t time_ns;
     uint32_t loop_time;
 
     uint8_t system_state;

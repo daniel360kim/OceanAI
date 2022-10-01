@@ -51,8 +51,8 @@ void loop() {
 		Serial.print("Current position: "); Serial.println(stepper.currentPosition_mm());
 	}
 	// Move the motor one step
-	if(micros() - previousPrintmicros > 1000000) {
-		previousPrintmicros = micros();
+	if(scoped_timer.elapsed() - previousPrintmicros > 1000000) {
+		previousPrintmicros = scoped_timer.elapsed();
 		Serial.print("Current position: "); Serial.println(stepper.currentPosition_mm());
 	}
 	stepper.update();

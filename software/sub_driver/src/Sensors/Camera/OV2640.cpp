@@ -64,7 +64,7 @@ namespace Optics
             {
                 #if DEBUG_ON == true
                     char* message = (char*)"OV2640: SPI bus initialization failed";
-                    Debug::error.addToBuffer(micros(), Debug::Fatal, message);
+                    Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Fatal, message);
 
                     #if LIVE_DEBUG == true
                         Serial.println(F(message));
@@ -78,7 +78,7 @@ namespace Optics
             {
                 #if DEBUG_ON == true
                     char* message = (char*)"OV2640: SPI bus initialization successful";
-                    Debug::success.addToBuffer(micros(), Debug::Success, message);
+                    Debug::success.addToBuffer(scoped_timer.elapsed(), Debug::Success, message);
 
                     #if LIVE_DEBUG == true
                         Serial.println(F(message));
@@ -101,7 +101,7 @@ namespace Optics
             {
                 #if DEBUG_ON == true
                 char* message = (char*)"OV2640: Could not find/detect camera";
-                Debug::error.addToBuffer(micros(), Debug::Fatal, message);
+                Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Fatal, message);
 
                     #if LIVE_DEBUG == true
                         Serial.println(F(message));
@@ -114,7 +114,7 @@ namespace Optics
             {
                 #if DEBUG_ON == true
                 char* message = (char*)"OV2640: Found the camera";
-                Debug::success.addToBuffer(micros(), Debug::Success, message);
+                Debug::success.addToBuffer(scoped_timer.elapsed(), Debug::Success, message);
 
                     #if LIVE_DEBUG == true
                         Serial.println(F(message));
@@ -139,7 +139,7 @@ namespace Optics
     
     void Camera::capture(unsigned long delay_micros, unsigned long *capture_time, unsigned long *save_time, uint32_t *FIFO_length, bool(*closeCurrentFile)(), bool(*reopenPrevFile)(const char*), const char* filename)
     {
-        uint64_t current_micros = micros();
+        uint64_t current_micros = scoped_timer.elapsed();
 
         if(current_micros - previous_log >= delay_micros)
         {
@@ -151,18 +151,18 @@ namespace Optics
 
             camera.start_capture();
             
-            uint64_t total_time = micros();
+            uint64_t total_time = scoped_timer.elapsed();
             while ( !camera.get_bit(ARDUCHIP_TRIG, CAP_DONE_MASK));
 
-            *capture_time = total_time - micros();
+            *capture_time = total_time - scoped_timer.elapsed();
             #if LIVE_DEBUG == true
                 Serial.print(F("capture total_time used (in miliseconds):"));
                 Serial.println(*capture_time / 1000, DEC);
             #endif
-            total_time = micros();
+            total_time = scoped_timer.elapsed();
 
             read_fifo_burst(FIFO_length);
-            total_time = micros() - total_time;
+            total_time = scoped_timer.elapsed() - total_time;
             camera.clear_fifo_flag();
 
             *save_time = total_time;
@@ -193,7 +193,7 @@ namespace Optics
         {
              #if DEBUG_ON == true
                 char* message = (char*)"OV2640: FIFO Buffer Oversized";
-                Debug::error.addToBuffer(micros(), Debug::Fatal, message);
+                Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Fatal, message);
 
                     #if LIVE_DEBUG == true
                         Serial.println(F(message));
@@ -262,7 +262,7 @@ namespace Optics
                 {
                     #if DEBUG_ON == true
                         char* message = (char*)"Failed to open image file";
-                        Debug::error.addToBuffer(micros(), Debug::Warning, message);
+                        Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Warning, message);
                         
                         #if LIVE_DEBUG == true
                             Serial.println(F(message));
@@ -276,7 +276,7 @@ namespace Optics
                     file.close();
                     #if DEBUG_ON == true
                         char* message = (char*)"Failed to preallocate image file";
-                        Debug::error.addToBuffer(micros(), Debug::Warning, message);
+                        Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Warning, message);
                         #if LIVE_DEBUG == true
                             Serial.println(F(message));
                         #endif

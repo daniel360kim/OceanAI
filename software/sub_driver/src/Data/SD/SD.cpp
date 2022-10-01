@@ -25,7 +25,7 @@
 #include "../../config.h"
 #include "../StartInfo.h"
 #include "StaticQueue.h"
-#include "../../mission.h"
+#include "../../core/Timer.h"
 
 extern unsigned long _heap_start;
 extern unsigned long _heap_end;
@@ -47,7 +47,7 @@ Timer<1, micros> cap_update;
  * @param mission mission information
  * @param log_interval how many microseconds between each log 
  */
-SD_Logger::SD_Logger(Duration mission, uint32_t log_interval) 
+SD_Logger::SD_Logger(Time::Mission mission, uint32_t log_interval) 
 {
     m_log_file_size = sizeof(Data) * (mission.mission_time / 1e+6) * log_interval;
     this->log_interval = log_interval;
@@ -143,7 +143,7 @@ bool SD_Logger::init()
         {
             #if DEBUG_ON == true
                 char* message = (char*)"Failed to make directory";
-                Debug::error.addToBuffer(micros(), Debug::Fatal, message);
+                Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Fatal, message);
                 
                 #if LIVE_DEBUG == true
                     Serial.println(F(message));
@@ -285,7 +285,7 @@ bool SD_Logger::logData(Data data)
     }
 
     //Logging at a certain interval
-    unsigned long long current_time = micros();
+    unsigned long long current_time = scoped_timer.elapsed();
     if(current_time - previous_time >= log_interval)
     {
         
@@ -311,7 +311,7 @@ bool SD_Logger::logData(Data data)
                 iterations++;
             }
         }
-        previous_time = micros();
+        previous_time = scoped_timer.elapsed();
     }
     //For debugging. Should conditional compile this but too lazy lol
     if(buf.is_full())
@@ -382,7 +382,7 @@ bool SD_Logger::rewindPrint()
             Data cc;
             cc = read_buf.front();
             read_buf.pop();
-            file.print(cc.time_us); file.print(comma); file.print(cc.loop_time); file.print(comma);
+            file.print(cc.time_ns); file.print(comma); file.print(cc.loop_time); file.print(comma);
             file.print(cc.system_state); file.print(comma);
             file.print(cc.dt,10); file.print(comma);
             file.print(cc.bmp_rpres); file.print(comma); file.print(cc.bmp_rtemp); file.print(comma); file.print(cc.bmp_fpres); file.print(comma); file.print(cc.bmp_ftemp);file.print(comma);

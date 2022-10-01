@@ -1,5 +1,6 @@
 
 #include "AccelStepper.h"
+#include "../core/Timer.h"
 
 #include <cmath>
 #include <algorithm>
@@ -43,7 +44,7 @@ bool AccelStepper::runSpeed()
     if (!_stepInterval)
         return false;
 
-    unsigned long time = micros();
+    unsigned long time = scoped_timer.elapsed();
     if (time - _lastStepTime >= _stepInterval)
     {
         if (_direction == DIRECTION_CW)

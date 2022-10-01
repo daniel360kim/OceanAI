@@ -59,9 +59,9 @@ double SF::invSqrt(double x)
 {
 	double halfx = 0.5 * x;
 	double y = x;
-	int64_t i = *(int64_t*) &y;
+	int64_t i = *(int64_t*) &y; //expect warning here
 	i = 0x5fe6eb50c7b537a9 - (i >> 1);
-	y = *(double*)&i;
+	y = *(double*)&i; //expect warning here
 	y = y * (1.5 - (halfx * y * y));
 	y = y * (1.5 - (halfx * y * y));
 	return y;

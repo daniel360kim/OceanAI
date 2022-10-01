@@ -16,6 +16,8 @@ void Print::addToBuffer(uint64_t timestamp, Severity severity, char* message)
     printBuffer.push_back(*metadata);
 
     delete metadata;
+
+    
 }
 
 void Print::printBuffer_vec()

@@ -63,7 +63,7 @@ void setup()
   Entropy.Initialize();
   start.Startup();
 
-  previous_time = micros();
+  previous_time = scoped_timer.elapsed();
 
 }
 
@@ -170,7 +170,7 @@ void receiveCalibration() {
 void loop()
 { 
   
-  data.time_us = micros();
+  data.time_us = scoped_timer.elapsed();
   data.dt = (data.time_us - previous_time) / 1000000.0;
   previous_time = data.time_us;
 
@@ -269,7 +269,7 @@ void loop()
 
   while(data.time_us >= 900000000ull)
   {
-    //Serial.println(micros());
+    //Serial.println(scoped_timer.elapsed());
     LEDa.setColor(255,0,0);
     start.rewindPrint();
     LEDa.setColor(0,255,0);

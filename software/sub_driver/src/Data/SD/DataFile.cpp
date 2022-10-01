@@ -25,7 +25,7 @@ DataFile::DataFile(const char* file_name, ENDING ending)
 	{
 	#if DEBUG_ON == true
 		char* message = (char*)"DataFile: File name too large";
-		Debug::error.addToBuffer(micros(), Debug::Critical_Error, message);
+		Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Critical_Error, message);
 
 		#if LIVE_DEBUG == true
 			Serial.println(F(message));
@@ -37,7 +37,7 @@ DataFile::DataFile(const char* file_name, ENDING ending)
 	
 		#if DEBUG_ON == true
 			char* message = (char*)"DataFile: File name buffered";
-			Debug::success.addToBuffer(micros(), Debug::Success, message);
+			Debug::success.addToBuffer(scoped_timer.elapsed(), Debug::Success, message);
 
 			#if LIVE_DEBUG == true
 				Serial.println(F(message));
@@ -88,7 +88,7 @@ bool DataFile::createFile()
 		#if DEBUG_ON == true
 		{
 			char* message = (char*)"Datafile: Error initializing SDIO";
-			Debug::error.addToBuffer(micros(), Debug::Critical_Error, message);
+			Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Critical_Error, message);
 			#if LIVE_DEBUG == true	
 				Serial.println(F(message));
 			#endif
@@ -102,7 +102,7 @@ bool DataFile::createFile()
 		#if DEBUG_ON == true
 		{
 			char* message = (char*)"Datafile: SDIO initialization successful";
-			Debug::success.addToBuffer(micros(), Debug::Success, message);
+			Debug::success.addToBuffer(scoped_timer.elapsed(), Debug::Success, message);
 			#if LIVE_DEBUG == true	
 				Serial.println(F(message));
 			#endif
@@ -127,7 +127,7 @@ bool DataFile::createFile()
 			#if DEBUG_ON == true
 			{
 				char* message = (char*)"Datafile: File numbering unsuccessful";
-				Debug::error.addToBuffer(micros(), Debug::Critical_Error, message);
+				Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Critical_Error, message);
 				#if LIVE_DEBUG == true	
 					Serial.println(F(message));
 				#endif

@@ -117,14 +117,14 @@ void setup()
 
     output.indicateCompleteStartup();
     Serial.println("Done initializing");
-    previous_time = micros();
+    previous_time = scoped_timer.elapsed();
 }
 
 bool logged = false;
 
 void loop()
 {
-    data.time_us = micros();
+    data.time_us = scoped_timer.elapsed();
     data.dt = (data.time_us - previous_time) / 1000000.0;
     previous_time = data.time_us;
 
@@ -167,7 +167,7 @@ void loop()
     {
         signal.on();
         LEDa.setColor(255, 255, 255);
-        unsigned long start = micros();
+        unsigned long start = scoped_timer.elapsed();
         if (!logger.rewindPrint())
         {
             while (1)
@@ -177,7 +177,7 @@ void loop()
             }
         }
 
-        unsigned long finish = micros();
+        unsigned long finish = scoped_timer.elapsed();
         LEDa.setColor(0, 255, 0);
         Serial.print("Rewind took: ");
         Serial.println(finish - start);

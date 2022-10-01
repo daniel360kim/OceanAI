@@ -15,8 +15,11 @@
 #ifndef SensorFusion_h
 #define SensorFusion_h
 
-#include <math.h>
+#include <cmath>
+
+#include "../../core/Timer.h"
 #include "Arduino.h"
+
 
 //--------------------------------------------------------------------------------------------
 // Variable declaration
@@ -43,7 +46,7 @@ public:
 	//const double RAD_TO_DEG = 57.29577951308233f; //180.0f/PI
 	
 	double deltatUpdate (){
-		Now = micros();
+		Now = scoped_timer.elapsed();
 		deltat = ((Now - lastUpdate) / 1000000.0); // set integration time by time elapsed since last filter update
 		lastUpdate = Now;
 		return deltat;

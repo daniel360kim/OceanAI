@@ -23,7 +23,7 @@
 #include "../data_struct.h"
 #include "../../config.h"
 #include "StaticQueue.h"
-#include "../../mission.h"
+#include "../../core/Timer.h"
 
 extern SdFs sd;
 extern FsFile file;
@@ -32,7 +32,7 @@ class SD_Logger
 {
 public:
     SD_Logger() {}
-    SD_Logger(Duration mission, uint32_t log_interval);
+    SD_Logger(Time::Mission mission, uint32_t log_interval);
 
     bool log_crash_report();
     bool init();
