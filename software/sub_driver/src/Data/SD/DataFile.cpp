@@ -11,6 +11,7 @@
 #include "DataFile.h"
 #include "../../core/config.h"
 #include "../../core/debug.h"
+#include "../../core/Timer.h"
 #include "SD.h"
 
 
@@ -18,33 +19,6 @@
 
 DataFile::DataFile(const char* file_name, ENDING ending)
 {
-  /*when changing the number ending, we need to know how many elements to shift down*/
-    num_bytes = strlen(file_name); 
-  /*We also make sure the file name is not too long: SD uses 8.3 filenames so it can only be 8 chars long
-	if(num_bytes >= 5) 
-	{
-	#if DEBUG_ON == true
-		char* message = (char*)"DataFile: File name too large";
-		Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Critical_Error, message);
-
-		#if LIVE_DEBUG == true
-			Serial.println(F(message));
-		#endif
-
-	#endif
-	}
-	*/
-	
-		#if DEBUG_ON == true
-			char* message = (char*)"DataFile: File name buffered";
-			Debug::success.addToBuffer(scoped_timer.elapsed(), Debug::Success, message);
-
-			#if LIVE_DEBUG == true
-				Serial.println(F(message));
-			#endif
-		#endif
-
-	
 	switch(ending)
 	{
 		case CSV:
@@ -86,27 +60,15 @@ bool DataFile::createFile()
 	if(!sd.begin(SdioConfig(FIFO_SDIO)))
 	{
 		#if DEBUG_ON == true
-		{
-			char* message = (char*)"Datafile: Error initializing SDIO";
-			Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Critical_Error, message);
-			#if LIVE_DEBUG == true	
-				Serial.println(F(message));
-			#endif
-		}
+		    ERROR_LOG(Debug::Critical_Error, "SD card initialization failed");
 		#endif
-		
+
 		return false;
 	}
 	else
 	{
 		#if DEBUG_ON == true
-		{
-			char* message = (char*)"Datafile: SDIO initialization successful";
-			Debug::success.addToBuffer(scoped_timer.elapsed(), Debug::Success, message);
-			#if LIVE_DEBUG == true	
-				Serial.println(F(message));
-			#endif
-		}
+			SUCCESS_LOG("SD card initialization successful");
 		#endif
 	}
 	
@@ -125,13 +87,7 @@ bool DataFile::createFile()
 		else
 		{
 			#if DEBUG_ON == true
-			{
-				char* message = (char*)"Datafile: File numbering unsuccessful";
-				Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Critical_Error, message);
-				#if LIVE_DEBUG == true	
-					Serial.println(F(message));
-				#endif
-			}
+				ERROR_LOG(Debug::Critical_Error, "Too many files");
 			#endif
 			return false;
 		}
@@ -172,7 +128,7 @@ bool DataFile::resizeBuff(int num_bytes, uint8_t** buff) {
  */
 char* DataFile::appendChars(const char *hostname, const char *def_host)
 {
-  // create hostname
+  	// create hostname
 	int num_bytes = strlen(hostname) + strlen(def_host) + 1; // +1 for the null terminator | allocate a buffer of the required size
 	char *hostname_str = NULL;
 	resizeBuff(num_bytes, &hostname_str);

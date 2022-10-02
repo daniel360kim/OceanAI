@@ -41,6 +41,9 @@ namespace Time
 
         Async(int64_t interval, T(*func)(P...)) : Timer()
         {
+            #if interval < 0
+                #error "interval cannot be negative"
+            #endif
             reset();
             
             this->func = func;
@@ -72,6 +75,9 @@ namespace Time
 
         void setInterval(uint64_t interval)
         {
+            #if interval < 0
+                #error "Interval cannot be negative"
+            #endif
             this->interval = interval;
         }
 

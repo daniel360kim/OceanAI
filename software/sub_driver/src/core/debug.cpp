@@ -3,15 +3,19 @@
 
 #include "debug.h"
 
+#include "Timer.h"
+#define SUCCESS_LOG(message) Debug::success.addToBuffer(scoped_timed.elapsed(), Debug::Success, message)
+#define ERROR_LOG(...) Debug::error.addToBuffer(scoped_timer.elapsed(), __VA_ARGS__)
+
 namespace Debug
 {
 
 Print error;
 Print success;
 
-void Print::addToBuffer(uint64_t timestamp, Severity severity, char* message)
+void Print::addToBuffer(Severity severity, char* message)
 {
-    Message *metadata = new Message(timestamp, severity, message);
+    Message *metadata = new Message(severity, message);
 
     printBuffer.push_back(*metadata);
 

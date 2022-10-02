@@ -26,12 +26,9 @@ struct StartFile_d
 // Conditional Compilation Configurations
 #if DEBUG_ON == true
     static constexpr bool debug = true;
-#if LIVE_DEBUG == true
-    static constexpr bool live_debug = true;
-#endif
+
 #else
     static constexpr bool debug = false;
-    static constexpr bool live_debug = false;
 #endif
 
 #if OPTICS_ON == true

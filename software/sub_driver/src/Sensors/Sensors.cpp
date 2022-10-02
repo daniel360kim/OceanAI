@@ -148,13 +148,7 @@ bool UnifiedSensors::initNavSensors()
             case 0:
             {
                 #if DEBUG_ON == true
-                                char* bar_message = (char *)"Sensors: Barometer initialization error";
-                                Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Critical_Error, bar_message);
-
-                #if LIVE_DEBUG == true
-                                Serial.println(F(bar_message));
-                #endif
-
+                    ERROR_LOG(Debug::Fatal, "BMP388 Error");
                 #endif
 
                 return false;
@@ -163,13 +157,7 @@ bool UnifiedSensors::initNavSensors()
             case 1:
             {
                 #if DEBUG_ON == true
-                                char* acc_message = (char *)"Sensors: Accelerometer initialization error";
-                                Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Critical_Error, acc_message);
-
-                #if LIVE_DEBUG == true
-                                Serial.println(F(acc_message));
-                #endif
-
+                    ERROR_LOG(Debug::Critical_Error, "BMI088 Accel Initialization Error");
                 #endif
 
                 return false;
@@ -178,13 +166,7 @@ bool UnifiedSensors::initNavSensors()
             case 2:
             {
                 #if DEBUG_ON == true
-                                char* gyr_message = (char *)"Sensors: Gyroscope initialization error";
-                                Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Critical_Error, gyr_message);
-
-                #if LIVE_DEBUG == true
-                                Serial.println(F(gyr_message));
-                #endif
-
+                    ERROR_LOG(Debug::Critical_Error, "BMI088 Gyro Initialization Error");
                 #endif
 
                 return false;
@@ -194,13 +176,7 @@ bool UnifiedSensors::initNavSensors()
             case 3:
             {
                 #if DEBUG_ON == true
-                                char* mag_message = (char *)"Sensors: Magentometer initialization error";
-                                Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Critical_Error, mag_message);
-
-                #if LIVE_DEBUG == true
-                                Serial.println(F(mag_message));
-                #endif
-
+                    ERROR_LOG(Debug::Critical_Error, "LIS3MDL Initialization Error");
                 #endif
 
                 return false;
@@ -209,13 +185,7 @@ bool UnifiedSensors::initNavSensors()
             default:
             {
                 #if DEBUG_ON == true
-                                char* unk_message = (char *)"Sensors: Unknown sensor error initialization error";
-                                Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Critical_Error, unk_message);
-
-                #if LIVE_DEBUG == true
-                                Serial.println(F(unk_message));
-                #endif
-
+                    ERROR_LOG(Debug::Critical_Error, "Unknown Error");
                 #endif
                 return false;
             }
@@ -224,14 +194,9 @@ bool UnifiedSensors::initNavSensors()
     }
 
 #if DEBUG_ON == true
-    char *message = (char *)"Sensors: All sensors successfully initialized";
-    Debug::success.addToBuffer(scoped_timer.elapsed(), Debug::Success, message);
-
-#if LIVE_DEBUG == true
-    Serial.println(F(message));
+    SUCCESS_LOG("All sensors initialized successfully");
 #endif
 
-#endif
     return true;
 }
 
@@ -286,11 +251,19 @@ void UnifiedSensors::initPressureSensor(uint8_t input_pin, uint32_t interval, do
     /*Pressure sensor outputs at least 0.1V, so it is malfunctional or disconnected if it outputs less than 0.1V*/
     if(pressure_voltage <= 0.1)
     {
+        #if DEBUG_ON == true
+            ERROR_LOG(Debug::Warning, "Pressure sensor is not connected or is malfunctioning");
+        #endif
+
         pressure_sensor_connected = false;
         return;
     }
     else
     {
+        #if DEBUG_ON == true
+            SUCCESS_LOG("Pressure sensor is connected");
+        #endif
+        
         pressure_sensor_connected = true;
         pressure_function.setInterval(interval);
         pressure_function.setFunction(UnifiedSensors::readExternalPressure);

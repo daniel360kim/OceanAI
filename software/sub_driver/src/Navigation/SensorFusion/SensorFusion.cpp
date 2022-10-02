@@ -25,7 +25,7 @@
 
 #include "SensorFusion.h" // SF
 #include "../Orientation.h"
-#include <math.h>
+#include <cmath>
 #include "Arduino.h"
 
 //-------------------------------------------------------------------------------------------
@@ -128,7 +128,7 @@ void SF::MahonyUpdate(double gx, double gy, double gz, double ax, double ay, dou
 		// Reference direction of Earth's magnetic field
 		hx = 2.0 * (mx * (0.5 - q2q2 - q3q3) + my * (q1q2 - q0q3) + mz * (q1q3 + q0q2));
 		hy = 2.0 * (mx * (q1q2 + q0q3) + my * (0.5 - q1q1 - q3q3) + mz * (q2q3 - q0q1));
-		bx = sqrtf(hx * hx + hy * hy);
+		bx = std::sqrt(hx * hx + hy * hy);
 		bz = 2.0 * (mx * (q1q3 - q0q2) + my * (q2q3 + q0q1) + mz * (0.5 - q1q1 - q2q2));
 
 		// Estimated direction of gravity and magnetic field
@@ -323,7 +323,7 @@ void SF::MadgwickUpdate(double gx, double gy, double gz, double ax, double ay, d
 		// Reference direction of Earth's magnetic field
 		hx = mx * q0q0 - _2q0my * q3 + _2q0mz * q2 + mx * q1q1 + _2q1 * my * q2 + _2q1 * mz * q3 - mx * q2q2 - mx * q3q3;
 		hy = _2q0mx * q3 + my * q0q0 - _2q0mz * q1 + _2q1mx * q2 - my * q1q1 + my * q2q2 + _2q2 * mz * q3 - my * q3q3;
-		_2bx = sqrt(hx * hx + hy * hy);
+		_2bx = std::sqrt(hx * hx + hy * hy);
 		_2bz = -_2q0mx * q2 + _2q0my * q1 + mz * q0q0 + _2q1mx * q3 - mz * q1q1 + _2q2 * my * q3 - mz * q2q2 + mz * q3q3;
 		_4bx = 2.0 * _2bx;
 		_4bz = 2.0 * _2bz;
