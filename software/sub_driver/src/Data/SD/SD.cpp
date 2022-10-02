@@ -300,7 +300,6 @@ bool SD_Logger::logData(Data data)
         }
         previous_time = scoped_timer.elapsed();
     }
-    //For debugging. Should conditional compile this but too lazy lol
     if(write_buf.size() > 100)
     {
         return false;
