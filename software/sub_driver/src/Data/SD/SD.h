@@ -18,11 +18,11 @@
 #include <stdint.h>
 #include <vector>
 #include <CrashReport.h>
+#include <queue>
 
 #include "DataFile.h"
 #include "../data_struct.h"
 #include "../../core/config.h"
-#include "StaticQueue.h"
 #include "../../core/Timer.h"
 #include "../../core/timed_function.h"
 

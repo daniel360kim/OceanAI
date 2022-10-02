@@ -24,7 +24,6 @@
 #include "../../core/debug.h"
 #include "../../core/config.h"
 #include "../StartInfo.h"
-#include "StaticQueue.h"
 #include "../../core/Timer.h"
 
 extern unsigned long _heap_start;
@@ -271,6 +270,11 @@ bool SD_Logger::init()
  */
 bool SD_Logger::logData(Data data)
 {
+    if(!m_inital_cap_updated)
+    {
+        data.sd_capacity = configs.sd_cap;
+        m_inital_cap_updated = true;
+    }
     //Logging at a certain interval
     uint64_t current_time = scoped_timer.elapsed();
     if(current_time - previous_time >= log_interval)
@@ -302,20 +306,17 @@ bool SD_Logger::logData(Data data)
     }
     if(write_buf.size() > 100)
     {
-        return false;
+        //Clear the old data if it gets too large
+        std::queue<Data> empty;
+        std::swap(write_buf, empty);
+
+        log_interval+= 10000000; //If the buffer is too large we increase the log interval to prevent overflow
     }
 
     flusher.void_tick(this);
     capacity_updater.void_tick(data.sd_capacity);
-
-    if(!m_inital_cap_updated)
-    {
-        data.sd_capacity = configs.sd_cap;
-        m_inital_cap_updated = true;
-    }
     
     return true;
-    
 }
 
 /**
@@ -333,6 +334,11 @@ bool SD_Logger::logData(Data data)
 bool SD_Logger::rewindPrint()
 {
     file.close();
+
+    //Freeing memory from write_buffer
+    std::queue<Data> empty;
+    std::swap(write_buf, empty);
+
     //finding a buffer size based on available memory and how much data we logged
     //this allows us to create the largest buffer possible for less opens and closed of files
     //pretty nifty tbh

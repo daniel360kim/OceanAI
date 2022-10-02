@@ -56,10 +56,7 @@ void UnifiedSensors::scanAddresses()
     {
         
         Wire.beginTransmission(address);
-
-        Time::NamedTimer i2c("I2C end Transmission");
         error = Wire.endTransmission();
-        Time::TimerManager::getInstance().addTimer(i2c.getTimeInfo());
     
         if (error == 0)
         {
