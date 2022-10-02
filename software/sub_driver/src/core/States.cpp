@@ -125,60 +125,6 @@ void continuousFunctions()
 
     //Serial.println(data.external.raw_pres);
 }
-
-/**
- * Singleton return instance functions
- */
-
-//Instantiates the singletons
-Initialization Initialization::instance;
-ErrorIndication ErrorIndication::instance;
-IdleMode IdleMode::instance;
-Diving Diving::instance;
-Resurfacing Resurfacing::instance;
-Surfaced Surfaced::instance;
-SD_translate SD_translate::instance;
-SD_reinitialize SD_reinitialize::instance;
-
-Initialization& Initialization::getInstance()
-{
-    return instance;
-}
-
-ErrorIndication& ErrorIndication::getInstance()
-{
-    return instance;
-}
-
-IdleMode& IdleMode::getInstance()
-{
-    return instance;
-}
-
-Diving& Diving::getInstance()
-{
-    return instance;
-}
-
-Resurfacing& Resurfacing::getInstance()
-{
-    return instance;
-}
-
-Surfaced& Surfaced::getInstance()
-{
-    return instance;
-}
-
-SD_translate& SD_translate::getInstance()
-{
-    return instance;
-}
-
-SD_reinitialize& SD_reinitialize::getInstance()
-{
-    return instance;
-}
 ///****************///
 
 /**
@@ -199,17 +145,22 @@ void Initialization::enter(StateAutomation* state)
     output.startupSequence();
     Serial.begin(2000000);
 
+    LEDa.setColor(255, 0, 255);
+    LEDb.setColor(255, 0, 255);
+
     UnifiedSensors::getInstance().scanAddresses();
 
+    LEDa.setColor(0, 255, 255);
+    LEDb.setColor(0, 255, 255);
     if(!UnifiedSensors::getInstance().initNavSensors())
     {
         state->setState(ErrorIndication::getInstance());
         return;
     }
 
-    UnifiedSensors::getInstance().initVoltmeter(v_div);
-    UnifiedSensors::getInstance().initTDS(TDS);
-    UnifiedSensors::getInstance().initPressureSensor(TX_GPS);
+    UnifiedSensors::getInstance().initVoltmeter(v_div, (uint32_t)10000000, 10.0);
+    UnifiedSensors::getInstance().initTDS(TDS, (uint32_t)10000000, 10.0);
+    UnifiedSensors::getInstance().initPressureSensor(TX_GPS, (uint32_t)10000000, 20.0);
 
     UnifiedSensors::getInstance().setInterrupts(BAR_int, ACC_int, GYR_int, MAG_int);
 
@@ -382,15 +333,15 @@ void SD_translate::enter(StateAutomation* state)
 void SD_translate::run(StateAutomation* state)
 {
     Serial.println("Running SD_translate state");
-    Time::Timer rewind_timer;
+    Time::NamedTimer sd_timer("SD Translation");
     if(!logger.rewindPrint())
     {
         state->setState(ErrorIndication::getInstance());
         return;
     }
-    int64_t elapsed = rewind_timer.elapsed();
+    Time::TimerManager::getInstance().addTimer(sd_timer.getTimeInfo());
     LEDa.setColor(0, 255, 0);
-    Serial.print(F("Rewind time(ns): ")); Serial.println(elapsed);
+    Time::TimerManager::getInstance().printTimers();
     while(1)
     {
         //just stop the program for now. add reinitialization state later
@@ -401,5 +352,59 @@ void SD_translate::run(StateAutomation* state)
 
 void SD_translate::exit(StateAutomation* state)
 {
+}
+
+/**
+ * Singleton return instance functions
+ */
+
+//Instantiates the singletons
+Initialization Initialization::instance;
+ErrorIndication ErrorIndication::instance;
+IdleMode IdleMode::instance;
+Diving Diving::instance;
+Resurfacing Resurfacing::instance;
+Surfaced Surfaced::instance;
+SD_translate SD_translate::instance;
+SD_reinitialize SD_reinitialize::instance;
+
+Initialization& Initialization::getInstance()
+{
+    return instance;
+}
+
+ErrorIndication& ErrorIndication::getInstance()
+{
+    return instance;
+}
+
+IdleMode& IdleMode::getInstance()
+{
+    return instance;
+}
+
+Diving& Diving::getInstance()
+{
+    return instance;
+}
+
+Resurfacing& Resurfacing::getInstance()
+{
+    return instance;
+}
+
+Surfaced& Surfaced::getInstance()
+{
+    return instance;
+}
+
+SD_translate& SD_translate::getInstance()
+{
+    return instance;
+}
+
+SD_reinitialize& SD_reinitialize::getInstance()
+{
+    return instance;
 }
 

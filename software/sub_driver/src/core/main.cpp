@@ -5,20 +5,13 @@
 
 StateAutomation submarine;
 
-int print(void*)
-{
-    Serial.println("Hello");
-    return 5;
-}
-
-Time::Async<int, void*> timed_function(1000000000, print);
 
 void setup() 
 {
-    //submarine.initialize();
+    submarine.initialize();
 }
 
 void loop()
 {
-    int i = timed_function.tick(nullptr);
+    submarine.run();
 }

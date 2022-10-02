@@ -19,7 +19,7 @@
 #include "../core/config.h"
 #include "../core/debug.h"
 #include "LowPass.h"
-#include "../core/Time.h"
+#include "../core/timed_function.h"
 #include "../Data/StartInfo.h"
 #include "../core/Timer.h"
 
@@ -31,27 +31,6 @@ Bmi088Gyro gyro(Wire, 0x68);
 
 LIS3MDL mag;
 
-Timer<1, micros> TDS_interrupt;
-Timer<1, micros> voltage_interrupt;
-Timer<1, micros> pressure_interrupt;
-
-namespace Filter
-{
-    LowPass<1> gyr_x(30);
-    LowPass<1> gyr_y(30);
-    LowPass<1> gyr_z(30);
-
-    LowPass<1> acc_x(30);
-    LowPass<1> acc_y(30);
-    LowPass<1> acc_z(30);
-
-    LowPass<1> bmp_pres(10);
-    LowPass<1> bmp_temp(5);
-
-    LowPass<1> ext_temp(50);
-    LowPass<1> ext_pres(50);
-};
-
 ADC adc;
 
 volatile bool UnifiedSensors::bar_flag = false;
@@ -59,11 +38,13 @@ volatile bool UnifiedSensors::accel_flag = false;
 volatile bool UnifiedSensors::gyro_flag = false;
 volatile bool UnifiedSensors::mag_flag = true;
 
-volatile bool UnifiedSensors::TDS_flag = false;
-volatile bool UnifiedSensors::voltage_flag = false;
-volatile bool UnifiedSensors::pressure_flag = false;
-
 bool UnifiedSensors::pressure_sensor_connected = false;
+
+uint8_t UnifiedSensors::TDS_pin = 0;
+uint8_t UnifiedSensors::voltage_pin = 0;
+uint8_t UnifiedSensors::pressure_pin = 0;
+
+double UnifiedSensors::temp = 0;
 
 void UnifiedSensors::scanAddresses()
 {
@@ -73,9 +54,13 @@ void UnifiedSensors::scanAddresses()
 
     for(address = 1; address < 127; address++ )
     {
+        
         Wire.beginTransmission(address);
-        error = Wire.endTransmission();
 
+        Time::NamedTimer i2c("I2C end Transmission");
+        error = Wire.endTransmission();
+        Time::TimerManager::getInstance().addTimer(i2c.getTimeInfo());
+    
         if (error == 0)
         {
             configs.addresses.push_back(address);
@@ -109,14 +94,22 @@ bool UnifiedSensors::initNavSensors()
     baro.setTimeStandby(TIME_STANDBY_80MS);
     baro.startNormalConversion();
 
+    bmp_pres.setCutoff(10);
+    bmp_temp.setCutoff(5);
+
     configs.BMP_os_p = (char *)"Pressure: X4";
     configs.BMP_os_t = (char *)"Temperature: X16";
     configs.BMP_ODR = (char *)"Standby: 80 milliseconds";
+
     status[1] = accel.begin();
     accel.setOdr(Bmi088Accel::ODR_800HZ_BW_140HZ);
     accel.pinModeInt1(Bmi088Accel::PUSH_PULL, Bmi088Accel::ACTIVE_HIGH);
     accel.mapDrdyInt1(true);
     accel.setRange(Bmi088Accel::RANGE_3G);
+
+    acc_x.setCutoff(30);
+    acc_y.setCutoff(30);
+    acc_z.setCutoff(30);
 
     configs.accel_range = (char *)"Accel: 3G";
     configs.accel_ODR = (char *)"Accel ODR: 800Hz";
@@ -126,6 +119,11 @@ bool UnifiedSensors::initNavSensors()
     gyro.pinModeInt3(Bmi088Gyro::PUSH_PULL, Bmi088Gyro::ACTIVE_HIGH);
     gyro.mapDrdyInt3(true);
     gyro.setRange(Bmi088Gyro::RANGE_250DPS);
+
+    gyr_x.setCutoff(30);
+    gyr_y.setCutoff(30);
+    gyr_z.setCutoff(30);
+
     configs.gyro_range = (char *)"Gyro: 250 degrees per second";
     configs.gyro_ODR = (char *)"Gyro ODR: 1000Hz";
 
@@ -256,38 +254,52 @@ void UnifiedSensors::initADC()
 #endif
 }
 
-void UnifiedSensors::initTDS(uint8_t TDS_pin)
+void UnifiedSensors::initTDS(uint8_t TDS_pin, uint32_t interval, double filt_cutoff)
 {
-    int freq = 10000; // every 10000 us
     pinMode(TDS_pin, INPUT);
     this->TDS_pin = TDS_pin;
-    TDS_interrupt.every(freq, TDS_drdy);
+
+    //Setting interval and function pointer for reading from the sensor
+    tds_function.setInterval(interval);
+    tds_function.setFunction(UnifiedSensors::readTDS);
+
+    tds_filter.setCutoff(filt_cutoff);
 }
 
-void UnifiedSensors::initVoltmeter(uint8_t input_pin)
+void UnifiedSensors::initVoltmeter(uint8_t input_pin, uint32_t interval, double filt_cutoff)
 {
-    int freq = 1000000; // every 1000000 us
     pinMode(input_pin, INPUT);
     voltage_pin = input_pin;
-    voltage_interrupt.every(freq, voltage_drdy);
+    
+    //Setting interval and function pointer for reading from the sensor
+    voltage_function.setInterval(interval);
+    voltage_function.setFunction(UnifiedSensors::readVoltage);
+
+    voltage_filter.setCutoff(filt_cutoff);
 }
 
-void UnifiedSensors::initPressureSensor(uint8_t input_pin)
+void UnifiedSensors::initPressureSensor(uint8_t input_pin, uint32_t interval, double filt_cutoff)
 {
     pressure_pin = input_pin;
     pinMode(pressure_pin, INPUT);
 
+    double pressure_voltage = 0.0;
+    readExternalPressure_v(pressure_voltage);
+
     /*Pressure sensor outputs at least 0.1V, so it is malfunctional or disconnected if it outputs less than 0.1V*/
-    if(readExternalPressure_v() <= 0.1)
+    if(pressure_voltage <= 0.1)
     {
         pressure_sensor_connected = false;
+        return;
     }
     else
     {
         pressure_sensor_connected = true;
-        Serial.println("Pressure sensor connected");
+        pressure_function.setInterval(interval);
+        pressure_function.setFunction(UnifiedSensors::readExternalPressure);
     }
 
+    ext_pres.setCutoff(filt_cutoff);
 }
 
 void UnifiedSensors::setInterrupts(const uint8_t bar_int, const uint8_t accel_int, const uint8_t gyro_int, const uint8_t mag_int)
@@ -363,47 +375,40 @@ void UnifiedSensors::returnRawMag(double *x, double *y, double *z)
     *z = mag.m.z / 68.42 - HARD_IRON_BIAS[2];
 }
 
-double UnifiedSensors::readTDS()
+void UnifiedSensors::readTDS(double& tds_reading)
 {
     int tds = adc.adc0->analogRead(TDS_pin);
 
     double averageVoltage = tds * (double)VREF / 1024.0;
     double compensationCoefficient = 1.0 + 0.02 * (temp - 25.0);                                                                                                                            // temperature compensation formula: fFinalResult(25^C) = fFinalResult(current)/(1.0+0.02*(fTP-25.0));
     double compensationVolatge = averageVoltage / compensationCoefficient;                                                                                                                  // temperature compensation
-    double tdsValue = (133.42 * compensationVolatge * compensationVolatge * compensationVolatge - 255.86 * compensationVolatge * compensationVolatge + 857.39 * compensationVolatge) * 0.5; // convert voltage value to tds value
-
-    return tdsValue;
+    tds_reading = (133.42 * compensationVolatge * compensationVolatge * compensationVolatge - 255.86 * compensationVolatge * compensationVolatge + 857.39 * compensationVolatge) * 0.5; // convert voltage value to tds value
 }
 
-double UnifiedSensors::readVoltage()
+void UnifiedSensors::readVoltage(double& voltage)
 {
-    double reading = adc.adc1->analogRead(voltage_pin) * (double)VREF / 1024.0;
-    reading = reading * (9.95 + 1.992) / 1.992;
+    voltage = adc.adc1->analogRead(voltage_pin) * (double)VREF / 1024.0;
+    voltage = voltage * (9.95 + 1.992) / 1.992;
 
-    if (reading <= 0.1)
-        reading = 0.0;
-
-    return reading;
+    if (voltage <= 0.1)
+        voltage = 0.0;
 }
 
-double UnifiedSensors::readExternalPressure_v()
+void UnifiedSensors::readExternalPressure_v(double& voltage)
 {
     int tds = analogRead(pressure_pin);
-    double reading = tds * (double)VREF / 1024.0;
-    Serial.println(reading);
-    return reading;
+    voltage = tds * (double)VREF / 1024.0;
 }
 
-double UnifiedSensors::readExternalPressure()
+void UnifiedSensors::readExternalPressure(double& pressure)
 {
-    double voltage = readExternalPressure_v();
+    double voltage = 0.0;
+    readExternalPressure_v(voltage);
     double psi = (100.0 / 3.0) * voltage + (50.0 - ((100.0 / 3.0) * (3.3 / 2.0))); //pressure = 25psi * voltage - 12.5psi (linear)
-    double atm = psi / 14.6959488;
-    return atm;
+    pressure = psi / 14.6959488;
 }
 void UnifiedSensors::logToStruct(Data &data)
 {
-    
     if (UnifiedSensors::mag_flag)
     {
         returnRawMag(&data.mag.x, &data.mag.y, &data.mag.z);
@@ -416,9 +421,9 @@ void UnifiedSensors::logToStruct(Data &data)
 
         returnRawAccel(&data.racc.x, &data.racc.y, &data.racc.z, &data.bmi_temp);
 
-        data.facc.x = Filter::acc_x.filt(data.racc.x, data.dt);
-        data.facc.y = Filter::acc_y.filt(data.racc.y, data.dt);
-        data.facc.z = Filter::acc_z.filt(data.racc.z, data.dt);
+        data.facc.x = acc_x.filt(data.racc.x, data.dt);
+        data.facc.y = acc_y.filt(data.racc.y, data.dt);
+        data.facc.z = acc_z.filt(data.racc.z, data.dt);
 
         temp_measurements[1] = data.bmi_temp;
 
@@ -426,9 +431,9 @@ void UnifiedSensors::logToStruct(Data &data)
 
         returnRawGyro(&data.rgyr.x, &data.rgyr.y, &data.rgyr.z);
 
-        data.fgyr.x = Filter::gyr_x.filt(data.rgyr.x, data.dt);
-        data.fgyr.y = Filter::gyr_y.filt(data.rgyr.y, data.dt);
-        data.fgyr.z = Filter::gyr_z.filt(data.rgyr.z, data.dt);
+        data.fgyr.x = gyr_x.filt(data.rgyr.x, data.dt);
+        data.fgyr.y = gyr_y.filt(data.rgyr.y, data.dt);
+        data.fgyr.z = gyr_z.filt(data.rgyr.z, data.dt);
 
         UnifiedSensors::gyro_flag = false;
     }
@@ -438,33 +443,18 @@ void UnifiedSensors::logToStruct(Data &data)
         returnRawBaro(&data.bmp_rpres, &data.bmp_rtemp);
         temp_measurements[0] = data.bmp_rtemp;
 
-        data.bmp_fpres = Filter::bmp_pres.filt(data.bmp_rpres, data.dt);
-        data.bmp_ftemp = Filter::bmp_temp.filt(data.bmp_rtemp, data.dt);
+        data.bmp_fpres = bmp_pres.filt(data.bmp_rpres, data.dt);
+        data.bmp_ftemp = bmp_temp.filt(data.bmp_rtemp, data.dt);
 
         UnifiedSensors::bar_flag = false;
     }
 
-    if (UnifiedSensors::TDS_flag)
-    {
-        data.TDS = readTDS();
-        UnifiedSensors::TDS_flag = false;
-    }
+    tds_function.void_tick(data.r_TDS);
+    voltage_function.void_tick(data.r_voltage);
+    pressure_function.void_tick(data.external.raw_pres);
 
-    if (UnifiedSensors::voltage_flag)
-    {
-        data.voltage = readVoltage();
-        UnifiedSensors::voltage_flag = false;
-    }
-
-
-    data.external.raw_pres = readExternalPressure();
+    data.f_TDS = tds_filter.filt(data.r_TDS, data.dt);
+    data.f_voltage = voltage_filter.filt(data.r_voltage, data.dt);
+    data.external.filt_pres = ext_pres.filt(data.external.raw_pres, data.dt); 
     
-    
-
-
-
-    // temp_ekf.step(temp_measurements);
-
-    TDS_interrupt.tick();
-    voltage_interrupt.tick();
 }

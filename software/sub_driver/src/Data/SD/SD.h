@@ -24,6 +24,7 @@
 #include "../../core/config.h"
 #include "StaticQueue.h"
 #include "../../core/Timer.h"
+#include "../../core/timed_function.h"
 
 extern SdFs sd;
 extern FsFile file;
@@ -55,25 +56,22 @@ public:
 private:
     char* csv_filename;
     uint64_t previous_time;
-
-    unsigned long pt_cap_update;
-
     uint64_t iterations;
-
-    static volatile bool cap_update_int;
 
     static unsigned int freeMemory();
     unsigned int findFactors();
-    static bool flush(void*);
-    static bool getCapacity(void*);
+    static void flush(void*);
+    static void getCapacity(uint32_t &capacity);
 
+    std::queue<Data> write_buf;
 
-    StaticCircularBuffer<Data, 10> buf;
+    Time::Async<void, void*> flusher;
+    Time::Async<void, uint32_t&> capacity_updater;
 
     uint64_t m_log_file_size;
     uint32_t log_interval;
 
-
+    bool m_inital_cap_updated = false;
 };
 
 

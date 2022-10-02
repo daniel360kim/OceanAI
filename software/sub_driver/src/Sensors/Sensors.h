@@ -24,6 +24,8 @@
 
 #include "LowPass.h"
 
+#include "../core/timed_function.h"
+#include "../core/Timer.h"
 #include "../Data/data_struct.h"
 
 constexpr double VREF = 3.3;
@@ -38,9 +40,9 @@ public:
     void scanAddresses();
     bool initNavSensors();
     void initADC();
-    void initTDS(uint8_t TDS_pin);
-    void initVoltmeter(uint8_t input_pin);
-    void initPressureSensor(uint8_t input_pin);
+    void initTDS(uint8_t TDS_pin, uint32_t interval, double filt_cutoff);
+    void initVoltmeter(uint8_t input_pin , uint32_t interval, double filt_cutoff);
+    void initPressureSensor(uint8_t input_pin , uint32_t interval, double filt_cutoff);
     void setInterrupts(const uint8_t bar_int, const uint8_t accel_int, const uint8_t gyro_int, const uint8_t mag_int);
     void setGyroBias();
 
@@ -51,10 +53,31 @@ public:
     
     void logToStruct(Data &data);
 
-    double readTDS();
-    double readVoltage();
-    double readExternalPressure_v();
-    double readExternalPressure();
+    static void readTDS(double &tds_reading);
+    static void readVoltage(double& voltage);
+    static void readExternalPressure_v(double& voltage);
+    static void readExternalPressure(double& pressure);
+
+    double gx_bias = 0, gy_bias = 0, gz_bias = 0;
+    const double HARD_IRON_BIAS[3] = { 0.36, 0.39, 0.49 };
+
+    std::vector<uint8_t> address;
+
+private:
+    UnifiedSensors() {}
+
+    static UnifiedSensors instance;
+    static uint8_t TDS_pin, voltage_pin, pressure_pin;
+    static double temp;
+
+    double temp_measurements[2];
+
+    static bool pressure_sensor_connected;
+
+    //Timers to measure tds and voltage and pressure at certain intervals
+    Time::Async<void, double&> tds_function;
+    Time::Async<void, double&> voltage_function;
+    Time::Async<void, double&> pressure_function;
 
     static volatile bool bar_flag;
     static volatile bool accel_flag;
@@ -66,32 +89,23 @@ public:
     static void gyro_drdy()  { gyro_flag = true; }
     static void mag_drdy()  { mag_flag = true; }
 
-    double gx_bias = 0, gy_bias = 0, gz_bias = 0;
-    const double HARD_IRON_BIAS[3] = { 0.36, 0.39, 0.49 };
 
-    std::vector<uint8_t> address;
+    //Low pass filters for all the sensors
+    Filter::LowPass<1> gyr_x;
+    Filter::LowPass<1> gyr_y;
+    Filter::LowPass<1> gyr_z;
 
-private:
-    UnifiedSensors() {}
+    Filter::LowPass<1> acc_x;
+    Filter::LowPass<1> acc_y;
+    Filter::LowPass<1> acc_z;
 
-    static UnifiedSensors instance;
-    uint8_t TDS_pin, voltage_pin, pressure_pin;
-    double temp = 25;
+    Filter::LowPass<1> bmp_pres;
+    Filter::LowPass<1> bmp_temp;
 
-    double temp_measurements[2];
-    int getMedian(int bArray[], int iFilterLen);
-
-    //Using a timer we generate a fake interrupt for analog reads
-    static volatile bool TDS_flag;
-    static volatile bool voltage_flag;
-    static volatile bool pressure_flag;
-
-    //Set the flags true for the interrupt
-    static inline bool TDS_drdy(void*) { TDS_flag = true; return true; }
-    static inline bool voltage_drdy(void*) { voltage_flag = true; return true; }
-    static inline bool pressure_drdy(void*) { pressure_flag = true; return true; }
-
-    static bool pressure_sensor_connected;
+    Filter::LowPass<1> tds_filter;
+    Filter::LowPass<1> voltage_filter;
+    Filter::LowPass<1> ext_temp;
+    Filter::LowPass<1> ext_pres;
 };
 
 

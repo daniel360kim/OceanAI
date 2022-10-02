@@ -20,7 +20,7 @@
 #include "SD.h"
 #include "DataFile.h"
 #include "../data_struct.h"
-#include "../../core/Time.h"
+
 #include "../../core/debug.h"
 #include "../../core/config.h"
 #include "../StartInfo.h"
@@ -31,15 +31,9 @@ extern unsigned long _heap_start;
 extern unsigned long _heap_end;
 extern char *__brkval;
 
-volatile bool SD_Logger::cap_update_int = false;
-
 SdFs sd;
 FsFile file;
 cid_t cid;
-
-//Flush and update sd capacity at certain intervals
-Timer<1, micros> flusher;
-Timer<1, micros> cap_update;
 
 /**
  * @brief Construct a new sd logger::sd logger object
@@ -51,7 +45,12 @@ SD_Logger::SD_Logger(Time::Mission mission, uint32_t log_interval)
 {
     m_log_file_size = sizeof(Data) * (mission.mission_time / 1e+9) * (log_interval / 1e+9);
     this->log_interval = log_interval;
-    
+
+    flusher.setInterval(3e+10);
+    flusher.setFunction(SD_Logger::flush);
+
+    capacity_updater.setInterval(360000000000);
+    capacity_updater.setFunction(getCapacity);
 }
 
 bool SD_Logger::log_crash_report()
@@ -107,18 +106,18 @@ bool SD_Logger::init()
     }
 
     //Creating header for CSV file
-    file.print(("Time us,loop_time,sys_state,dt,"));
-    file.print(("bmp_rpres, bmp_rtemp, bmp_fpres, bmp_ftemp,"));
-    file.print(("racc_x,racc_y,racc_z,facc_x,facc_y,facc_z,"));
-    file.print(("wfax,wfay,wfaz,"));
-    file.print(("vx,vy,vz,px,py,pz,"));
-    file.print(("rgx,rgy,rgz,fgx,fgy,fgz,"));
-    file.print(("rel_x,rel_y,rel_z,"));
+    file.print(("Time us,loop_time(hz),sys_state,dt(sec),"));
+    file.print(("bmp_rpres(atm), bmp_rtemp(°C), bmp_fpres(atm), bmp_ftemp(°C),"));
+    file.print(("racc_x(m/s/s),racc_y(m/s/s),racc_z(m/s/s),facc_x(m/s/s),facc_y(m/s/s),facc_z(m/s/s),"));
+    file.print(("wfax(m/s/s),wfay(m/s/s),wfaz(m/s/s),"));
+    file.print(("vx(m/s),vy(m/s),vz(m/s),px(m),py(m),pz(m),"));
+    file.print(("rgx(rad/s),rgy(rad/s),rgz(rad/s),fgx(rad/s),fgy(rad/s),fgz(rad/s),"));
+    file.print(("rel_x(deg),rel_y(deg),rel_z(deg),"));
     file.print(("rel_w,rel_x,rel_y,rel_z,"));
-    file.print(("bmi_temp,"));
-    file.print(("rmx,rmy,rmz,"));
-    file.print(("ext_loop_time,ext_rtemp,ext_rpres,ext_ftemp,ext_fpres,"));
-    file.print(("TDS,voltage,clk_speed,int_temp,"));
+    file.print(("bmi_temp(°C),"));
+    file.print(("rmx(T),rmy(T),rmz(T),"));
+    file.print(("ext_loop_time(hz),ext_rtemp(°C),ext_rpres(atm),ext_ftemp(°C),ext_fpres(atm),"));
+    file.print(("raw_TDS,filt_TDS,raw_voltage,filt_voltage,clk_speed,int_temp(°C),"));
     file.print(("dive_limit,dive_homed,dive_current_pos,dive_current_pos_mm,dive_target_pos,dive_target_pos_mm,"));
     file.print(("dive_speed,dive_accel,dive_max_speed,"));
     file.print(("pitch_limit,pitch_homed,pitch_current_pos,pitch_current_pos_mm,dive_target_pos,dive_target_pos_mm,"));
@@ -260,11 +259,6 @@ bool SD_Logger::init()
         file.close();
         return false;
     }
-
-    //Flushing our data every several seconds
-    flusher.every(6e+8, SD_Logger::flush);
-    cap_update.every(3600000000, SD_Logger::getCapacity); //update our sd capacity every once in a while (expensive function)
-
     return true;
 }
 
@@ -277,27 +271,19 @@ bool SD_Logger::init()
  */
 bool SD_Logger::logData(Data data)
 {
-    //Updating capacity every once in a while   
-    if(SD_Logger::cap_update_int == true)
-    {
-        data.sd_capacity = sd.freeClusterCount();
-        SD_Logger::cap_update_int = false;
-    }
-
     //Logging at a certain interval
     uint64_t current_time = scoped_timer.elapsed();
     if(current_time - previous_time >= log_interval)
     {
-        
         //If our sd card is busy we add to our buffer
         if(file.isBusy())
         {
-            buf.insert(data);
+            write_buf.push(data);
         }
         else
         {
             //If nothing is in the buffer we directly write to the sd card
-            if(buf.size() == 0)
+            if(write_buf.size() == 0)
             {
                 file.write((const uint8_t*)&data, sizeof(data));
                 iterations++;
@@ -305,8 +291,9 @@ bool SD_Logger::logData(Data data)
             else
             {
                 //If there is data in the buffer we move it into the buffer and write the oldest data to the sd card
-                buf.insert(data);
-                data = buf.get();
+                write_buf.push(data);
+                data = write_buf.front();
+                write_buf.pop();
                 file.write((const uint8_t*)&data, sizeof(data));
                 iterations++;
             }
@@ -314,13 +301,19 @@ bool SD_Logger::logData(Data data)
         previous_time = scoped_timer.elapsed();
     }
     //For debugging. Should conditional compile this but too lazy lol
-    if(buf.is_full())
+    if(write_buf.size() > 100)
     {
         return false;
     }
 
-    cap_update.tick();
-    flusher.tick();
+    flusher.void_tick(this);
+    capacity_updater.void_tick(data.sd_capacity);
+
+    if(!m_inital_cap_updated)
+    {
+        data.sd_capacity = configs.sd_cap;
+        m_inital_cap_updated = true;
+    }
     
     return true;
     
@@ -354,7 +347,6 @@ bool SD_Logger::rewindPrint()
     //Since the findFactors() function automatically makes sure we have the greatest common factor of the iterations, we can just divide the iterations by buf_size
     for(uint64_t j = 0; j < iterations / buf_size; j++)
     {
-
         file.open(data_filename, FILE_READ);
 
         Data datacopy; //creating a copy of our data to read into
@@ -432,7 +424,7 @@ bool SD_Logger::rewindPrint()
             file.print(cc.bmi_temp); file.print(comma);
             file.print(cc.mag.x); file.print(comma); file.print(cc.mag.y); file.print(comma); file.print(cc.mag.z); file.print(comma);
             file.print(cc.external.loop_time); file.print(comma); file.print(cc.external.raw_temp); file.print(comma); file.print(cc.external.raw_pres); file.print(comma); file.print(cc.external.filt_pres); file.print(comma); file.print(cc.external.filt_temp); file.print(comma);
-            file.print(cc.TDS); file.print(comma); file.print(cc.voltage); file.print(comma);
+            file.print(cc.r_TDS); file.print(comma); file.print(cc.f_TDS); file.print(comma); file.print(cc.r_voltage); file.print(comma); file.print(cc.f_voltage); file.print(comma);
             file.print(cc.clock_speed); file.print(comma); file.print(cc.internal_temp); file.print(comma);
             file.print(cc.dive_stepper.limit_state); file.print(comma); file.print(cc.dive_stepper.homed); file.print(comma); 
             file.print(cc.dive_stepper.current_position); file.print(comma); file.print(cc.dive_stepper.current_position_mm); file.print(comma); file.print(cc.dive_stepper.target_position); file.print(comma); file.print(cc.dive_stepper.target_position_mm); file.print(comma);
@@ -495,16 +487,14 @@ unsigned int SD_Logger::findFactors()
     return factor_to_use;
 }
 
-bool SD_Logger::flush(void*)
+void SD_Logger::flush(void*)
 {
     file.flush();
-    return true;
 }
 
-bool SD_Logger::getCapacity(void*)
+void SD_Logger::getCapacity(uint32_t &capacity)
 {
-    SD_Logger::cap_update_int = true;
-    return true;
+    capacity = sd.freeClusterCount();
 }
 
 bool SD_Logger::reopenFile(const char* filename)

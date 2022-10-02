@@ -34,6 +34,11 @@ namespace Time
     class Async : public Timer
     {
     public:
+        Async() : Timer()
+        {
+            reset();
+        }
+
         Async(int64_t interval, T(*func)(P...)) : Timer()
         {
             reset();
@@ -46,10 +51,10 @@ namespace Time
         {
             if(elapsed() - previous_time >= interval && running)
             {
-                return_val = func(params...);
+                *return_val = func(params...);
                 previous_time = elapsed();
             }
-            return return_val;
+            return *return_val;
         }
 
         /**
@@ -64,7 +69,6 @@ namespace Time
                 previous_time = elapsed();
             }
         }
-
 
         void setInterval(uint64_t interval)
         {

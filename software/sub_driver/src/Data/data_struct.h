@@ -107,9 +107,9 @@ struct Vec3
 
 struct ExternalData
 {
-    float loop_time;
-    float raw_temp;
-    float raw_pres;
+    double loop_time;
+    double raw_temp;
+    double raw_pres;
 
     double filt_temp;
     double filt_pres;
@@ -144,8 +144,11 @@ struct Data
 
     ExternalData external;
 
-    double TDS;
-    double voltage;
+    double r_TDS;
+    double f_TDS;
+
+    double r_voltage;
+    double f_voltage;
 
     uint16_t clock_speed;
     double internal_temp;
