@@ -40,9 +40,9 @@ public:
     void initADC();
     void initTDS(uint8_t TDS_pin);
     void initVoltmeter(uint8_t input_pin);
-    void setInterrupts(const uint8_t bar_int, const uint8_t accel_int, const uint8_t gyro_int, const uint8_t mag_int, const uint8_t ext_int);
+    void initPressureSensor(uint8_t input_pin);
+    void setInterrupts(const uint8_t bar_int, const uint8_t accel_int, const uint8_t gyro_int, const uint8_t mag_int);
     void setGyroBias();
-    
 
     void returnRawBaro(double *pres, double *temp);
     void returnRawAccel(double *x, double *y, double *z, double *tempC);
@@ -53,18 +53,18 @@ public:
 
     double readTDS();
     double readVoltage();
+    double readExternalPressure_v();
+    double readExternalPressure();
 
     static volatile bool bar_flag;
     static volatile bool accel_flag;
     static volatile bool gyro_flag ;
     static volatile bool mag_flag;
-    static volatile bool ext_flag;
 
     static void bar_drdy()  { bar_flag = true; }
     static void accel_drdy()  { accel_flag = true; }
     static void gyro_drdy()  { gyro_flag = true; }
     static void mag_drdy()  { mag_flag = true; }
-    static void ext_drdy()  {  ext_flag = true; }
 
     double gx_bias = 0, gy_bias = 0, gz_bias = 0;
     const double HARD_IRON_BIAS[3] = { 0.36, 0.39, 0.49 };
@@ -75,7 +75,7 @@ private:
     UnifiedSensors() {}
 
     static UnifiedSensors instance;
-    uint8_t TDS_pin, voltage_pin;
+    uint8_t TDS_pin, voltage_pin, pressure_pin;
     double temp = 25;
 
     double temp_measurements[2];
@@ -84,14 +84,14 @@ private:
     //Using a timer we generate a fake interrupt for analog reads
     static volatile bool TDS_flag;
     static volatile bool voltage_flag;
+    static volatile bool pressure_flag;
 
     //Set the flags true for the interrupt
     static inline bool TDS_drdy(void*) { TDS_flag = true; return true; }
     static inline bool voltage_drdy(void*) { voltage_flag = true; return true; }
+    static inline bool pressure_drdy(void*) { pressure_flag = true; return true; }
 
-
-    
-
+    static bool pressure_sensor_connected;
 };
 
 

@@ -31,10 +31,9 @@ Bmi088Gyro gyro(Wire, 0x68);
 
 LIS3MDL mag;
 
-ExternalSensor ext_sensor(9);
-
 Timer<1, micros> TDS_interrupt;
 Timer<1, micros> voltage_interrupt;
+Timer<1, micros> pressure_interrupt;
 
 namespace Filter
 {
@@ -62,8 +61,9 @@ volatile bool UnifiedSensors::mag_flag = true;
 
 volatile bool UnifiedSensors::TDS_flag = false;
 volatile bool UnifiedSensors::voltage_flag = false;
+volatile bool UnifiedSensors::pressure_flag = false;
 
-volatile bool UnifiedSensors::ext_flag = false;
+bool UnifiedSensors::pressure_sensor_connected = false;
 
 void UnifiedSensors::scanAddresses()
 {
@@ -272,19 +272,35 @@ void UnifiedSensors::initVoltmeter(uint8_t input_pin)
     voltage_interrupt.every(freq, voltage_drdy);
 }
 
-void UnifiedSensors::setInterrupts(const uint8_t bar_int, const uint8_t accel_int, const uint8_t gyro_int, const uint8_t mag_int, const uint8_t ext_int)
+void UnifiedSensors::initPressureSensor(uint8_t input_pin)
+{
+    pressure_pin = input_pin;
+    pinMode(pressure_pin, INPUT);
+
+    /*Pressure sensor outputs at least 0.1V, so it is malfunctional or disconnected if it outputs less than 0.1V*/
+    if(readExternalPressure_v() <= 0.1)
+    {
+        pressure_sensor_connected = false;
+    }
+    else
+    {
+        pressure_sensor_connected = true;
+        Serial.println("Pressure sensor connected");
+    }
+
+}
+
+void UnifiedSensors::setInterrupts(const uint8_t bar_int, const uint8_t accel_int, const uint8_t gyro_int, const uint8_t mag_int)
 {
     pinMode(bar_int, INPUT);
     pinMode(accel_int, INPUT);
     pinMode(gyro_int, INPUT);
     pinMode(mag_int, INPUT);
-    pinMode(ext_int, INPUT_PULLDOWN);
 
     attachInterrupt(digitalPinToInterrupt(bar_int), bar_drdy, RISING);
     attachInterrupt(digitalPinToInterrupt(accel_int), accel_drdy, RISING);
     attachInterrupt(digitalPinToInterrupt(gyro_int), gyro_drdy, RISING);
     attachInterrupt(digitalPinToInterrupt(mag_int), mag_drdy, RISING);
-    attachInterrupt(digitalPinToInterrupt(ext_int), ext_drdy, FALLING);
 }
 
 void UnifiedSensors::setGyroBias()
@@ -313,7 +329,12 @@ void UnifiedSensors::setGyroBias()
 }
 void UnifiedSensors::returnRawBaro(double *pres, double *temp)
 {
-    baro.getTempPres(*temp, *pres);
+    double temperature = 0;
+    double pres_hpa = 0;
+    baro.getTempPres(temperature, pres_hpa);
+
+    *pres = pres_hpa * 0.0009869233; //convert to atm
+    *temp = temperature;
 }
 
 void UnifiedSensors::returnRawAccel(double *x, double *y, double *z, double *tempC)
@@ -344,7 +365,6 @@ void UnifiedSensors::returnRawMag(double *x, double *y, double *z)
 
 double UnifiedSensors::readTDS()
 {
-
     int tds = adc.adc0->analogRead(TDS_pin);
 
     double averageVoltage = tds * (double)VREF / 1024.0;
@@ -357,7 +377,6 @@ double UnifiedSensors::readTDS()
 
 double UnifiedSensors::readVoltage()
 {
-
     double reading = adc.adc1->analogRead(voltage_pin) * (double)VREF / 1024.0;
     reading = reading * (9.95 + 1.992) / 1.992;
 
@@ -367,6 +386,21 @@ double UnifiedSensors::readVoltage()
     return reading;
 }
 
+double UnifiedSensors::readExternalPressure_v()
+{
+    int tds = analogRead(pressure_pin);
+    double reading = tds * (double)VREF / 1024.0;
+    Serial.println(reading);
+    return reading;
+}
+
+double UnifiedSensors::readExternalPressure()
+{
+    double voltage = readExternalPressure_v();
+    double psi = (100.0 / 3.0) * voltage + (50.0 - ((100.0 / 3.0) * (3.3 / 2.0))); //pressure = 25psi * voltage - 12.5psi (linear)
+    double atm = psi / 14.6959488;
+    return atm;
+}
 void UnifiedSensors::logToStruct(Data &data)
 {
     
@@ -422,19 +456,12 @@ void UnifiedSensors::logToStruct(Data &data)
         UnifiedSensors::voltage_flag = false;
     }
 
-    if (UnifiedSensors::ext_flag)
-    {
-        ExternalSensor::RawData ext_data = ext_sensor.getData();
 
-        data.external.loop_time = ext_data.loop_time;
-        data.external.raw_temp = (double)ext_data.temperature;
-        data.external.raw_pres = (double)ext_data.pressure;
+    data.external.raw_pres = readExternalPressure();
+    
+    
 
-        data.external.filt_temp = Filter::ext_temp.filt(data.external.raw_temp, data.dt);
-        data.external.filt_pres = Filter::ext_pres.filt(data.external.raw_pres, data.dt);
 
-        UnifiedSensors::ext_flag = false;
-    }
 
     // temp_ekf.step(temp_measurements);
 

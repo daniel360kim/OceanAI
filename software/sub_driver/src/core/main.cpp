@@ -1,11 +1,24 @@
-#include "core/States.h"
-#include "core/StateAutomation.h"
+#include "States.h"
+#include "StateAutomation.h"
 
-StateAutomation* submarine;
+#include "timed_function.h"
 
-void setup() {}
+StateAutomation submarine;
+
+int print(void*)
+{
+    Serial.println("Hello");
+    return 5;
+}
+
+Time::Async<int, void*> timed_function(1000000000, print);
+
+void setup() 
+{
+    //submarine.initialize();
+}
 
 void loop()
 {
-    submarine->run();
+    int i = timed_function.tick(nullptr);
 }

@@ -50,7 +50,7 @@ namespace Time
             return elapsed() * 1000;
         }
 
-    private:
+    protected:
         std::chrono::time_point<teensy_clock, teensy_clock::duration> start_time;
     };
 

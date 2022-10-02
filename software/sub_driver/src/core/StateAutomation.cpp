@@ -14,6 +14,10 @@
 
 StateAutomation::StateAutomation()
 {
+}
+
+void StateAutomation::initialize()
+{
     m_currentState = &Initialization::getInstance();
     m_currentState->enter(this);
 }

@@ -122,6 +122,8 @@ void continuousFunctions()
     }
 
     buoyancy.logToStruct(data);
+
+    //Serial.println(data.external.raw_pres);
 }
 
 /**
@@ -207,8 +209,9 @@ void Initialization::enter(StateAutomation* state)
 
     UnifiedSensors::getInstance().initVoltmeter(v_div);
     UnifiedSensors::getInstance().initTDS(TDS);
+    UnifiedSensors::getInstance().initPressureSensor(TX_GPS);
 
-    UnifiedSensors::getInstance().setInterrupts(BAR_int, ACC_int, GYR_int, MAG_int, TX_RF);
+    UnifiedSensors::getInstance().setInterrupts(BAR_int, ACC_int, GYR_int, MAG_int);
 
     UnifiedSensors::getInstance().setGyroBias();
 
@@ -270,7 +273,6 @@ void Diving::enter(StateAutomation* state)
 
 void Diving::run(StateAutomation* state)
 {
-    Serial.println("Running Diving state");
     buoyancy.forward();
     if(buoyancy.currentPosition() == buoyancy.targetPosition())
     {
@@ -349,7 +351,6 @@ void Surfaced::enter(StateAutomation* state)
 
 void Surfaced::run(StateAutomation* state)
 {
-    Serial.println("Running Surfaced state");
     continuousFunctions();
 
     if(!logger.logData(data))
