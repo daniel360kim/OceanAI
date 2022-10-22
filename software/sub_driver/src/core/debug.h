@@ -5,8 +5,8 @@
 #include <Arduino.h>
 
 #include "Timer.h"
-#define SUCCESS_LOG(message) Debug::success.addToBuffer(Debug::Success, message); Serial.println(F(message));
-#define ERROR_LOG(Severity, message) Debug::error.addToBuffer(Severity, message); Serial.println(F(message));
+#define SUCCESS_LOG(message) Debug::success.addToBuffer(Debug::Success, (char*)message); Serial.println(F(message));
+#define ERROR_LOG(Severity, message) Debug::error.addToBuffer(Severity, (char*)message); Serial.println(F(message));
 
 namespace Debug
 {

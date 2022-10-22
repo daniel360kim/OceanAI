@@ -1,17 +1,16 @@
-#include "States.h"
+
 #include "StateAutomation.h"
 
-#include "timed_function.h"
-
+#include <Arduino.h>
 StateAutomation submarine;
 
-
-void setup() 
+void setup()
 {
-    submarine.initialize();
+  submarine.initialize();
 }
 
 void loop()
 {
-    submarine.run();
+  submarine.run();
 }
+

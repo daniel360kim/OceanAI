@@ -1,16 +1,9 @@
 #include "pins.h"
 #include "module/stepper.h"
 
-StepperPins pins_p {
-	STP_p,
-	DIR_p,
-	MS1_p,
-	MS2_p,
-	ERR_p,
-	STOP_p
-};
 
-StepperPins pins_b {
+
+StepperPins pins_boo {
 	STP_b,
 	DIR_b,
 	MS1_b,
@@ -26,7 +19,7 @@ StepperProperties properties {
 
 
 unsigned long previousPrintmicros;
-Stepper stepper(pins_p, Stepper::Resolution::HALF, properties);
+Stepper stepper(pins_boo, Stepper::Resolution::HALF, properties);
 
 long target = 0;
 
@@ -43,17 +36,17 @@ void setup() {
 }
 
 void loop() {
-	if(Serial.available() > 0 && (stepper.currentPosition_mm() >= target - 1 && stepper.currentPosition_mm() <= target + 1)) {
+	if(Serial.available() > 0 && (stepper.currentPosition() >= target - 1 && stepper.currentPosition() <= target + 1)) {
 		Serial.println("Target reached");
 		long move = Serial.parseInt();
 		target += move;
-		stepper.move_mm(move);
-		Serial.print("Current position: "); Serial.println(stepper.currentPosition_mm());
+		stepper.move(move);
+		Serial.print("Current position: "); Serial.println(stepper.currentPosition());
 	}
 	// Move the motor one step
-	if(scoped_timer.elapsed() - previousPrintmicros > 1000000) {
-		previousPrintmicros = scoped_timer.elapsed();
-		Serial.print("Current position: "); Serial.println(stepper.currentPosition_mm());
+	if(micros() - previousPrintmicros > 1000000) {
+		previousPrintmicros = micros();
+		Serial.print("Current position: "); Serial.println(stepper.currentPosition());
 	}
 	stepper.update();
 }

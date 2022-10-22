@@ -42,14 +42,13 @@ namespace Optics
         bool begin();
         void setFrameCount(uint8_t frame_num) { this->frame_num = frame_num; }
         void capture(unsigned long delay_micros, unsigned long *capture_time, unsigned long *save_time, uint32_t *FIFO_length, bool(*closeCurrentFile)(), bool(*reopenPrevFile)(const char*), const char* filename);
-
     private:
 
         uint8_t cs_pin;
         uint8_t frame_num = ONE_PHOTO;
         bool is_header = false;
         char* image_file_name;
-        uint8_t read_fifo_burst(uint32_t *fifolength);
+        uint8_t read_fifo_burst();
 
 
         uint64_t previous_log;

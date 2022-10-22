@@ -14,6 +14,7 @@
 #include <SdFat.h>
 #include <vector>
 #include <queue>
+#include <memory>
 #include <CrashReport.h>
 #include <stdint.h>
 
@@ -56,8 +57,12 @@ bool SD_Logger::log_crash_report()
 {
     if(!sd.begin(SdioConfig(FIFO_SDIO)))
     {
-        #if DEBUG_ON == true
-            ERROR_LOG(Debug::Critical_Error, "SD card initialization failed");
+        #if DEBUG_ON
+            char* msg = (char*)"SD card initialization failed";
+            ERROR_LOG(Debug::Critical_Error, *msg);
+            #if LIVE_DEBUG 
+                Serial.println(*msg);
+            #endif
         #endif
         return false;
     }
@@ -66,8 +71,12 @@ bool SD_Logger::log_crash_report()
     {
         if(!sd.mkdir("logs"))
         {
-            #if DEBUG_ON == true
-                ERROR_LOG(Debug::Fatal, "Failed to create logs directory");
+            #if DEBUG_ON
+                char* msg = (char*)("Failed to create logs directory");
+                ERROR_LOG(Debug::Fatal, *msg);
+                #if LIVE_DEBUG 
+                    Serial.println(*msg);
+                #endif
             #endif
             return false;
         }
@@ -75,8 +84,12 @@ bool SD_Logger::log_crash_report()
     DataFile crash_file("logs/crash", DataFile::ENDING::TXT);
     if(!crash_file.createFile())
     {
-        #if DEBUG_ON == true
-            ERROR_LOG(Debug::Fatal, "Failed to create crash file");
+        #if DEBUG_ON 
+            char* msg = (char*)"Failed to create crash file";
+            ERROR_LOG(Debug::Fatal, msg);
+            #if LIVE_DEBUG 
+                Serial.println(msg);
+            #endif
         #endif
         return false;
     }
@@ -85,8 +98,12 @@ bool SD_Logger::log_crash_report()
     CrashReport.printTo(file);
     file.close();
 
-    #if DEBUG_ON == true
-        SUCCESS_LOG("Crash report logged successfully");
+    #if DEBUG_ON
+        char* msg = (char*)("Crash report logged successfully");
+        SUCCESS_LOG(*msg);
+        #if LIVE_DEBUG 
+            Serial.println(*msg);
+        #endif
     #endif
     return true;
 }
@@ -107,8 +124,12 @@ bool SD_Logger::init()
     DataFile csvFile("ASCII", DataFile::ENDING::CSV);
     if(!csvFile.createFile())
     {
-        #if DEBUG_ON == true
-            ERROR_LOG(Debug::Fatal, "Failed to create CSV file");
+        #if DEBUG_ON
+            char* msg = (char*)("Failed to create CSV file");
+            ERROR_LOG(Debug::Fatal, *msg);
+            #if LIVE_DEBUG 
+                Serial.println(*msg);
+            #endif
         #endif
         return false;
     }
@@ -117,7 +138,8 @@ bool SD_Logger::init()
 
     if(!file.open(csv_filename, O_WRITE | O_CREAT))
     {
-        #if DEBUG_ON == true
+        #if DEBUG_ON
+
             ERROR_LOG(Debug::Fatal, "Failed to open CSV file");
         #endif
         return false;
@@ -150,8 +172,12 @@ bool SD_Logger::init()
 
     if(!data.createFile())
     {
-        #if DEBUG_ON == true
-            ERROR_LOG(Debug::Fatal, "Failed to create data binary file");
+        #if DEBUG_ON
+            char* msg = (char*)("Failed to create binary file");
+            ERROR_LOG(Debug::Fatal, *msg);
+            #if LIVE_DEBUG 
+                Serial.println(*msg);
+            #endif
         #endif
         return false;
     }
@@ -161,8 +187,12 @@ bool SD_Logger::init()
     {
         if(!sd.mkdir("Images"))
         {
-            #if DEBUG_ON == true
-                ERROR_LOG(Debug::Fatal, "Failed to create Images directory");
+            #if DEBUG_ON
+                char* msg = (char*)("Failed to create Images directory");
+                ERROR_LOG(Debug::Fatal, *msg);
+                #if LIVE_DEBUG 
+                    Serial.println(*msg);
+                #endif
             #endif
             return false;
         }
@@ -171,16 +201,24 @@ bool SD_Logger::init()
     DataFile start("start", DataFile::ENDING::TXT);
     if(!start.createFile())
     {
-        #if DEBUG_ON == true
-            ERROR_LOG(Debug::Fatal, "Failed to create start file");
+        #if DEBUG_ON
+            char* msg = (char*)("Failed to create start file");
+            ERROR_LOG(Debug::Fatal, *msg);
+            #if LIVE_DEBUG 
+                Serial.println(*msg);
+            #endif
         #endif
         return false;
     }
 
     if(!file.open(start.file_name, O_WRITE | O_CREAT))
     {
-        #if DEBUG_ON == true
-            ERROR_LOG(Debug::Fatal, "Failed to open start file");
+        #if DEBUG_ON
+            char* msg = (char*)("Failed to open start file");
+            ERROR_LOG(Debug::Fatal, *msg);
+            #if LIVE_DEBUG 
+                Serial.println(*msg);
+            #endif
         #endif
         return false;
     }
@@ -267,8 +305,12 @@ bool SD_Logger::init()
 
     if(!file.close())
     {
-        #if DEBUG_ON == true
-            ERROR_LOG(Debug::Fatal, "Failed to close start file");
+        #if DEBUG_ON
+            char* msg = (char*)("Failed to close start file");
+            ERROR_LOG(Debug::Fatal, *msg);
+            #if LIVE_DEBUG 
+                Serial.println(*msg);
+            #endif
         #endif
         return false;
     }
@@ -276,8 +318,12 @@ bool SD_Logger::init()
 
     if(!file.open(data_filename, O_WRITE | O_CREAT))
     {
-        #if DEBUG_ON == true
-            ERROR_LOG(Debug::Critical_Error, "Failed to open data binary file");
+        #if DEBUG_ON
+            char* msg = (char*)("Failed to open binary file");
+            ERROR_LOG(Debug::Critical_Error, *msg);
+            #if LIVE_DEBUG 
+                Serial.println(*msg);
+            #endif
         #endif
         return false;
     }
@@ -285,8 +331,12 @@ bool SD_Logger::init()
     //file must be preallocated to prevent spending lots of time searching for free clusters
     if(!file.preAllocate(m_log_file_size + 10000))
     {
-        #if DEBUG_ON == true
-            ERROR_LOG(Debug::Critical_Error, "Failed to preallocate data binary file");
+        #if DEBUG_ON
+            char* msg = (char*)("Failed to preallocate binary file");
+            ERROR_LOG(Debug::Critical_Error, *msg);
+            #if LIVE_DEBUG 
+                Serial.println(*msg);
+            #endif
         #endif
         file.close();
         return false;
@@ -315,8 +365,12 @@ bool SD_Logger::logData(Data data)
         //If our sd card is busy we add to our buffer
         if(file.isBusy())
         {
-            #if DEBUG_ON == true
-                ERROR_LOG(Debug::Info, "Pushed SD data to buffer: SD Busy");
+            #if DEBUG_ON
+                char* msg = (char*)("Pushed SD data to buffer: SD card is busy");
+                ERROR_LOG(Debug::Warning, *msg);
+                #if LIVE_DEBUG 
+                    Serial.println(*msg); 
+                #endif
             #endif
             write_buf.push(data);
         }
@@ -342,8 +396,12 @@ bool SD_Logger::logData(Data data)
     }
     if(write_buf.size() > 100)
     {
-        #if DEBUG_ON == true
-            ERROR_LOG(Debug::Warning, "SD write buffer overflow: clearing and reducing write speed");
+        #if DEBUG_ON
+            char* msg = (char*)("SD Buffer Overflow: clearing and reducing log interval");
+            ERROR_LOG(Debug::Warning, *msg);
+            #if LIVE_DEBUG 
+                Serial.println(*msg);
+            #endif
         #endif
         //Clear the old data if it gets too large
         std::queue<Data> empty;
@@ -374,8 +432,12 @@ bool SD_Logger::rewindPrint()
 {
     if(!file.close())
     {
-        #if DEBUG_ON == true
-            ERROR_LOG(Debug::Critical_Error, "Failed to close binary file before translation");
+        #if DEBUG_ON
+            char* msg = (char*)("Failed to close binary file before translation");
+            ERROR_LOG(Debug::Critical_Error, *msg);
+            #if LIVE_DEBUG 
+                Serial.println(*msg);
+            #endif
         #endif
         return false;
     }
@@ -391,13 +453,18 @@ bool SD_Logger::rewindPrint()
     long write_iterator = 0;
     std::queue<Data> read_buf;
 
+
     //Since the findFactors() function automatically makes sure we have the greatest common factor of the iterations, we can just divide the iterations by buf_size
     for(uint64_t j = 0; j < iterations / buf_size; j++)
     {
         if(!file.open(data_filename, FILE_READ))
         {
-            #if DEBUG_ON == true
-                ERROR_LOG(Debug::Critical_Error, "Failed to open binary file for translation");
+            #if DEBUG_ON
+                char* msg = (char*)("Failed to open binary file for translation");
+                ERROR_LOG(Debug::Critical_Error, *msg);
+                #if LIVE_DEBUG 
+                    Serial.println(*msg);
+                #endif
             #endif
             return false;
         }
@@ -414,8 +481,13 @@ bool SD_Logger::rewindPrint()
 
         if(!file.close())
         {
-            #if DEBUG_ON == true
-                ERROR_LOG(Debug::Critical_Error, "Failed to close binary file after reading");
+            #if DEBUG_ON
+                char* msg = (char*)("Failed to close binary file after reading");
+                ERROR_LOG(Debug::Critical_Error, *msg);
+                #if LIVE_DEBUG 
+                    Serial.println(*msg);
+                #endif
+
             #endif
             return false;
         }
@@ -423,8 +495,12 @@ bool SD_Logger::rewindPrint()
 
         if(!file.open(csv_filename, O_CREAT | O_APPEND | O_WRITE))
         {
-            #if DEBUG_ON == true
-                ERROR_LOG(Debug::Critical_Error, "Failed to open csv file for writing");
+            #if DEBUG_ON
+                char* msg = (char*)("Failed to open csv file for writing");
+                ERROR_LOG(Debug::Critical_Error, *msg);
+                #if LIVE_DEBUG 
+                    Serial.println(*msg);
+                #endif
             #endif
             return false;
         }
@@ -499,8 +575,12 @@ bool SD_Logger::rewindPrint()
         }   
         if(!file.close())
         {
-            #if DEBUG_ON == true
-                ERROR_LOG(Debug::Critical_Error, "Failed to close csv file");
+            #if DEBUG_ON
+                char* msg = (char*)("Failed to close csv file");
+                ERROR_LOG(Debug::Critical_Error, *msg);
+                #if LIVE_DEBUG
+                    Serial.println(*msg);
+                #endif
             #endif
         }
         write_iterator++;
@@ -508,8 +588,12 @@ bool SD_Logger::rewindPrint()
         std::queue<Data>().swap(read_buf); //clearing the buffer
     }
 
-    #if DEBUG_ON == true
-        SUCCESS_LOG("Finished writing to SD card");
+    #if DEBUG_ON 
+        char* msg = (char*)("Finished writing to SD card");
+        SUCCESS_LOG(*msg);
+        #if LIVE_DEBUG
+            Serial.println(*msg);
+        #endif
     #endif
     return true;
 }

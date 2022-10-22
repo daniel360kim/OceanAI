@@ -79,9 +79,16 @@ public:
 
     void logToStruct(Data &data);
 
-private:
     bool sinking = false;
     bool rising = false;
+
+    void calibrate();
+    void calibrate_noCheck(); //calibrate without checking if the limit switch is pressed a second time
+
+
+private:
+    void recheckLimit();
+    
 };
 
 

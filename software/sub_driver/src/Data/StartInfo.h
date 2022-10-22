@@ -24,7 +24,7 @@ struct StartFile_d
   char *ascii_file;
 
 // Conditional Compilation Configurations
-#if DEBUG_ON == true
+#if DEBUG_ON
     static constexpr bool debug = true;
 
 #else

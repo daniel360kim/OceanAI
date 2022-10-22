@@ -11,31 +11,6 @@
 
 #include "States.h"
 
-#include "Sensors/Sensors.h"
-#include "navigation/Orientation.h"
-
-#include "pins.h"
-
-#include "Data/SD/SD.h"
-
-#include "indication/OutputFuncs.h"
-#include "indication/LED.h"
-
-#include <Arduino.h>
-#include <teensy_clock/teensy_clock.h>
-#include <stdint.h>
-#include <chrono>
-
-#include "Navigation/SensorFusion/Fusion.h"
-#include "Navigation/Postioning.h"
-#include "Sensors/Camera/OV2640.h"
-
-
-#include "debug.h"
-#include "Time.h"
-#include "core/OS.h"
-#include "core/Timer.h"
-#include "module/stepper.h"
 
 Time::Mission mission_duration;
 Fusion SFori;
@@ -55,7 +30,7 @@ Position nav_p;
 Data data;
 GPSdata gps_data;
 
-SD_Logger logger(mission_duration, 33333333);
+SD_Logger logger(mission_duration, 100000);
 
 bool rfInit = true;
 bool warning = false;
@@ -76,9 +51,10 @@ StepperPins pins_b{
     ERR_b,
     STOP_b};
 
-Buoyancy buoyancy(pins_b, Stepper::Resolution::HALF, StepperProperties(81.0, 52670));
+Buoyancy buoyancy(pins_b, Stepper::Resolution::HALF, StepperProperties(169.0, 76000));
 
 CurrentState currentState;
+
 
 /**
  * @brief Functions that run no matter the state
@@ -91,6 +67,10 @@ void continuousFunctions()
     previous_time = scoped_timer.elapsed();
 
     data.system_state = static_cast<uint8_t>(currentState);
+    
+    #if PRINT_STATE
+        StateAutomation::printState(Serial, currentState);
+    #endif
 
     data.loop_time = 1.0 / data.dt;
 
@@ -122,8 +102,6 @@ void continuousFunctions()
     }
 
     buoyancy.logToStruct(data);
-
-    //Serial.println(data.external.raw_pres);
 }
 ///****************///
 
@@ -143,12 +121,17 @@ void Initialization::enter(StateAutomation* state)
     }
 
     output.startupSequence();
+
+    #if DEBUG == true
+        while(!Serial); //Wait for serial montior to open
+    #endif
     Serial.begin(2000000);
 
     LEDa.setColor(255, 0, 255);
     LEDb.setColor(255, 0, 255);
 
     UnifiedSensors::getInstance().scanAddresses();
+    Serial.println("Addresses scanned");
 
     LEDa.setColor(0, 255, 255);
     LEDb.setColor(0, 255, 255);
@@ -157,6 +140,7 @@ void Initialization::enter(StateAutomation* state)
         state->setState(ErrorIndication::getInstance());
         return;
     }
+    Serial.println("Nav sensors initialized");
 
     UnifiedSensors::getInstance().initVoltmeter(v_div, (uint32_t)10000000, 10.0);
     UnifiedSensors::getInstance().initTDS(TDS, (uint32_t)10000000, 10.0);
@@ -165,6 +149,7 @@ void Initialization::enter(StateAutomation* state)
     UnifiedSensors::getInstance().setInterrupts(BAR_int, ACC_int, GYR_int, MAG_int);
 
     UnifiedSensors::getInstance().setGyroBias();
+    Serial.println("Other sensors initialized");
 
     #if OPTICS_ON == true
         if (!camera.begin())
@@ -178,6 +163,7 @@ void Initialization::enter(StateAutomation* state)
         state->setState(ErrorIndication::getInstance());
         return;
     }
+    Serial.println("Logger initialized");
 
     LEDb.blink(255, 0, 0, 1000);
     LEDa.blink(255, 0, 0, 1000);
@@ -189,7 +175,7 @@ void Initialization::enter(StateAutomation* state)
 
 void Initialization::run(StateAutomation* state)
 {
-    state->setState(Diving::getInstance());
+    state->setState(Resurfacing::getInstance());
 }
 
 void Initialization::exit(StateAutomation* state)
@@ -216,15 +202,23 @@ void ErrorIndication::exit(StateAutomation* state)
 void Diving::enter(StateAutomation* state)
 {
     currentState = CurrentState::DIVING_MODE;
-    buoyancy.setMaxSpeed(6000);
-    buoyancy.setSpeed(6000);
-    buoyancy.setAcceleration(6000);
+    buoyancy.setMaxSpeed(10000);
+    buoyancy.setSpeed(10000);
+    buoyancy.setAcceleration(10000);
     buoyancy.setResolution(Stepper::Resolution::HALF);
+    buoyancy.setMinPulseWidth(1);
+    buoyancy.sink();
 }
 
 void Diving::run(StateAutomation* state)
 {
-    buoyancy.forward();
+    if(buoyancy.sinking && buoyancy.currentPosition() == buoyancy.targetPosition())
+    {
+        state->setState(Resurfacing::getInstance());
+        return;
+    }
+    Serial.println("Diving");
+    buoyancy.update();
     if(buoyancy.currentPosition() == buoyancy.targetPosition())
     {
         state->setState(Resurfacing::getInstance());
@@ -254,15 +248,23 @@ void Diving::exit(StateAutomation* state)
 void Resurfacing::enter(StateAutomation* state)
 {
     currentState = CurrentState::RESURFACING;
-    buoyancy.setMaxSpeed(6000);
-    buoyancy.setSpeed(6000);
-    buoyancy.setAcceleration(6000);
+    buoyancy.setMaxSpeed(10000);
+    buoyancy.setSpeed(10000);
+    buoyancy.setAcceleration(10000);
     buoyancy.setResolution(Stepper::Resolution::HALF);
+    buoyancy.rise();
+    buoyancy.setMinPulseWidth(1);
 }
 
 void Resurfacing::run(StateAutomation* state)
 {
-    buoyancy.forward();
+    if(buoyancy.rising && buoyancy.currentPosition() == buoyancy.targetPosition())
+    {
+        state->setState(Diving::getInstance());
+        return;
+    }
+
+    buoyancy.run();
     //Just filling and refilling syringe at this point. need to check accelerometers and pressure
     //sensors to check minimums and maximums of our dive
     if(buoyancy.currentPosition() == buoyancy.targetPosition())

@@ -166,10 +166,14 @@ void Stepper::recheckLimit()
 
 
     move(-100000000);
+    uint64_t start = millis();
     while(limit.state() == false)
     {
+        if(millis() - start > 10000)
+        {
+            return;
+        }
         run();
-
     }
 
     setCurrentPosition(0);
@@ -190,13 +194,12 @@ void Buoyancy::sink()
         calibrate();
     }
 
-    goTo(-1 * currentPosition()); //go to the other side of the carriage
+    move(properties.halves_length); //go to the other side of the carriage
 
     sinking = true;
     rising = false;
 
-    //this calibrates the stepper so might as well get rid of errors and set postion to 0
-    setCurrentPosition(0);
+
 }
 
 /**
@@ -205,7 +208,7 @@ void Buoyancy::sink()
  */
 void Buoyancy::rise()
 {
-    goTo(properties.halves_length - currentPosition()); //moves to the very end of the carriage
+    move(-1 * properties.halves_length); //moves to the very end of the carriage
 
     sinking = false;
     rising = true;
@@ -244,3 +247,60 @@ void Buoyancy::logToStruct(Data &data)
     data.dive_stepper.max_speed = maxSpeed();
     data.dive_stepper.acceleration = acceleration();
 }
+
+
+void Buoyancy::calibrate()
+{
+    setMaxSpeed(6000);
+    setAcceleration(6000);
+    setSpeed(6000);
+    setResolution(Resolution::HALF);
+
+    calibrate_noCheck();
+
+    recheckLimit();
+
+    calibrated = true;
+}
+
+void Buoyancy::calibrate_noCheck()
+{
+    if(limit.state() == true)
+    {
+        recheckLimit();
+        return;
+    }
+
+    move(100000000); //just move a lot lol
+    while(limit.state() == false)
+    {
+        run();
+    }
+    
+    setCurrentPosition(0);
+}
+
+void Buoyancy::recheckLimit()
+{
+    setCurrentPosition(0);
+    move(-500);
+    while(currentPosition() != -500)
+    {
+        run();
+    }
+    
+    setResolution(EIGHTH);
+    move(100000000);
+    uint64_t start = millis();
+    while(limit.state() == false)
+    {
+        if(millis() - start > 10000)
+        {
+            return;
+        }
+        run();
+    }
+
+    setCurrentPosition(0);
+}
+

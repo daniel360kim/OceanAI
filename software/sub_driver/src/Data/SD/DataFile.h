@@ -39,6 +39,8 @@ private:
     bool resizeBuff(int num_bytes, char** buff) { return resizeBuff(num_bytes,(uint8_t**)buff); } //overloaded function to support appendChars()
 
     uint8_t num_bytes;
+
+    static bool file_initialized;
 };
 
 #endif

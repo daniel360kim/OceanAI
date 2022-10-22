@@ -8,6 +8,7 @@
  * @copyright Copyright (c) 2022 OceanAI (https://github.com/daniel360kim/OceanAI)
  *
  */
+
 #include "Sensors.h"
 
 #include <ADC.h>
@@ -15,6 +16,7 @@
 #include <Wire.h>
 #include <stdint.h>
 #include <array>
+#include <memory>
 
 #include "../core/config.h"
 #include "../core/debug.h"
@@ -26,6 +28,7 @@
 UnifiedSensors UnifiedSensors::instance;
 
 BMP388_DEV baro;
+
 Bmi088Accel accel(Wire, 0x18);
 Bmi088Gyro gyro(Wire, 0x68);
 
@@ -147,8 +150,12 @@ bool UnifiedSensors::initNavSensors()
             {
             case 0:
             {
-                #if DEBUG_ON == true
-                    ERROR_LOG(Debug::Fatal, "BMP388 Error");
+                #if DEBUG_ON
+                    char* msg = (char*)("BMP388 Error");            
+                    ERROR_LOG(Debug::Fatal, *msg);
+                    #if LIVE_DEBUG
+                        Serial.println(*msg);
+                    #endif
                 #endif
 
                 return false;
@@ -156,8 +163,12 @@ bool UnifiedSensors::initNavSensors()
             }
             case 1:
             {
-                #if DEBUG_ON == true
-                    ERROR_LOG(Debug::Critical_Error, "BMI088 Accel Initialization Error");
+                #if DEBUG_ON
+                    char* msg = (char*)("BMI088 Accel Initialization Error");
+                    ERROR_LOG(Debug::Critical_Error, *msg);
+                    #if LIVE_DEBUG
+                        Serial.println(*msg);
+                    #endif
                 #endif
 
                 return false;
@@ -165,8 +176,12 @@ bool UnifiedSensors::initNavSensors()
             }
             case 2:
             {
-                #if DEBUG_ON == true
-                    ERROR_LOG(Debug::Critical_Error, "BMI088 Gyro Initialization Error");
+                #if DEBUG_ON
+                    char* msg = (char*)("BMI088 Gyro Initialization Error");
+                    ERROR_LOG(Debug::Critical_Error, *msg);
+                    #if LIVE_DEBUG
+                        Serial.println(*msg);
+                    #endif
                 #endif
 
                 return false;
@@ -175,8 +190,12 @@ bool UnifiedSensors::initNavSensors()
 
             case 3:
             {
-                #if DEBUG_ON == true
-                    ERROR_LOG(Debug::Critical_Error, "LIS3MDL Initialization Error");
+                #if DEBUG_ON
+                    char* msg = (char*)("LIS3MDL Initialization Error");
+                    ERROR_LOG(Debug::Critical_Error, *msg);
+                    #if LIVE_DEBUG
+                        Serial.println(*msg);
+                    #endif
                 #endif
 
                 return false;
@@ -184,8 +203,12 @@ bool UnifiedSensors::initNavSensors()
             }
             default:
             {
-                #if DEBUG_ON == true
-                    ERROR_LOG(Debug::Critical_Error, "Unknown Error");
+                #if DEBUG_ON
+                    char* msg = (char*)("Unknown Sensor Array Error");
+                    ERROR_LOG(Debug::Critical_Error, *msg);
+                    #if LIVE_DEBUG
+                        Serial.println(*msg);
+                    #endif
                 #endif
                 return false;
             }
@@ -193,9 +216,13 @@ bool UnifiedSensors::initNavSensors()
         }
     }
 
-#if DEBUG_ON == true
-    SUCCESS_LOG("All sensors initialized successfully");
-#endif
+    #if DEBUG_ON
+        char* msg = (char*)("Nav Sensor Initialization Complete");
+        SUCCESS_LOG(*msg);
+        #if LIVE_DEBUG
+            Serial.println(*msg);
+        #endif
+    #endif
 
     return true;
 }
@@ -251,8 +278,12 @@ void UnifiedSensors::initPressureSensor(uint8_t input_pin, uint32_t interval, do
     /*Pressure sensor outputs at least 0.1V, so it is malfunctional or disconnected if it outputs less than 0.1V*/
     if(pressure_voltage <= 0.1)
     {
-        #if DEBUG_ON == true
-            ERROR_LOG(Debug::Warning, "Pressure sensor is not connected or is malfunctioning");
+        #if DEBUG_ON
+            char* msg = (char*)("Pressure Sensor Malfunction");
+            ERROR_LOG(Debug::Warning, *msg);
+            #if LIVE_DEBUG
+                Serial.println(*msg);
+            #endif
         #endif
 
         pressure_sensor_connected = false;
@@ -260,8 +291,12 @@ void UnifiedSensors::initPressureSensor(uint8_t input_pin, uint32_t interval, do
     }
     else
     {
-        #if DEBUG_ON == true
-            SUCCESS_LOG("Pressure sensor is connected");
+        #if DEBUG_ON
+            char* msg = (char*)("Pressure Sensor Connected");
+            SUCCESS_LOG(*msg);
+            #if LIVE_DEBUG
+                Serial.println(*msg);
+            #endif
         #endif
         
         pressure_sensor_connected = true;

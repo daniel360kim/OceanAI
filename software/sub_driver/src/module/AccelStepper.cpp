@@ -24,7 +24,7 @@ void AccelStepper::moveTo(long absolute)
 {
     if (_targetPos != absolute)
     {
-        _targetPos = absolute;
+        _targetPos = dir_multiplier * absolute;
         computeNewSpeed();
         // compute new n?
     }
@@ -35,6 +35,7 @@ void AccelStepper::move(long relative)
     moveTo(_currentPos + relative);
 }
 
+
 // Implements steps according to the current step interval
 // You must call this at least once per step
 // returns true if a step occurred
@@ -44,17 +45,16 @@ bool AccelStepper::runSpeed()
     if (!_stepInterval)
         return false;
 
-    unsigned long time = scoped_timer.elapsed();
+    uint64_t time = scoped_timer.elapsed();
     if (time - _lastStepTime >= _stepInterval)
     {
-        if (_direction == DIRECTION_CW)
+        if (_direction== DIRECTION_CW)
         {
-            // Clockwise
             _currentPos += 1;
+          
         }
         else
         {
-            // Anticlockwise
             _currentPos -= 1;
         }
         step(_currentPos);
@@ -159,7 +159,7 @@ void AccelStepper::computeNewSpeed()
     }
     _n++;
     _stepInterval = _cn;
-    _speed = 1000000.0 / _cn;
+    _speed = 1000000000.0 / _cn;
     if (_direction == DIRECTION_CCW)
         _speed = -_speed;
 
@@ -197,7 +197,7 @@ AccelStepper::AccelStepper(uint8_t interface, uint8_t pin1, uint8_t pin2, uint8_
     _acceleration = 0.0;
     _sqrt_twoa = 1.0;
     _stepInterval = 0;
-    _minPulseWidth = 1;
+    _minPulseWidth = 10;
     _enablePin = 0xff;
     _lastStepTime = 0;
     _pin[0] = pin1;
@@ -232,7 +232,7 @@ AccelStepper::AccelStepper(void (*forward)(), void (*backward)())
     _acceleration = 0.0;
     _sqrt_twoa = 1.0;
     _stepInterval = 0;
-    _minPulseWidth = 1;
+    _minPulseWidth = 10;
     _enablePin = 0xff;
     _lastStepTime = 0;
     _pin[0] = 0;
@@ -263,7 +263,7 @@ void AccelStepper::setMaxSpeed(double speed)
     if (_maxSpeed != speed)
     {
         _maxSpeed = speed;
-        _cmin = 1000000.0 / speed;
+        _cmin = 1000000000.0 / speed;
         // Recompute _n from current speed and adjust speed if accelerating or cruising
         if (_n > 0)
         {
@@ -289,7 +289,7 @@ void AccelStepper::setAcceleration(double acceleration)
         // Recompute _n per Equation 17
         _n = _n * (_acceleration / acceleration);
         // New c0 per Equation 7, with correction per Equation 15
-        _c0 = 0.676 * std::sqrt(2.0 / acceleration) * 1000000.0; // Equation 15
+        _c0 = 0.676 * std::sqrt(2.0 / acceleration) * 1000000000.0; // Equation 15
         _acceleration = acceleration;
         computeNewSpeed();
     }
@@ -304,7 +304,7 @@ void AccelStepper::setSpeed(double speed)
         _stepInterval = 0;
     else
     {
-        _stepInterval = std::abs(1000000.0 / speed);
+        _stepInterval = std::abs(1000000000.0 / speed);
         _direction = (speed > 0.0) ? DIRECTION_CW : DIRECTION_CCW;
     }
     _speed = speed;
@@ -313,6 +313,11 @@ void AccelStepper::setSpeed(double speed)
 double AccelStepper::speed()
 {
     return _speed;
+}
+
+void AccelStepper::invertDirection()
+{
+    dir_multiplier = -dir_multiplier;
 }
 
 // Subclasses can override
@@ -363,7 +368,7 @@ void AccelStepper::setOutputPins(uint8_t mask)
         numpins = 3;
     uint8_t i;
     for (i = 0; i < numpins; i++)
-        digitalWrite(_pin[i], (mask & (1 << i)) ? (HIGH ^ _pinInverted[i]) : (LOW ^ _pinInverted[i]));
+        digitalWrite(_pin[i], (mask & (1 << i)) ? (HIGH  ^ _pinInverted[i]) : (LOW ^ _pinInverted[i]));
 }
 
 // 0 pin step function (ie for functional usage)

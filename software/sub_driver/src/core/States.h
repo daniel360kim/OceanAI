@@ -18,8 +18,31 @@ No remote control functionality yet
 
 #include "StateAutomation.h"
 
-#include "../core/pins.h"
-#include "../module/stepper.h"
+#include "Sensors/Sensors.h"
+#include "navigation/Orientation.h"
+
+#include "pins.h"
+
+#include "Data/SD/SD.h"
+
+#include "indication/OutputFuncs.h"
+#include "indication/LED.h"
+
+#include <Arduino.h>
+#include <teensy_clock/teensy_clock.h>
+#include <stdint.h>
+#include <chrono>
+
+#include "Navigation/SensorFusion/Fusion.h"
+#include "Navigation/Postioning.h"
+#include "Sensors/Camera/OV2640.h"
+
+
+#include "debug.h"
+#include "Time.h"
+#include "core/OS.h"
+#include "core/Timer.h"
+#include "module/stepper.h"
 
 
 class Initialization : public State

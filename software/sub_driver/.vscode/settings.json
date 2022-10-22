@@ -66,5 +66,6 @@
     "Makefile": "cpp",
     "*.tpp": "cpp",
     "system_error": "cpp"
-}
+},
+"C_Cpp.errorSquiggles": "Enabled"
 }

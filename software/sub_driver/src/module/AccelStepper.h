@@ -91,13 +91,14 @@ public:
 
     uint64_t step_iterations;
 
+    void invertDirection();
+
 
 protected:
-    typedef enum
-    {
-        DIRECTION_CCW = 0,
-        DIRECTION_CW = 1
-    } Direction;
+
+    bool DIRECTION_CCW = 0;
+    bool DIRECTION_CW = 1;
+
 
     void computeNewSpeed();
 
@@ -120,6 +121,7 @@ protected:
     virtual void step8(long step);
 
     bool _direction;
+    int dir_multiplier = 1;
 
     int res_multiplier = 1;
     int pos_multiplier = 1;
@@ -141,9 +143,9 @@ private:
     double _acceleration;
     double _sqrt_twoa;
 
-    unsigned long _stepInterval;
+    uint64_t _stepInterval;
 
-    unsigned long _lastStepTime;
+    uint64_t _lastStepTime;
 
     unsigned int _minPulseWidth;
 
@@ -162,8 +164,6 @@ private:
     double _cn;
 
     double _cmin;
-
-    
 };
 
 #endif

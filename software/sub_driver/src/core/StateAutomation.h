@@ -12,6 +12,7 @@
 #ifndef STATE_AUTOMATION_H
 #define STATE_AUTOMATION_H
 
+#include <Arduino.h>
 
 class StateAutomation;
 
@@ -25,7 +26,7 @@ public:
     virtual ~State() {}
     virtual void enter(StateAutomation* state) = 0;
     virtual void run(StateAutomation* state) = 0;
-    virtual void exit(StateAutomation* state) = 0;
+    virtual void exit(StateAutomation* state) = 0; 
 };
 
 enum class CurrentState
@@ -50,6 +51,8 @@ public:
     inline State* getCurrentState() { return m_currentState; }
     void run();
     void setState(State& newState);
+
+    static void printState(Print &printer, CurrentState &state);
 
 private:
     State* m_currentState;

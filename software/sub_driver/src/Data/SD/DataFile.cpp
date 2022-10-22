@@ -17,8 +17,11 @@
 
 #include <Arduino.h>
 
+bool DataFile::file_initialized = false;
+
 DataFile::DataFile(const char* file_name, ENDING ending)
 {
+	num_bytes = strlen(file_name);
 	switch(ending)
 	{
 		case CSV:
@@ -56,22 +59,32 @@ DataFile::DataFile(const char* file_name, ENDING ending)
 
 bool DataFile::createFile()
 {
-	
-	if(!sd.begin(SdioConfig(FIFO_SDIO)))
+	if(!DataFile::file_initialized) //only initialize SD once
 	{
-		#if DEBUG_ON == true
-		    ERROR_LOG(Debug::Critical_Error, "SD card initialization failed");
-		#endif
+		if(!sd.begin(SdioConfig(FIFO_SDIO)))
+		{
+			#if DEBUG_ON
+				char* msg = (char*)"SD card initialization failed";
+				ERROR_LOG(Debug::Critical_Error, msg);
+				#if LIVE_DEBUG
+					Serial.println(msg);
+				#endif
+			#endif
 
-		return false;
+			return false;
+		}
+		else
+		{
+			#if DEBUG_ON
+				char* msg = (char*)"SD card initialization successful";
+				SUCCESS_LOG(msg);
+				#if LIVE_DEBUG
+					Serial.println(msg);
+				#endif
+			#endif
+		}
+		DataFile::file_initialized = true;
 	}
-	else
-	{
-		#if DEBUG_ON == true
-			SUCCESS_LOG("SD card initialization successful");
-		#endif
-	}
-	
 	
 	while(sd.exists(file_name))
 	{
@@ -86,8 +99,12 @@ bool DataFile::createFile()
 		}
 		else
 		{
-			#if DEBUG_ON == true
-				ERROR_LOG(Debug::Critical_Error, "Too many files");
+			#if DEBUG_ON
+				char* msg = (char*)"Too many files; Could not make successive file name";
+				ERROR_LOG(Debug::Critical_Error, msg);
+				#if LIVE_DEBUG
+					Serial.println(msg);
+				#endif
 			#endif
 			return false;
 		}
