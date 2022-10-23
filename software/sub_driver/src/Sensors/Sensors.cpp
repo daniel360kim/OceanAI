@@ -339,20 +339,17 @@ void UnifiedSensors::logToStruct(Data &data)
     //Mag, Accel, Gyro, and baro all have their own interrupt pins
     if (UnifiedSensors::mag_flag)
     {
-        Time::NamedTimer mag_timer("Mag");
         data.rmag = returnRawMag();
 
         data.fmag.x = mag_x.filt(data.rmag.x, data.delta_time);
         data.fmag.y = mag_y.filt(data.rmag.y, data.delta_time);
         data.fmag.z = mag_z.filt(data.rmag.z, data.delta_time);
-        mag_timer.showElapsed();
 
         UnifiedSensors::mag_flag = false;
     }
 
     if (UnifiedSensors::accel_flag && UnifiedSensors::gyro_flag)
     {
-        Time::NamedTimer accel_timer("IMU");
         data.racc = returnRawAccel();
         data.bmi_temp = returnAccelTempC();
 
@@ -363,17 +360,14 @@ void UnifiedSensors::logToStruct(Data &data)
         data.rgyr = returnRawGyro();
 
         UnifiedSensors::gyro_flag = false;
-        accel_timer.showElapsed();
     }
 
     if (UnifiedSensors::bar_flag)
     {
-        Time::NamedTimer baro_timer("Baro");
         data.raw_bmp = returnRawBaro();
         temp_measurements[0] = data.raw_bmp.temperature;
 
         UnifiedSensors::bar_flag = false;
-        baro_timer.showElapsed();
     }
 
     int64_t current_time = scoped_timer.elapsed();

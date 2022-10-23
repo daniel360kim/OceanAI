@@ -12,49 +12,50 @@
 #include "States.h"
 #include "Timer.h"
 
+namespace
+{
+    Time::Mission mission_duration;
+    Fusion SFori;
 
-Time::Mission mission_duration;
-Fusion SFori;
+    Optics::Camera camera(CS_VD);
 
-Optics::Camera camera(CS_VD);
+    Orientation ori;
 
-Orientation ori;
+    LED signal(SIGNAL);
 
-LED signal(SIGNAL);
+    int64_t previous_time;
+    teensy_clock::time_point start_time;
 
-int64_t previous_time;
-teensy_clock::time_point start_time;
+    Velocity nav_v;
+    Position nav_p;
 
-Velocity nav_v;
-Position nav_p;
+    Data data;
 
-Data data;
+    SD_Logger logger(mission_duration.mission_time, 2000000);
 
-SD_Logger logger(mission_duration.mission_time, 2000000);
+    bool rfInit = true;
+    bool warning = false;
 
-bool rfInit = true;
-bool warning = false;
+    StepperPins pins_p{
+        STP_p,
+        DIR_p,
+        MS1_p,
+        MS2_p,
+        ERR_p,
+        STOP_p};
 
-StepperPins pins_p{
-    STP_p,
-    DIR_p,
-    MS1_p,
-    MS2_p,
-    ERR_p,
-    STOP_p};
+    StepperPins pins_b{
+        STP_b,
+        DIR_b,
+        MS1_b,
+        MS2_b,
+        ERR_b,
+        STOP_b};
 
-StepperPins pins_b{
-    STP_b,
-    DIR_b,
-    MS1_b,
-    MS2_b,
-    ERR_b,
-    STOP_b};
+    Buoyancy buoyancy(pins_b, Stepper::Resolution::HALF, StepperProperties(169.0, 76000));
 
-Buoyancy buoyancy(pins_b, Stepper::Resolution::HALF, StepperProperties(169.0, 76000));
-
-CurrentState currentState;
-
+    CurrentState currentState;
+}
 
 /**
  * @brief Functions that run no matter the state
@@ -74,7 +75,7 @@ void continuousFunctions()
 
     data.loop_time = 1.0 / data.delta_time;
 
-    
+
     UnifiedSensors::getInstance().logToStruct(data);
     OS::getInstance().log_cpu_state(data);
 

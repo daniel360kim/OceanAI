@@ -16,12 +16,6 @@ StateAutomation::StateAutomation()
 {
 }
 
-void StateAutomation::initialize()
-{
-    m_currentState = &Initialization::getInstance();
-    m_currentState->enter(this);
-}
-
 void StateAutomation::setState(State& newState)
 {
     m_currentState->exit(this);
@@ -31,6 +25,12 @@ void StateAutomation::setState(State& newState)
 
 void StateAutomation::run()
 {
+    if(!m_initialized)
+    {
+        m_currentState = &Initialization::getInstance();
+        m_currentState->enter(this);
+        m_initialized = true;
+    }
     m_currentState->run(this);
 }
 

@@ -2,14 +2,14 @@
 #include "StateAutomation.h"
 
 #include <Arduino.h>
-StateAutomation submarine;
 
-void setup()
+void setup() 
 {
-  submarine.initialize();
+	StateAutomation submarine;
+	while(1)
+	{
+		submarine.run();
+	}
 }
 
-void loop()
-{
-  submarine.run();
-}
+void loop() {}

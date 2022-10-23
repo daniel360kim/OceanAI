@@ -46,8 +46,6 @@ class StateAutomation
 public:
     StateAutomation();
 
-    void initialize();
-
     inline State* getCurrentState() { return m_currentState; }
     void run();
     void setState(State& newState);
@@ -55,6 +53,7 @@ public:
     static void printState(Print &printer, CurrentState &state);
 
 private:
+    bool m_initialized = false;
     State* m_currentState;
 };
 

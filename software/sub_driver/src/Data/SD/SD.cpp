@@ -393,7 +393,6 @@ bool SD_Logger::rewindPrint()
     //finding a buffer size based on available memory and how much data we logged
     //this allows us to create the largest buffer possible for less opens and closes of files
     int buf_size = findFactors(); 
-    unsigned long long write_iterator = 0;
 
     //Creating a circular buffer with a size based on the available memory
     CircularBuffer<Data> read_buf(buf_size);
@@ -408,22 +407,12 @@ bool SD_Logger::rewindPrint()
             return false;
         }
 
+        file.seekSet(j * sizeof(Data) * buf_size); //seeking to the correct location in the file
         Data datacopy; //creating a copy of our data to read into
-        //This is really ineffiient 
-        //TODO make it better
-        //MAYBE used file.seek or position to go to specific lines
-        //Right now, everytime we read, we start from the beginning
-        for(unsigned long i = 0; i < buf_size + (write_iterator * buf_size); i++)
+        for(unsigned long i = 0; i < buf_size; i++)
         {
-            if(!file.read((uint8_t *)&datacopy, sizeof(datacopy)))
-            {
-                ERROR_LOG(Debug::Critical_Error, "Failed to read from binary file during translation");
-            }
-
-            if(i >= buf_size + ((write_iterator - 1) * buf_size))
-            {
-                read_buf.insert(datacopy); //inserting data into our buffer
-            }
+            file.read((uint8_t*)&datacopy, sizeof(Data)); //reading the data into our copy
+            read_buf.insert(datacopy); //pushing the data into our circular buffer
         }
 
 
@@ -451,7 +440,6 @@ bool SD_Logger::rewindPrint()
         {
             ERROR_LOG(Debug::Critical_Error, "Failed to close csv file during translation");
         }
-        write_iterator++;
 
         read_buf.reset();
     }
