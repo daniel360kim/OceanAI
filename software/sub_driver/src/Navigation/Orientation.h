@@ -12,7 +12,7 @@
 #define Orientation_h
 
 #include "Quaternion.h"
-
+#include "../data/data_struct.h"
 
 class Orientation 
 {
@@ -24,7 +24,7 @@ public:
     static void toEuler(double w, double x, double y, double z, double *X, double *Y, double *Z);
 
     //static Quaternion toQuaternion(double x, double y, double z);
-    void convertAccelFrame(Quaternion orientation, double ax, double ay, double az, double *wfax, double *wfay, double *wfaz);
+    Angles_3D convertAccelFrame(Quaternion orientation, double ax, double ay, double az);
     
     static Quaternion toQuaternion(double x, double y, double z);
     static double constrainAngle_whole(double x);

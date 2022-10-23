@@ -11,72 +11,7 @@
 #ifndef Data_struct_h
 #define Data_struct_h
 
-#include <Arduino.h>
-#include <chrono>
-
-#include "navigation/Quaternion.h"
-namespace GPS_data
-{
-    struct Coordinates
-    {
-        float degrees, coordinate;
-    }; 
-    struct Location
-    {
-        Coordinates latitude;
-        Coordinates longitude; 
-    };
-
-    struct Date
-    {
-        uint16_t year;
-        uint8_t month;
-        uint8_t day;
-    };
-
-    struct Time
-    {
-        uint8_t hour;
-        uint8_t minute;
-        uint8_t second;
-        uint8_t centisecond;
-    };
-
-    struct Speed
-    {
-        float knots;
-        float mph;
-        float mps;
-    };
-
-    struct Course
-    {
-        float deg;
-    };
-
-    struct Altitude
-    {
-        float meters;
-    };
-
-    struct Satellites
-    {
-        uint32_t value;
-    };
-
-    struct HDOP
-    {
-        float hdop;
-    };
-
-    struct Metadata
-    {
-        uint32_t charsProcessed;
-        uint32_t sentencesWithFix;
-        uint32_t failedChecksum;
-        uint32_t passedChecksum;
-    };
-};
+#include <stdint.h>
 
 struct StepperData
 {
@@ -100,160 +35,72 @@ struct OpticalData
     uint32_t FIFO_length;
 };
 
-struct Vec3
+struct Angles_3D
 {
     double x, y, z;
 };
 
-struct ExternalData
+struct Angles_4D
 {
-    double loop_time;
-    double raw_temp;
-    double raw_pres;
-
-    double filt_temp;
-    double filt_pres;
+    double w, x, y, z;
 };
+
+struct BMP388Data
+{
+    double pressure;
+    double temperature;
+};
+
 
 //To do: organize into different structs for optimization and organization
 struct Data
 {
     int64_t time_ns;
-    uint32_t loop_time;
+    int loop_time;
 
-    uint8_t system_state;
+    int system_state;
 
-    double dt;
-    double bmp_rpres, bmp_rtemp, bmp_fpres, bmp_ftemp; //from bmp388
+    double delta_time;
 
-    Vec3 racc;
-    Vec3 facc;
-    Vec3 wfacc;
-    Vec3 vel;
-    Vec3 pos;
+    BMP388Data raw_bmp;
 
-    Vec3 rgyr;
-    Vec3 fgyr;
-    Vec3 rel_ori;
+    Angles_3D racc;
+    Angles_3D wfacc;
+    Angles_3D vel;
+    Angles_3D pos;
 
-    Quaternion relative;
+    Angles_3D rgyr;
+    Angles_3D rel_ori;
+
+    Angles_4D relative;
 
     double bmi_temp;
 
-    Vec3 mag;
+    Angles_3D rmag;
+    Angles_3D fmag;
 
-    ExternalData external;
+    double raw_TDS;
+    double filt_TDS;
+    
+    double raw_ext_pres;
+    double filt_ext_pres;
 
-    double r_TDS;
-    double f_TDS;
+    double raw_voltage;
+    double filt_voltage;
 
-    double r_voltage;
-    double f_voltage;
-
-    uint16_t clock_speed;
+    int clock_speed;
     double internal_temp;
 
     StepperData dive_stepper;
     StepperData pitch_stepper;
-
-    bool sinking;
-    bool rising;
-
+    
     OpticalData optical_data;
 
     uint32_t sd_capacity;
 
 };
 
-//int size = sizeof(Data);
 
-struct GPSdata
-{   
-    bool GPS_activated;
-    //GPS Data
-    GPS_data::Location location;    
-    GPS_data::Date date;
-    GPS_data::Time time;
-    GPS_data::Speed speed;
-    GPS_data::Course course;
-    GPS_data::Altitude altitude;
-    GPS_data::Satellites satellites;
-    GPS_data::HDOP hdop;
-    GPS_data::Metadata metadata;
-};
-
-struct TransmissionPacket
-{
-    float ax; 
-    float ay;
-    float az;
-
-    float x;
-    float y;
-    float z;
-
-    bool limit_state_p;
-    bool homed_p;
-    float current_position_p;
-    float current_position_mm_p;
-
-    float target_position_p;
-    float target_position_mm_p;
-
-    float speed_p;
-    float acceleration_p;
-    float max_speed_p;
-
-    bool limit_state_b;
-    bool homed_b;
-    float current_position_b;
-    float current_position_mm_b;
-
-    float target_position_b;
-    float target_position_mm_b;
-
-    float speed_b;
-    float acceleration_b;
-    float max_speed_b;
-
-    bool sinking;
-    bool rising;
-
-    //converts data to the transmission packet
-    void set(Data data)
-    {
-        ax = data.wfacc.x;
-        ay = data.wfacc.y;
-        az = data.wfacc.z;
-
-        x = data.rel_ori.x;
-        y = data.rel_ori.y;
-        z = data.rel_ori.z;
-
-        limit_state_b = data.dive_stepper.limit_state;
-        homed_b = data.dive_stepper.homed;
-        current_position_b = data.dive_stepper.current_position;
-        current_position_mm_b = data.dive_stepper.current_position_mm;
-        target_position_b = data.dive_stepper.target_position;
-        target_position_mm_b = data.dive_stepper.target_position_mm;
-        speed_b = data.dive_stepper.speed;
-        acceleration_b = data.dive_stepper.acceleration;
-        max_speed_b = data.dive_stepper.max_speed;
-
-        limit_state_p = data.pitch_stepper.limit_state;
-        homed_p = data.pitch_stepper.homed;
-        current_position_p = data.pitch_stepper.current_position;
-        current_position_mm_p = data.pitch_stepper.current_position_mm;
-        target_position_p = data.pitch_stepper.target_position;
-        target_position_mm_p = data.pitch_stepper.target_position_mm;
-        speed_p = data.pitch_stepper.speed;
-        acceleration_p = data.pitch_stepper.acceleration;
-        max_speed_p = data.pitch_stepper.max_speed;
-
-        sinking = data.sinking;
-        rising = data.rising;
-    }
-};
 
 
 

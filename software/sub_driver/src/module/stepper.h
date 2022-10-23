@@ -9,6 +9,13 @@
 #include "limit.h"
 #include "data/data_struct.h"
 
+/**
+ * @brief Properties of our stepper motor configuration
+ * Carriage length describes the range the stepper mover can move an object in mm
+ * Halves length is how many half-resolution steps are in a full carriage length
+ * Halves length can be measureed with a different test program
+ * This struct is passed into the constructor of the stepper class
+ */
 struct StepperProperties
 {
     StepperProperties() {}
@@ -17,6 +24,10 @@ struct StepperProperties
     long halves_length; //how many half steps are in the carriage
 };
 
+/**
+ * @brief Pins of the TMC2208 stepper driver
+ * 
+ */
 struct StepperPins
 {
     uint8_t STP;
@@ -27,10 +38,15 @@ struct StepperPins
     uint8_t limit;
 };
 
+/**
+ * @brief Child class of AccelStepper
+ * Includes code to change the resolution of the stepper 
+ * and to calibrate the motor w/ limit switches
+ */
 class Stepper : public AccelStepper
 {
 public:
-    enum Resolution
+    enum class Resolution
     {
         HALF,
         QUARTER,
@@ -38,7 +54,7 @@ public:
         SIXTEENTH
     };
 
-    explicit Stepper(StepperPins pins, Resolution resolution, StepperProperties properties);
+    Stepper(StepperPins pins, Resolution resolution, StepperProperties properties);
 
     void setResolution(Resolution resolution);
     void calibrate();
@@ -67,6 +83,7 @@ protected:
 };
 
 //Singleton class for buoyancy driver
+//TODO: make this less horrible
 class Buoyancy : public Stepper
 {
 public:

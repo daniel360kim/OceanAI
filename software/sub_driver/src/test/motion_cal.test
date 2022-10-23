@@ -171,7 +171,7 @@ void loop()
 { 
   
   data.time_us = scoped_timer.elapsed();
-  data.dt = (data.time_us - previous_time) / 1000000.0;
+  data.delta_time = (data.time_us - previous_time) / 1000000.0;
   previous_time = data.time_us;
 
   signal.blink(Entropy.random(20, 200));
@@ -180,13 +180,13 @@ void loop()
 
   sensor.logToStruct(data);
   
-  Quaternion orientation = ori.update(data.rgyr_x, data.rgyr_y, data.rgyr_z, data.dt);
+  Quaternion orientation = ori.update(data.rgyr_x, data.rgyr_y, data.rgyr_z, data.delta_time);
  
   ori.convertAccelFrame(orientation, data.racc_x, data.racc_y, data.racc_z, &data.fWfacc_x, &data.fWfacc_y, &data.fWfacc_z);
   ori.toEuler(&data.ori_X, &data.ori_Y, &data.ori_Z);
 
-  filt.MadgwickUpdate(data.rgyr_x, data.rgyr_y, data.rgyr_z, data.racc_x, data.racc_y, data.racc_z, data.rmag_x, data.rmag_y, data.rmag_z, data.dt);
-  filtf.MadgwickUpdate(data.fgyr_x, data.fgyr_y, data.fgyr_z, data.facc_x, data.facc_y, data.facc_z, data.rmag_x, data.rmag_y, data.rmag_z, data.dt);
+  filt.MadgwickUpdate(data.rgyr_x, data.rgyr_y, data.rgyr_z, data.racc_x, data.racc_y, data.racc_z, data.rmag_x, data.rmag_y, data.rmag_z, data.delta_time);
+  filtf.MadgwickUpdate(data.fgyr_x, data.fgyr_y, data.fgyr_z, data.facc_x, data.facc_y, data.facc_z, data.rmag_x, data.rmag_y, data.rmag_z, data.delta_time);
 
   double rx = filt.getRoll();
   double ry = filt.getPitch();

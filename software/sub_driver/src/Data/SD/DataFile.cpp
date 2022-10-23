@@ -9,110 +9,135 @@
  * 
  */
 #include "DataFile.h"
+
+
+#include "SD.h"
 #include "../../core/config.h"
 #include "../../core/debug.h"
-#include "../../core/Timer.h"
-#include "SD.h"
-
 
 #include <Arduino.h>
 
 bool DataFile::file_initialized = false;
 
+
 DataFile::DataFile(const char* file_name, ENDING ending)
 {
-	num_bytes = strlen(file_name);
+	m_filename_length = strlen(file_name);
 	switch(ending)
 	{
 		case CSV:
-			this->file_name = appendChars(file_name, "00.csv");
+			m_filename = appendChars(file_name, "00.csv");
 			break;
 
 		case TXT:
-			this->file_name = appendChars(file_name, "00.txt");
+			m_filename = appendChars(file_name, "00.txt");
 			break;
 		
 		case DAT:
-			this->file_name = appendChars(file_name, "00.data");
+			m_filename = appendChars(file_name, "00.data");
 			break;
 		
 		case JPG:
-			this->file_name = appendChars(file_name, "00.jpg");
+			m_filename = appendChars(file_name, "00.jpg");
 			break;
 		
 		case PNG:
-			this->file_name = appendChars(file_name, "00.png");
+			m_filename = appendChars(file_name, "00.png");
 			break;
 		
 		default:
-			this->file_name = appendChars(file_name, "00.txt"); //default to .txt
+			m_filename = appendChars(file_name, "00.txt"); //default to .txt
 	
 	}	
 }
 
 /**
- * Creates variable file name after initializing SD card
- *
- * @param sd_cs Chip select pin of the SD.
- * @return True: file creation successful/False: file creation unsuccessful.
+ * @brief Creates a folder in the SD card
+ * 
+ * @param folder_name name of the folder that will be created
+ * @return true folder creation successful
+ * @return false folder creation unsuccessful
  */
+bool DataFile::createFolder(const char* folder_name)
+{
+	if(!initializeSD()) //initialize SD
+	{
+		return false;
+	}
 
+	if(sd.exists(folder_name)) //return if the folder already exists
+	{
+		return true;
+	}
+	else
+	{
+		if(!sd.mkdir(folder_name))
+		{
+			ERROR_LOG(Debug::Fatal, "Failed to create folder");
+			return false;
+		}
+		else
+		{
+			SUCCESS_LOG("Folder created");
+			return true;
+		}
+	}
+}
+
+/**
+ * @brief Creates a file name, automatically numbering if the file name already exists
+ * 
+ * @return true file creation successful
+ * @return false file creation unsuccessful
+ */
 bool DataFile::createFile()
 {
-	if(!DataFile::file_initialized) //only initialize SD once
+	if(!initializeSD())
 	{
-		if(!sd.begin(SdioConfig(FIFO_SDIO)))
-		{
-			#if DEBUG_ON
-				char* msg = (char*)"SD card initialization failed";
-				ERROR_LOG(Debug::Critical_Error, msg);
-				#if LIVE_DEBUG
-					Serial.println(msg);
-				#endif
-			#endif
-
-			return false;
-		}
-		else
-		{
-			#if DEBUG_ON
-				char* msg = (char*)"SD card initialization successful";
-				SUCCESS_LOG(msg);
-				#if LIVE_DEBUG
-					Serial.println(msg);
-				#endif
-			#endif
-		}
-		DataFile::file_initialized = true;
+		return false;
 	}
 	
-	while(sd.exists(file_name))
+	//Iterate through all files, adding a number to the file name if it already exists
+	//Range of possible files is from 00-99
+	while(sd.exists(m_filename))
 	{
-		if(file_name[num_bytes + 1] != '9')
+		if(m_filename[m_filename_length + 1] != '9')
 		{
-			file_name[num_bytes + 1]++;
+			m_filename[m_filename_length + 1]++;
 		}
-		else if(file_name[num_bytes] != '9')
+		else if(m_filename[m_filename_length] != '9')
 		{
-			file_name[num_bytes + 1] = '0';
-			file_name[num_bytes]++;
+			m_filename[m_filename_length + 1] = '0';
+			m_filename[m_filename_length]++;
 		}
 		else
 		{
-			#if DEBUG_ON
-				char* msg = (char*)"Too many files; Could not make successive file name";
-				ERROR_LOG(Debug::Critical_Error, msg);
-				#if LIVE_DEBUG
-					Serial.println(msg);
-				#endif
-			#endif
+			ERROR_LOG(Debug::Critical_Error, "Could not number files");
 			return false;
 		}
-
 	}
 
 	return true;
 }
+
+bool DataFile::initializeSD()
+{
+	if(!DataFile::file_initialized) //only initialize SD once
+	{
+		if(!sd.begin(SdioConfig(FIFO_SDIO))) //Initialize SD for FIFO with TEENSY builtin
+		{
+			ERROR_LOG(Debug::Critical_Error, "SD initialization failed");
+			return false;
+		}
+		else
+		{
+			SUCCESS_LOG("SD initialization successful");
+		}
+		DataFile::file_initialized = true; //after an initialization, we set this to true so we don't initialize again
+	}
+	return true;
+}
+
 
 /**
  * Used to append two chars. 
@@ -125,12 +150,12 @@ bool DataFile::resizeBuff(int num_bytes, uint8_t** buff) {
 
 	if(*buff) 
 	{                                        // If we did NOT get passed in a NULL..
-		free(*buff);                                    // We free the memory.
+		delete [] *buff;                     // ..delete the memory we allocated before
 		*buff = NULL;                                    // Set the pointer to NULL.
 	}
 	if (num_bytes > 0) 
 	{                                // If we got a positive non zero value..
-		*buff = (uint8_t*)malloc(num_bytes);    // We attempt allocate that number of bytes.
+		*buff = new uint8_t[num_bytes];                    // Allocate the memory.
 		return *buff != NULL;                        // And we return true for non NULL result (non-NULL = Success)
 	}
 	return true;                                        // In this case we were not asked to allocate anything so it was a success.
@@ -153,4 +178,3 @@ char* DataFile::appendChars(const char *hostname, const char *def_host)
 	strcat(hostname_str, def_host); // append default hostname to hostname
 	return hostname_str;
 }
-

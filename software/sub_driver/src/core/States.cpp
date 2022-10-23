@@ -10,6 +10,7 @@
  */
 
 #include "States.h"
+#include "Timer.h"
 
 
 Time::Mission mission_duration;
@@ -28,9 +29,8 @@ Velocity nav_v;
 Position nav_p;
 
 Data data;
-GPSdata gps_data;
 
-SD_Logger logger(mission_duration, 100000);
+SD_Logger logger(mission_duration.mission_time, 2000000);
 
 bool rfInit = true;
 bool warning = false;
@@ -63,7 +63,7 @@ CurrentState currentState;
 void continuousFunctions()
 {
     data.time_ns = scoped_timer.elapsed(); //scoped timer is a global object to measure time since program epoch
-    data.dt = (scoped_timer.elapsed() - previous_time) / 1000000000.0;
+    data.delta_time = (scoped_timer.elapsed() - previous_time) / 1000000000.0;
     previous_time = scoped_timer.elapsed();
 
     data.system_state = static_cast<uint8_t>(currentState);
@@ -72,8 +72,9 @@ void continuousFunctions()
         StateAutomation::printState(Serial, currentState);
     #endif
 
-    data.loop_time = 1.0 / data.dt;
+    data.loop_time = 1.0 / data.delta_time;
 
+    
     UnifiedSensors::getInstance().logToStruct(data);
     OS::getInstance().log_cpu_state(data);
 
@@ -81,8 +82,10 @@ void continuousFunctions()
     nav_p.updatePosition(data);
     SFori.update(data);
 
-    data.relative = Orientation::toQuaternion(data.rel_ori.x, data.rel_ori.y, data.rel_ori.z);
-    ori.convertAccelFrame(data.relative, data.facc.x, data.facc.y, data.facc.z, &data.wfacc.x, &data.wfacc.y, &data.wfacc.z);
+    Quaternion relative = Orientation::toQuaternion(data.rel_ori.x, data.rel_ori.y, data.rel_ori.z);
+    data.wfacc = ori.convertAccelFrame(relative, data.racc.x, data.racc.y, data.racc.z);
+
+    data.relative = static_cast<Angles_4D>(relative);
 
     
 #if OPTICS_ON == true
@@ -142,9 +145,9 @@ void Initialization::enter(StateAutomation* state)
     }
     Serial.println("Nav sensors initialized");
 
-    UnifiedSensors::getInstance().initVoltmeter(v_div, (uint32_t)10000000, 10.0);
-    UnifiedSensors::getInstance().initTDS(TDS, (uint32_t)10000000, 10.0);
-    UnifiedSensors::getInstance().initPressureSensor(TX_GPS, (uint32_t)10000000, 20.0);
+    UnifiedSensors::getInstance().initVoltmeter(v_div, 2e+7, 10.0);
+    UnifiedSensors::getInstance().initTDS(TDS, 2e+7, 10.0);
+    UnifiedSensors::getInstance().initPressureSensor(TX_GPS, 2e+7, 20.0);
 
     UnifiedSensors::getInstance().setInterrupts(BAR_int, ACC_int, GYR_int, MAG_int);
 
@@ -175,7 +178,7 @@ void Initialization::enter(StateAutomation* state)
 
 void Initialization::run(StateAutomation* state)
 {
-    state->setState(Resurfacing::getInstance());
+    state->setState(Diving::getInstance());
 }
 
 void Initialization::exit(StateAutomation* state)
@@ -217,7 +220,6 @@ void Diving::run(StateAutomation* state)
         state->setState(Resurfacing::getInstance());
         return;
     }
-    Serial.println("Diving");
     buoyancy.update();
     if(buoyancy.currentPosition() == buoyancy.targetPosition())
     {
@@ -334,7 +336,6 @@ void SD_translate::enter(StateAutomation* state)
 
 void SD_translate::run(StateAutomation* state)
 {
-    Serial.println("Running SD_translate state");
     Time::NamedTimer sd_timer("SD Translation");
     if(!logger.rewindPrint())
     {

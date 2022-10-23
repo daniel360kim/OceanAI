@@ -5,16 +5,25 @@
 #include <Arduino.h>
 
 #include "Timer.h"
-#define SUCCESS_LOG(message) Debug::success.addToBuffer(Debug::Success, (char*)message); Serial.println(F(message));
-#define ERROR_LOG(Severity, message) Debug::error.addToBuffer(Severity, (char*)message); Serial.println(F(message));
+
+#if DEBUG_ON
+    #define ERROR_LOG(severity, message) Debug::error.addToBuffer(severity, message)
+    #define SUCCESS_LOG(message) Debug::success.addToBuffer(Debug::Success, message)
+    #define INFO_LOG(message) Debug::info.addToBuffer(Debug::Info, message)
+#else
+    #define SUCCESS_LOG(message) 
+    #define ERROR_LOG(Severity, message)
+    #define INFO_LOG(message)
+#endif
 
 namespace Debug
 {
     //The severity of the message
     enum Severity
     {
-        Success, //for success messages
-        Info, //for information messages
+        Success,
+        Info,
+        Trace,
         Warning, //Something might go wrong
         Fatal, //A non critical component won't work (GPS, RF etc.)
         Critical_Error //A critica component won't work (IMU, Stepper motors etc.)
@@ -26,10 +35,11 @@ namespace Debug
      */
     struct Message
     {
-        Message(Severity severity, char* message) : timestamp(scoped_timer.elapsed()), severity(severity), message(message) {}
+        Message(Severity severity, const char* message) : timestamp(scoped_timer.elapsed()), severity(severity), message(message) {}
+        ~Message() {}
         uint64_t timestamp;
         Severity severity;
-        char* message;
+        const char* message;
     };
 
     /**
@@ -41,11 +51,12 @@ namespace Debug
     public:
         Print() {}
         std::vector<Message> printBuffer;
-        void addToBuffer(Severity severity, char* message);
+        void addToBuffer(Severity severity, const char* message);
         void printBuffer_vec();
        
     };
     extern Print error;
+    extern Print info;
     extern Print success;   
 
 };

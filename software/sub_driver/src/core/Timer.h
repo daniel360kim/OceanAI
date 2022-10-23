@@ -82,6 +82,14 @@ namespace Time
             return data;
         }
 
+        void showElapsed()
+        {
+            Serial.print(name);
+            Serial.print(": ");
+            Serial.print(elapsed());
+            Serial.println(" ns");
+        }
+
     protected:
         NamedTimer() {}
     private:
@@ -98,7 +106,6 @@ namespace Time
     public:
         static TimerManager& getInstance()
         {
-            static TimerManager instance;
             return instance;
         }
 
@@ -128,6 +135,7 @@ namespace Time
 
     private:
         TimerManager() {}
+        static TimerManager instance;
 
         std::map<const char*, TimerData> timers;
 
@@ -146,8 +154,8 @@ namespace Time
 
         static constexpr uint16_t days = 0;
         static constexpr uint16_t hours = 0;
-        static constexpr uint32_t minutes = 30;
-        static constexpr uint32_t seconds = 0;
+        static constexpr uint32_t minutes = 0;
+        static constexpr uint32_t seconds = 15;
 
         static constexpr uint64_t mission_time = ((uint64_t)(days * (uint64_t)8.64e+13) + (uint64_t)(hours * (uint64_t)3.6e+12) + (uint64_t)(minutes * (uint64_t)6e+10) + (uint64_t)(seconds * (uint64_t)1e+9));
 

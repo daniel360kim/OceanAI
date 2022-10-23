@@ -580,6 +580,7 @@ static const uint8_t bmi_feature_config[] = {
     0x2E, 0x18, 0x00, 0x80, 0x2E, 0x18, 0x00, 0x80, 0x2E, 0x18, 0x00,
     0x80, 0x2E, 0x18, 0x00, 0xFD, 0x2D};
 
+
 /**
  * @brief Construct a new Bmi088 Accel:: Bmi088 Accel object
  *
@@ -603,6 +604,12 @@ Bmi088Accel::Bmi088Accel(SPIClass &bus, uint8_t csPin)
   _spi = &bus;    // SPI bus
   _csPin = csPin; // chip select pin
   _useSPI = true; // set to use SPI
+}
+
+Bmi088Accel::Bmi088Accel()
+{
+  _address = (uint8_t)0x18;
+  _useSPI = false;    // set to use I2C
 }
 
 /**
@@ -1344,6 +1351,12 @@ Bmi088Gyro::Bmi088Gyro(SPIClass &bus, uint8_t csPin)
   _spi = &bus;    // SPI bus
   _csPin = csPin; // chip select pin
   _useSPI = true; // set to use SPI
+}
+
+Bmi088Gyro::Bmi088Gyro()
+{
+  _address = (uint8_t)0x68;
+  _useSPI = false;    // set to use I2C
 }
 
 /* begins communication with the BMI088 gyro */

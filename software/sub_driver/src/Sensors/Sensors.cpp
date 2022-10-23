@@ -11,12 +11,8 @@
 
 #include "Sensors.h"
 
-#include <ADC.h>
-#include <ADC_util.h>
-#include <Wire.h>
 #include <stdint.h>
 #include <array>
-#include <memory>
 
 #include "../core/config.h"
 #include "../core/debug.h"
@@ -27,25 +23,10 @@
 
 UnifiedSensors UnifiedSensors::instance;
 
-BMP388_DEV baro;
-
-Bmi088Accel accel(Wire, 0x18);
-Bmi088Gyro gyro(Wire, 0x68);
-
-LIS3MDL mag;
-
-ADC adc;
-
 volatile bool UnifiedSensors::bar_flag = false;
 volatile bool UnifiedSensors::accel_flag = false;
 volatile bool UnifiedSensors::gyro_flag = false;
 volatile bool UnifiedSensors::mag_flag = true;
-
-bool UnifiedSensors::pressure_sensor_connected = false;
-
-uint8_t UnifiedSensors::TDS_pin = 0;
-uint8_t UnifiedSensors::voltage_pin = 0;
-uint8_t UnifiedSensors::pressure_pin = 0;
 
 double UnifiedSensors::temp = 0;
 
@@ -94,9 +75,6 @@ bool UnifiedSensors::initNavSensors()
     baro.setTimeStandby(TIME_STANDBY_80MS);
     baro.startNormalConversion();
 
-    bmp_pres.setCutoff(10);
-    bmp_temp.setCutoff(5);
-
     configs.BMP_os_p = (char *)"Pressure: X4";
     configs.BMP_os_t = (char *)"Temperature: X16";
     configs.BMP_ODR = (char *)"Standby: 80 milliseconds";
@@ -107,10 +85,6 @@ bool UnifiedSensors::initNavSensors()
     accel.mapDrdyInt1(true);
     accel.setRange(Bmi088Accel::RANGE_3G);
 
-    acc_x.setCutoff(30);
-    acc_y.setCutoff(30);
-    acc_z.setCutoff(30);
-
     configs.accel_range = (char *)"Accel: 3G";
     configs.accel_ODR = (char *)"Accel ODR: 800Hz";
 
@@ -119,10 +93,6 @@ bool UnifiedSensors::initNavSensors()
     gyro.pinModeInt3(Bmi088Gyro::PUSH_PULL, Bmi088Gyro::ACTIVE_HIGH);
     gyro.mapDrdyInt3(true);
     gyro.setRange(Bmi088Gyro::RANGE_250DPS);
-
-    gyr_x.setCutoff(30);
-    gyr_y.setCutoff(30);
-    gyr_z.setCutoff(30);
 
     configs.gyro_range = (char *)"Gyro: 250 degrees per second";
     configs.gyro_ODR = (char *)"Gyro ODR: 1000Hz";
@@ -140,7 +110,11 @@ bool UnifiedSensors::initNavSensors()
 
     configs.mag_range = (char *)"Mag: +/- 4 Gauss";
     configs.mag_ODR = (char *)"Mag ODR: 1000Hz";
-    configs.mag_bias = { HARD_IRON_BIAS[0], HARD_IRON_BIAS[1], HARD_IRON_BIAS[2] };
+    configs.mag_bias = { mag_bias.x, mag_bias.y, mag_bias.z };
+
+    mag_x.setCutoff(30);
+    mag_y.setCutoff(30);
+    mag_z.setCutoff(30);
 
     for (uint8_t i = 0; i < status.size(); i++)
     {
@@ -150,97 +124,41 @@ bool UnifiedSensors::initNavSensors()
             {
             case 0:
             {
-                #if DEBUG_ON
-                    char* msg = (char*)("BMP388 Error");            
-                    ERROR_LOG(Debug::Fatal, *msg);
-                    #if LIVE_DEBUG
-                        Serial.println(*msg);
-                    #endif
-                #endif
-
+                ERROR_LOG(Debug::Critical_Error, "BMP388 initialization failed");
                 return false;
                 break;
             }
             case 1:
             {
-                #if DEBUG_ON
-                    char* msg = (char*)("BMI088 Accel Initialization Error");
-                    ERROR_LOG(Debug::Critical_Error, *msg);
-                    #if LIVE_DEBUG
-                        Serial.println(*msg);
-                    #endif
-                #endif
-
+                ERROR_LOG(Debug::Critical_Error, "Bmi088 Accel initialization failed");
                 return false;
                 break;
             }
             case 2:
             {
-                #if DEBUG_ON
-                    char* msg = (char*)("BMI088 Gyro Initialization Error");
-                    ERROR_LOG(Debug::Critical_Error, *msg);
-                    #if LIVE_DEBUG
-                        Serial.println(*msg);
-                    #endif
-                #endif
-
+                ERROR_LOG(Debug::Critical_Error, "Bmi088 Gyro initialization failed");
                 return false;
                 break;
             }
 
             case 3:
             {
-                #if DEBUG_ON
-                    char* msg = (char*)("LIS3MDL Initialization Error");
-                    ERROR_LOG(Debug::Critical_Error, *msg);
-                    #if LIVE_DEBUG
-                        Serial.println(*msg);
-                    #endif
-                #endif
-
+                ERROR_LOG(Debug::Critical_Error, "LIS3MDL Mag initialization failed");
                 return false;
                 break;
             }
             default:
             {
-                #if DEBUG_ON
-                    char* msg = (char*)("Unknown Sensor Array Error");
-                    ERROR_LOG(Debug::Critical_Error, *msg);
-                    #if LIVE_DEBUG
-                        Serial.println(*msg);
-                    #endif
-                #endif
+                ERROR_LOG(Debug::Critical_Error, "Unknown sensor initialization error");
                 return false;
             }
             }
         }
     }
 
-    #if DEBUG_ON
-        char* msg = (char*)("Nav Sensor Initialization Complete");
-        SUCCESS_LOG(*msg);
-        #if LIVE_DEBUG
-            Serial.println(*msg);
-        #endif
-    #endif
+    SUCCESS_LOG("All sensors initialized successfully");
 
     return true;
-}
-
-void UnifiedSensors::initADC()
-{
-    adc.adc0->setAveraging(1);                                       // set number of averages
-    adc.adc0->setResolution(12);                                     // set bits of resolution
-    adc.adc0->setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED);  // change the conversion speed
-    adc.adc0->setSamplingSpeed(ADC_SAMPLING_SPEED::VERY_HIGH_SPEED); // change the sampling speed
-
-////// ADC1 /////
-#ifdef ADC_DUAL_ADCS
-    adc.adc1->setAveraging(1);                                       // set number of averages
-    adc.adc1->setResolution(12);                                     // set bits of resolution
-    adc.adc1->setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED);  // change the conversion speed
-    adc.adc1->setSamplingSpeed(ADC_SAMPLING_SPEED::VERY_HIGH_SPEED); // change the sampling speed
-#endif
 }
 
 void UnifiedSensors::initTDS(uint8_t TDS_pin, uint32_t interval, double filt_cutoff)
@@ -248,9 +166,8 @@ void UnifiedSensors::initTDS(uint8_t TDS_pin, uint32_t interval, double filt_cut
     pinMode(TDS_pin, INPUT);
     this->TDS_pin = TDS_pin;
 
-    //Setting interval and function pointer for reading from the sensor
-    tds_function.setInterval(interval);
-    tds_function.setFunction(UnifiedSensors::readTDS);
+    m_tds_interval_ns = interval;
+    
 
     tds_filter.setCutoff(filt_cutoff);
 }
@@ -260,9 +177,7 @@ void UnifiedSensors::initVoltmeter(uint8_t input_pin, uint32_t interval, double 
     pinMode(input_pin, INPUT);
     voltage_pin = input_pin;
     
-    //Setting interval and function pointer for reading from the sensor
-    voltage_function.setInterval(interval);
-    voltage_function.setFunction(UnifiedSensors::readVoltage);
+    m_volt_interval_ns = interval;
 
     voltage_filter.setCutoff(filt_cutoff);
 }
@@ -272,36 +187,22 @@ void UnifiedSensors::initPressureSensor(uint8_t input_pin, uint32_t interval, do
     pressure_pin = input_pin;
     pinMode(pressure_pin, INPUT);
 
-    double pressure_voltage = 0.0;
-    readExternalPressure_v(pressure_voltage);
+    double pressure_voltage = readExternalPressure_v();
 
     /*Pressure sensor outputs at least 0.1V, so it is malfunctional or disconnected if it outputs less than 0.1V*/
     if(pressure_voltage <= 0.1)
     {
-        #if DEBUG_ON
-            char* msg = (char*)("Pressure Sensor Malfunction");
-            ERROR_LOG(Debug::Warning, *msg);
-            #if LIVE_DEBUG
-                Serial.println(*msg);
-            #endif
-        #endif
+        ERROR_LOG(Debug::Fatal, "Pressure Sensor Malfunction");
 
-        pressure_sensor_connected = false;
+        m_pressure_sensor_connected = false;
         return;
     }
     else
     {
-        #if DEBUG_ON
-            char* msg = (char*)("Pressure Sensor Connected");
-            SUCCESS_LOG(*msg);
-            #if LIVE_DEBUG
-                Serial.println(*msg);
-            #endif
-        #endif
+        SUCCESS_LOG("Pressure Sensor Connected");
         
-        pressure_sensor_connected = true;
-        pressure_function.setInterval(interval);
-        pressure_function.setFunction(UnifiedSensors::readExternalPressure);
+        m_pressure_sensor_connected = true;
+        m_ext_pres_interval_ns = interval;
     }
 
     ext_pres.setCutoff(filt_cutoff);
@@ -328,138 +229,174 @@ void UnifiedSensors::setGyroBias()
 
     for (uint8_t i = 0; i < 100; i++)
     {
-        double gx, gy, gz;
-        returnRawGyro(&gx, &gy, &gz);
-        gxIntegration += gx;
-        gyIntegration += gy;
-        gzIntegration += gz;
+        Angles_3D gyro = returnRawGyro();
+        gxIntegration += gyro.x;
+        gyIntegration += gyro.y;
+        gzIntegration += gyro.z;
         delayMicroseconds(100);
     }
 
-    gx_bias = gxIntegration / 100;
-    gy_bias = gyIntegration / 100;
-    gz_bias = gzIntegration / 100;
+    gyro_bias.x = gxIntegration / 100.0;
+    gyro_bias.y= gyIntegration / 100.0;
+    gyro_bias.z = gzIntegration / 100.0;
 
-    configs.gyro_bias.x = gx_bias;
-    configs.gyro_bias.y = gy_bias;
-    configs.gyro_bias.z = gz_bias;
+    configs.gyro_bias.x = gyro_bias.x;
+    configs.gyro_bias.y = gyro_bias.y;
+    configs.gyro_bias.z = gyro_bias.z;
 }
-void UnifiedSensors::returnRawBaro(double *pres, double *temp)
+BMP388Data UnifiedSensors::returnRawBaro()
 {
-    double temperature = 0;
+    BMP388Data data;
     double pres_hpa = 0;
-    baro.getTempPres(temperature, pres_hpa);
+    baro.getTempPres(data.temperature, pres_hpa);
 
-    *pres = pres_hpa * 0.0009869233; //convert to atm
-    *temp = temperature;
+    data.pressure = pres_hpa * 0.0009869233; //convert to atm
+
+    return data;
 }
 
-void UnifiedSensors::returnRawAccel(double *x, double *y, double *z, double *tempC)
+Angles_3D UnifiedSensors::returnRawAccel()
 {
+    Angles_3D accel_data;
+
     accel.readSensor();
-    *x = accel.getAccelX_mss();
-    *y = accel.getAccelY_mss();
-    *z = accel.getAccelZ_mss();
-    *tempC = accel.getTemperature_C();
+    accel_data.x = accel.getAccelX_mss();
+    accel_data.y = accel.getAccelY_mss();
+    accel_data.z = accel.getAccelZ_mss();
+
+    return accel_data;
 }
-void UnifiedSensors::returnRawGyro(double *x, double *y, double *z)
+
+double UnifiedSensors::returnAccelTempC()
 {
+    return accel.getTemperature_C();
+}
+
+Angles_3D UnifiedSensors::returnRawGyro()
+{
+    Angles_3D gyro_data;
+
     gyro.readSensor();
-    *x = gyro.getGyroX_rads() - gx_bias;
-    *y = gyro.getGyroY_rads() - gy_bias;
-    *z = gyro.getGyroZ_rads() - gz_bias;
+    gyro_data.x = gyro.getGyroX_rads() - gyro_bias.x;
+    gyro_data.y = gyro.getGyroY_rads() - gyro_bias.y;
+    gyro_data.z = gyro.getGyroZ_rads() - gyro_bias.z;
+    
+    return gyro_data;
 }
 
-void UnifiedSensors::returnRawMag(double *x, double *y, double *z)
+Angles_3D UnifiedSensors::returnRawMag()
 {
+    Angles_3D mag_data;
+
     mag.read();
-
     // Convert to mTesla. Rangle is +/-4 so we divide by 6842 to get gauss, then mult. by 100 to get mtesla
-    *x = mag.m.x / 68.42 - HARD_IRON_BIAS[0];
-    *y = mag.m.y / 68.42 - HARD_IRON_BIAS[1];
-    *z = mag.m.z / 68.42 - HARD_IRON_BIAS[2];
+    mag_data.x = mag.m.x / 68.42 - mag_bias.x;
+    mag_data.y = mag.m.y / 68.42 - mag_bias.y;
+    mag_data.z = mag.m.z / 68.42 - mag_bias.z;
+
+    return mag_data;
 }
 
-void UnifiedSensors::readTDS(double& tds_reading)
+double UnifiedSensors::readTDS()
 {
-    int tds = adc.adc0->analogRead(TDS_pin);
+    int tds = analogRead(TDS_pin);
 
     double averageVoltage = tds * (double)VREF / 1024.0;
     double compensationCoefficient = 1.0 + 0.02 * (temp - 25.0);                                                                                                                            // temperature compensation formula: fFinalResult(25^C) = fFinalResult(current)/(1.0+0.02*(fTP-25.0));
     double compensationVolatge = averageVoltage / compensationCoefficient;                                                                                                                  // temperature compensation
-    tds_reading = (133.42 * compensationVolatge * compensationVolatge * compensationVolatge - 255.86 * compensationVolatge * compensationVolatge + 857.39 * compensationVolatge) * 0.5; // convert voltage value to tds value
+    return (133.42 * compensationVolatge * compensationVolatge * compensationVolatge - 255.86 * compensationVolatge * compensationVolatge + 857.39 * compensationVolatge) * 0.5;            // convert voltage value to tds value
+
 }
 
-void UnifiedSensors::readVoltage(double& voltage)
+double UnifiedSensors::readVoltage()
 {
-    voltage = adc.adc1->analogRead(voltage_pin) * (double)VREF / 1024.0;
+    double voltage = analogRead(voltage_pin) * (double)VREF / 1024.0;
     voltage = voltage * (9.95 + 1.992) / 1.992;
 
     if (voltage <= 0.1)
         voltage = 0.0;
+    return voltage;
 }
 
-void UnifiedSensors::readExternalPressure_v(double& voltage)
+double UnifiedSensors::readExternalPressure_v()
 {
     int tds = analogRead(pressure_pin);
-    voltage = tds * (double)VREF / 1024.0;
+    double voltage = tds * (double)VREF / 1024.0;
+    return voltage;
 }
 
-void UnifiedSensors::readExternalPressure(double& pressure)
+double UnifiedSensors::readExternalPressure()
 {
     double voltage = 0.0;
-    readExternalPressure_v(voltage);
+    voltage = readExternalPressure_v();
     double psi = (100.0 / 3.0) * voltage + (50.0 - ((100.0 / 3.0) * (3.3 / 2.0))); //pressure = 25psi * voltage - 12.5psi (linear)
-    pressure = psi / 14.6959488;
+    return psi / 14.6959488; //convert to atm
 }
+
 void UnifiedSensors::logToStruct(Data &data)
 {
+    //Flags are triggered by interrupts set by the sensors
+    //Mag, Accel, Gyro, and baro all have their own interrupt pins
     if (UnifiedSensors::mag_flag)
     {
-        returnRawMag(&data.mag.x, &data.mag.y, &data.mag.z);
+        Time::NamedTimer mag_timer("Mag");
+        data.rmag = returnRawMag();
+
+        data.fmag.x = mag_x.filt(data.rmag.x, data.delta_time);
+        data.fmag.y = mag_y.filt(data.rmag.y, data.delta_time);
+        data.fmag.z = mag_z.filt(data.rmag.z, data.delta_time);
+        mag_timer.showElapsed();
 
         UnifiedSensors::mag_flag = false;
     }
 
     if (UnifiedSensors::accel_flag && UnifiedSensors::gyro_flag)
     {
-
-        returnRawAccel(&data.racc.x, &data.racc.y, &data.racc.z, &data.bmi_temp);
-
-        data.facc.x = acc_x.filt(data.racc.x, data.dt);
-        data.facc.y = acc_y.filt(data.racc.y, data.dt);
-        data.facc.z = acc_z.filt(data.racc.z, data.dt);
+        Time::NamedTimer accel_timer("IMU");
+        data.racc = returnRawAccel();
+        data.bmi_temp = returnAccelTempC();
 
         temp_measurements[1] = data.bmi_temp;
 
         UnifiedSensors::accel_flag = false;
 
-        returnRawGyro(&data.rgyr.x, &data.rgyr.y, &data.rgyr.z);
-
-        data.fgyr.x = gyr_x.filt(data.rgyr.x, data.dt);
-        data.fgyr.y = gyr_y.filt(data.rgyr.y, data.dt);
-        data.fgyr.z = gyr_z.filt(data.rgyr.z, data.dt);
+        data.rgyr = returnRawGyro();
 
         UnifiedSensors::gyro_flag = false;
+        accel_timer.showElapsed();
     }
 
     if (UnifiedSensors::bar_flag)
     {
-        returnRawBaro(&data.bmp_rpres, &data.bmp_rtemp);
-        temp_measurements[0] = data.bmp_rtemp;
-
-        data.bmp_fpres = bmp_pres.filt(data.bmp_rpres, data.dt);
-        data.bmp_ftemp = bmp_temp.filt(data.bmp_rtemp, data.dt);
+        Time::NamedTimer baro_timer("Baro");
+        data.raw_bmp = returnRawBaro();
+        temp_measurements[0] = data.raw_bmp.temperature;
 
         UnifiedSensors::bar_flag = false;
+        baro_timer.showElapsed();
     }
 
-    tds_function.void_tick(data.r_TDS);
-    voltage_function.void_tick(data.r_voltage);
-    pressure_function.void_tick(data.external.raw_pres);
+    int64_t current_time = scoped_timer.elapsed();
 
-    data.f_TDS = tds_filter.filt(data.r_TDS, data.dt);
-    data.f_voltage = voltage_filter.filt(data.r_voltage, data.dt);
-    data.external.filt_pres = ext_pres.filt(data.external.raw_pres, data.dt); 
+    
+    if(current_time - m_tds_prev_log >= m_tds_interval_ns)
+    {
+        data.raw_TDS = readTDS();
+        data.filt_TDS = tds_filter.filt(data.raw_TDS, data.delta_time);
+    }
+
+    if(current_time - m_volt_prev_log >= m_volt_interval_ns)
+    {
+        data.raw_voltage = readVoltage();
+        data.filt_voltage = voltage_filter.filt(data.raw_voltage, data.delta_time);
+    }
+
+    if(current_time - m_ext_pres_prev_log >= m_ext_pres_interval_ns)
+    {
+        data.raw_ext_pres = readExternalPressure();
+        data.filt_ext_pres = ext_pres.filt(data.raw_ext_pres, data.delta_time);
+    }
+
+ 
     
 }

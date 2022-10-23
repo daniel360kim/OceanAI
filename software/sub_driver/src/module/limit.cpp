@@ -12,6 +12,11 @@
 
 #include "limit.h"
 
+/**
+ * @brief initialize limit switch pins
+ * 
+ * @param limit_pin 
+ */
 void Limit::begin(const uint8_t limit_pin)
 {
     this->limit_pin = limit_pin;
@@ -19,6 +24,13 @@ void Limit::begin(const uint8_t limit_pin)
     button_state = !digitalRead(limit_pin);
 }
 
+
+/**
+ * @brief reads the limit switch
+ * 
+ * @return true limit switch is pressed
+ * @return false limit switch is not pressed
+ */
 bool Limit::state()
 {
     button_state = digitalRead(limit_pin);

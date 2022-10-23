@@ -68,6 +68,7 @@ class Bmi088Accel
     };
     Bmi088Accel(TwoWire &bus,uint8_t address);
     Bmi088Accel(SPIClass &bus,uint8_t csPin);
+    Bmi088Accel();
     int begin();
     bool setOdr(Odr odr);
     bool setRange(Range range);
@@ -241,6 +242,7 @@ class Bmi088Gyro
     };
     Bmi088Gyro(TwoWire &bus,uint8_t address);
     Bmi088Gyro(SPIClass &bus,uint8_t csPin);
+    Bmi088Gyro();
     int begin();
     bool setOdr(Odr odr);
     bool setRange(Range range);

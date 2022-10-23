@@ -20,13 +20,12 @@
 struct StartFile_d
 {
     // File names
-  char *bin_file;
-  char *ascii_file;
+  const char *bin_file;
+  const char *ascii_file;
 
 // Conditional Compilation Configurations
 #if DEBUG_ON
     static constexpr bool debug = true;
-
 #else
     static constexpr bool debug = false;
 #endif
@@ -64,8 +63,8 @@ struct StartFile_d
     char* gyro_ODR;
     char* mag_ODR;
 
-    Vec3 gyro_bias;
-    Vec3 mag_bias;
+    Angles_3D gyro_bias;
+    Angles_3D mag_bias;
 };
 
 extern StartFile_d configs;

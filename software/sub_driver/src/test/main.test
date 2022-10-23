@@ -133,10 +133,10 @@ bool logged = false;
 void loop()
 {
     data.time_ns = scoped_timer.elapsed(); //scoped timer is a global object to measure time since program epoch
-    data.dt = (scoped_timer.elapsed() - previous_time) / 1000000000.0;
+    data.delta_time = (scoped_timer.elapsed() - previous_time) / 1000000000.0;
     previous_time = scoped_timer.elapsed();
     
-    data.loop_time = 1.0 / data.dt;
+    data.loop_time = 1.0 / data.delta_time;
 
     output.loopIndication();
 

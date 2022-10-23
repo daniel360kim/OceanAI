@@ -66,29 +66,12 @@ namespace Optics
             temp = camera.read_reg(ARDUCHIP_TEST1);
             if(temp != 0x55)
             {
-                #if DEBUG_ON == true
-                    char* message = (char*)"OV2640: SPI bus initialization failed";
-                    Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Fatal, message);
-
-                    #if LIVE_DEBUG == true
-                        Serial.println(F(message));
-                    #endif
-
-                #endif
-                
+                ERROR_LOG(Debug::Critical_Error, "OV2640: SPI interface error!");
                 return false;
             }
             else
             {
-                #if DEBUG_ON == true
-                    char* message = (char*)"OV2640: SPI bus initialization successful";
-                    Debug::success.addToBuffer(scoped_timer.elapsed(), Debug::Success, message);
-
-                    #if LIVE_DEBUG == true
-                        Serial.println(F(message));
-                    #endif
-
-                #endif
+                SUCCESS_LOG("OV2640: SPI interface OK!");
                 break;
             }
         }
@@ -103,28 +86,12 @@ namespace Optics
 
             if((vid != 0x26) && ((pid != 0x41) || (pid != 0x42)))
             {
-                #if DEBUG_ON == true
-                char* message = (char*)"OV2640: Could not find/detect camera";
-                Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Fatal, message);
-
-                    #if LIVE_DEBUG == true
-                        Serial.println(F(message));
-                    #endif
-
-                #endif
+                ERROR_LOG(Debug::Critical_Error, "OV2640: Camera ID error!");
                 return false;
             }
             else
             {
-                #if DEBUG_ON == true
-                char* message = (char*)"OV2640: Found the camera";
-                Debug::success.addToBuffer(scoped_timer.elapsed(), Debug::Success, message);
-
-                    #if LIVE_DEBUG == true
-                        Serial.println(F(message));
-                    #endif
-
-                #endif
+                SUCCESS_LOG("OV2640: Camera ID OK!");
                 break;
                 
             }
@@ -137,7 +104,7 @@ namespace Optics
 
         configs.img_size = Settings::IMAGE_SIZE;
         configs.img_format = Settings::IMAGE_FORMAT;
-        Serial.println("Camera is ready");
+
         return true;
     }
     
@@ -160,10 +127,7 @@ namespace Optics
             while ( !camera.get_bit(ARDUCHIP_TRIG, CAP_DONE_MASK));
 
             *capture_time = total_time - scoped_timer.elapsed();
-            #if LIVE_DEBUG == true
-                Serial.print(F("capture total_time used (in miliseconds):"));
-                Serial.println(*capture_time / 1000, DEC);
-            #endif
+            
             total_time = scoped_timer.elapsed();
 
             read_fifo_burst();
@@ -172,14 +136,9 @@ namespace Optics
 
             *save_time = total_time;
             
-            #if LIVE_DEBUG == true
-                Serial.print(F("save capture total_time used (in miliseconds):"));
-                Serial.println(*save_time / 1000, DEC);
-            #endif
 
             reopenPrevFile(filename);
             previous_log = current_micros;
-            Serial.println("Capture complete");
         }
         
     }
@@ -197,15 +156,7 @@ namespace Optics
 
         if(length >= MAX_FIFO_SIZE) //8M
         {
-             #if DEBUG_ON == true
-                char* message = (char*)"OV2640: FIFO Buffer Oversized";
-                Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Fatal, message);
-
-                    #if LIVE_DEBUG == true
-                        Serial.println(F(message));
-                    #endif
-
-             #endif
+            ERROR_LOG(Debug::Fatal, "OV2640: FIFO Over size.");
         }
 
         camera.CS_LOW();
@@ -266,28 +217,13 @@ namespace Optics
                 //Open the new file
                 if(!image_file.open(c_path, O_WRITE | O_CREAT))
                 {
-                    #if DEBUG_ON == true
-                        char* message = (char*)"Failed to open image file";
-                        Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Warning, message);
-                        
-                        #if LIVE_DEBUG == true
-                            Serial.println(F(message));
-                        #endif
-
-                    #endif
+                    ERROR_LOG(Debug::Fatal, "OV2640: File open failed!");
                 }
 
                 if(!image_file.preAllocate(35000))
                 {
                     file.close();
-                    #if DEBUG_ON == true
-                        char* message = (char*)"Failed to preallocate image file";
-                        Debug::error.addToBuffer(scoped_timer.elapsed(), Debug::Warning, message);
-                        #if LIVE_DEBUG == true
-                            Serial.println(F(message));
-                        #endif
-
-                    #endif
+                    ERROR_LOG(Debug::Fatal, "OV2640: File pre-allocate failed!");
                 }
                 
                 //error check here

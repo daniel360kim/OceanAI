@@ -1,7 +1,9 @@
 #include <Arduino.h>
 #include <vector>
+#include <memory>
 
 #include "debug.h"
+#include "config.h"
 
 #include "Timer.h"
 
@@ -10,16 +12,16 @@ namespace Debug
 
     Print error;
     Print success;
+    Print info;
 
-    void Print::addToBuffer(Severity severity, char* message)
+    void Print::addToBuffer(Severity severity, const char* message)
     {
-        Message *metadata = new Message(severity, message);
+        std::unique_ptr<Message> msg = std::make_unique<Message>(severity, message);
 
-        printBuffer.push_back(*metadata);
-
-        delete metadata;
-
-        
+        printBuffer.push_back(*msg);
+        #if LIVE_DEBUG
+            Serial.println(message);
+        #endif
     }
 
     void Print::printBuffer_vec()

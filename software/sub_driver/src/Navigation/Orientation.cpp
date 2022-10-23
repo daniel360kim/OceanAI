@@ -15,6 +15,7 @@
 
 #include "Orientation.h"
 #include "Quaternion.h"
+#include "../data/data_struct.h"
 
 /**
  * @brief updates the class with the measurements
@@ -99,15 +100,18 @@ void Orientation::toEuler(double w, double x, double y, double z, double *X, dou
  * @param wfay converted ay
  * @param wfaz converted az
  */
-void Orientation::convertAccelFrame(Quaternion orientation, double ax, double ay, double az, double *wfax, double *wfay, double *wfaz)
+Angles_3D Orientation::convertAccelFrame(Quaternion orientation, double ax, double ay, double az)
 {
     Quaternion acc = { 0, ax, ay, az };
     Quaternion wF_acc = Quaternion::hamiltonProduct(orientation, acc);
 
+    Angles_3D world_frame_acc;
     //A simplified hamilton product multiplied by -1
-    *wfax = (wF_acc.w * orientation.x * -1 + wF_acc.x * orientation.w + wF_acc.y * orientation.z * -1 - wF_acc.z * orientation.y * -1);
-    *wfay = wF_acc.w * orientation.y * -1 - wF_acc.x * orientation.z * -1 + wF_acc.y * orientation.w + wF_acc.z * orientation.x * -1;
-    *wfaz = wF_acc.w * orientation.z * -1 + wF_acc.x * orientation.y * -1 - wF_acc.y * orientation.x * -1 + wF_acc.z * orientation.w + 9.8065;
+    world_frame_acc.x = (wF_acc.w * orientation.x * -1 + wF_acc.x * orientation.w + wF_acc.y * orientation.z * -1 - wF_acc.z * orientation.y * -1);
+    world_frame_acc.y = wF_acc.w * orientation.y * -1 - wF_acc.x * orientation.z * -1 + wF_acc.y * orientation.w + wF_acc.z * orientation.x * -1;
+    world_frame_acc.z = wF_acc.w * orientation.z * -1 + wF_acc.x * orientation.y * -1 - wF_acc.y * orientation.x * -1 + wF_acc.z * orientation.w + 9.8065;
+
+    return world_frame_acc;
 }
 
 double Orientation::constrainAngle_whole(double x) //to 0,360

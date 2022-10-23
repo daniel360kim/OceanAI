@@ -14,7 +14,6 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <SdFat.h>
-#include <tuple>
 #include <stdint.h>
 #include <vector>
 #include <CrashReport.h>
@@ -33,33 +32,28 @@ class SD_Logger
 {
 public:
     SD_Logger() {}
-    SD_Logger(Time::Mission mission, uint32_t log_interval);
+    SD_Logger(const int64_t duration_ns, int log_interval_ns);
 
     bool log_crash_report();
     bool init();
     bool logData(Data data);
 
-    /**
-     * @brief closes current file
-     * 
-     * @return true file close successful
-     * @return false file close unsuccessful
-     */
     static bool closeFile() { return file.close(); }
 
     static bool reopenFile(const char* filename);
 
     bool rewindPrint();
 
-    char* data_filename;
+    void printData(Print &printer, Data &data);
 
 private:
-    char* csv_filename;
-    uint64_t previous_time;
-    uint64_t iterations;
+    const char* m_data_filename; //name of the binary data
+    const char* m_csv_filename; //name of the ascii data
+    int64_t m_previous_log_time;
+    unsigned long long m_write_iterations;
 
-    static unsigned int freeMemory();
-    unsigned int findFactors();
+    static int freeMemory();
+    int findFactors();
     static void flush(void*);
     static void getCapacity(uint32_t &capacity);
 
@@ -69,7 +63,7 @@ private:
     Time::Async<void, uint32_t&> capacity_updater;
 
     uint64_t m_log_file_size;
-    uint32_t log_interval;
+    int m_log_interval;
 
     bool m_inital_cap_updated = false;
 };

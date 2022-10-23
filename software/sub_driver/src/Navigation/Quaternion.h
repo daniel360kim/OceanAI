@@ -12,6 +12,8 @@
 #ifndef Quaternion_h
 #define Quaternion_h
 
+#include "../data/data_struct.h"
+
 class Quaternion
 {
 public:
@@ -32,6 +34,12 @@ public:
     void toAxis(double gx, double gy, double gz, double dt);
     static Quaternion hamiltonProduct(Quaternion A, Quaternion B);
     static Norm findNorm(double gx, double gy, double gz, double dt);
+
+    //overloaded typecast operator to convert quaternion to 4D vector
+    operator Angles_4D() const
+    {
+        return {w, x, y, z};
+    }
 
 };
 

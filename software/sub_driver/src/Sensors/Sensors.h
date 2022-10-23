@@ -16,11 +16,11 @@
 #include <InternalTemperature.h>
 #include <vector>
 #include <stdint.h>
+#include <WireIMXRT.h>
 
 #include "BMP388/BMP388_DEV.h"
 #include "BMI088/BMI088.h"
 #include "LIS3MDL/LIS3MDL.h"
-#include "external_sensor/external_sensor.h"
 
 #include "LowPass.h"
 
@@ -39,45 +39,52 @@ public:
     }
     void scanAddresses();
     bool initNavSensors();
-    void initADC();
     void initTDS(uint8_t TDS_pin, uint32_t interval, double filt_cutoff);
     void initVoltmeter(uint8_t input_pin , uint32_t interval, double filt_cutoff);
     void initPressureSensor(uint8_t input_pin , uint32_t interval, double filt_cutoff);
     void setInterrupts(const uint8_t bar_int, const uint8_t accel_int, const uint8_t gyro_int, const uint8_t mag_int);
     void setGyroBias();
 
-    void returnRawBaro(double *pres, double *temp);
-    void returnRawAccel(double *x, double *y, double *z, double *tempC);
-    void returnRawGyro(double *x, double *y, double *z);
-    void returnRawMag(double *x, double *y, double *z);
+    BMP388Data returnRawBaro();
+    Angles_3D returnRawAccel();
+    double returnAccelTempC();
+    Angles_3D returnRawGyro();
+    Angles_3D returnRawMag();
     
     void logToStruct(Data &data);
 
-    static void readTDS(double &tds_reading);
-    static void readVoltage(double& voltage);
-    static void readExternalPressure_v(double& voltage);
-    static void readExternalPressure(double& pressure);
+    double readTDS();
+    double readVoltage();
+    double readExternalPressure_v();
+    double readExternalPressure();
 
-    double gx_bias = 0, gy_bias = 0, gz_bias = 0;
-    const double HARD_IRON_BIAS[3] = { 0.36, 0.39, 0.49 };
+    Angles_3D gyro_bias;
+    Angles_3D mag_bias = { 0.36, 0.39, 0.49 };
 
     std::vector<uint8_t> address;
 
 private:
     UnifiedSensors() {}
+    
+    BMP388_DEV baro;
+    Bmi088Accel accel;
+    Bmi088Gyro gyro;
+    LIS3MDL mag;
+
+
 
     static UnifiedSensors instance;
-    static uint8_t TDS_pin, voltage_pin, pressure_pin;
+
+    uint8_t TDS_pin, voltage_pin, pressure_pin;
     static double temp;
 
     double temp_measurements[2];
 
-    static bool pressure_sensor_connected;
+    bool m_pressure_sensor_connected = false;
 
-    //Timers to measure tds and voltage and pressure at certain intervals
-    Time::Async<void, double&> tds_function;
-    Time::Async<void, double&> voltage_function;
-    Time::Async<void, double&> pressure_function;
+    int64_t m_tds_prev_log;
+    int64_t m_volt_prev_log;
+    int64_t m_ext_pres_prev_log;
 
     static volatile bool bar_flag;
     static volatile bool accel_flag;
@@ -89,23 +96,21 @@ private:
     static void gyro_drdy()  { gyro_flag = true; }
     static void mag_drdy()  { mag_flag = true; }
 
+    long m_tds_interval_ns;
+    long m_volt_interval_ns;
+    long m_ext_pres_interval_ns;
 
     //Low pass filters for all the sensors
-    Filter::LowPass<1> gyr_x;
-    Filter::LowPass<1> gyr_y;
-    Filter::LowPass<1> gyr_z;
-
-    Filter::LowPass<1> acc_x;
-    Filter::LowPass<1> acc_y;
-    Filter::LowPass<1> acc_z;
-
-    Filter::LowPass<1> bmp_pres;
-    Filter::LowPass<1> bmp_temp;
+    Filter::LowPass<1> mag_x;
+    Filter::LowPass<1> mag_y;
+    Filter::LowPass<1> mag_z;
 
     Filter::LowPass<1> tds_filter;
     Filter::LowPass<1> voltage_filter;
     Filter::LowPass<1> ext_temp;
     Filter::LowPass<1> ext_pres;
+
+    
 };
 
 

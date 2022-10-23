@@ -28,9 +28,9 @@ double Positioning::returnProduct()
  */
 void Velocity::updateVelocity(Data &data)
 {
-    x.Integrate(data.wfacc.x, data.dt);
-    y.Integrate(data.wfacc.y, data.dt);
-    z.Integrate(data.wfacc.z, data.dt);
+    x.Integrate(data.wfacc.x, data.delta_time);
+    y.Integrate(data.wfacc.y, data.delta_time);
+    z.Integrate(data.wfacc.z, data.delta_time);
 
     data.vel.x = x.returnProduct();
     data.vel.y = y.returnProduct();
@@ -44,9 +44,9 @@ void Velocity::updateVelocity(Data &data)
  */
 void Position::updatePosition(Data &data)
 {
-    x.Integrate(data.vel.x, data.dt);
-    y.Integrate(data.vel.y, data.dt);
-    z.Integrate(data.vel.z, data.dt);
+    x.Integrate(data.vel.x, data.delta_time);
+    y.Integrate(data.vel.y, data.delta_time);
+    z.Integrate(data.vel.z, data.delta_time);
 
     data.pos.x = x.returnProduct();
     data.pos.y = y.returnProduct();
