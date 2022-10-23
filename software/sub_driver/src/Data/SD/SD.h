@@ -54,6 +54,7 @@ private:
 
     static int freeMemory();
     int findFactors();
+    int findFactors(const int available_memory);
     static void flush(void*);
     static void getCapacity(uint32_t &capacity);
 

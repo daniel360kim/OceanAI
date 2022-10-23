@@ -21,6 +21,7 @@
 #include <stddef.h>
 #include <numeric>
 
+
 #include "SD.h"
 #include "DataFile.h"
 #include "../data_struct.h"
@@ -400,7 +401,7 @@ bool SD_Logger::rewindPrint()
     //How many times we need to reopen and close files
     for(unsigned long long j = 0; j < m_write_iterations / buf_size; j++)
     {
-        if(!file.open(m_data_filename, FILE_READ))
+        if(!file.open(m_data_filename, O_RDONLY))
         {
             std::string bin_file_err = "Failed to open binary file at iteration: " + j;
             ERROR_LOG(Debug::Critical_Error, bin_file_err.c_str());
@@ -440,6 +441,7 @@ bool SD_Logger::rewindPrint()
         {
             ERROR_LOG(Debug::Critical_Error, "Failed to close csv file during translation");
         }
+
 
         read_buf.reset();
     }

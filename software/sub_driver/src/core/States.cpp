@@ -343,9 +343,9 @@ void SD_translate::run(StateAutomation* state)
         state->setState(ErrorIndication::getInstance());
         return;
     }
-    Time::TimerManager::getInstance().addTimer(sd_timer.getTimeInfo());
+    sd_timer.showElapsed();
     LEDa.setColor(0, 255, 0);
-    Time::TimerManager::getInstance().printTimers();
+    
     while(1)
     {
         //just stop the program for now. add reinitialization state later
