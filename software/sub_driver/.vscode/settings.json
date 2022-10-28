@@ -65,7 +65,8 @@
 "files.associations": {
     "Makefile": "cpp",
     "*.tpp": "cpp",
-    "system_error": "cpp"
+    "system_error": "cpp",
+    "vector": "cpp"
 },
 "C_Cpp.errorSquiggles": "Enabled"
 }

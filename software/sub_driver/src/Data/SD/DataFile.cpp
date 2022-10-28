@@ -45,6 +45,10 @@ DataFile::DataFile(const char* file_name, ENDING ending)
 			m_filename = appendChars(file_name, "00.png");
 			break;
 		
+		case MSGPACK:
+			m_filename = appendChars(file_name, "00.msgpack");
+			break;
+		
 		default:
 			m_filename = appendChars(file_name, "00.txt"); //default to .txt
 	

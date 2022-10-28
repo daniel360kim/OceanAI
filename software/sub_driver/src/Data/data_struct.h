@@ -57,13 +57,18 @@ struct Data
 {
     int64_t time_ns;
     int loop_time;
-
     int system_state;
-
     double delta_time;
+    uint32_t sd_capacity;
+
+    double raw_voltage;
+    double filt_voltage;
+    int clock_speed;
+    double internal_temp;
 
     BMP388Data raw_bmp;
 
+    double bmi_temp;
     Angles_3D racc;
     Angles_3D wfacc;
     Angles_3D vel;
@@ -74,8 +79,6 @@ struct Data
 
     Angles_4D relative;
 
-    double bmi_temp;
-
     Angles_3D rmag;
     Angles_3D fmag;
 
@@ -85,19 +88,13 @@ struct Data
     double raw_ext_pres;
     double filt_ext_pres;
 
-    double raw_voltage;
-    double filt_voltage;
-
-    int clock_speed;
-    double internal_temp;
-
     StepperData dive_stepper;
     StepperData pitch_stepper;
     
     OpticalData optical_data;
 
-    uint32_t sd_capacity;
-
+    
+    //65 total elements
 };
 
 

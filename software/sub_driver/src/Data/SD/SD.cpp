@@ -114,7 +114,7 @@ bool SD_Logger::log_crash_report()
 bool SD_Logger::init()
 {
     //Creating binary file 
-    DataFile bin("data", DataFile::DAT);
+    DataFile bin("data", DataFile::MSGPACK);
     if(!bin.createFile())
     {
         ERROR_LOG(Debug::Fatal, "Failed to create binary file");
@@ -295,6 +295,68 @@ bool SD_Logger::init()
     return true; //everything went well! SD card is ready to go
 }
 
+template <int N>
+void SD_Logger::data_to_json(Data &data, StaticJsonDocument<N> &doc)
+{
+    doc["time"] = data.time_ns;
+    doc["loop_time"] = data.loop_time;
+    doc["sys_state"] = data.system_state;
+    doc["delta_time"] = data.delta_time;
+    doc["sd_cap"] = data.sd_capacity;
+
+    JsonArray sys_data = doc.createNestedArray("sys_data");
+        sys_data.add(data.raw_voltage); sys_data.add(data.filt_voltage);
+        sys_data.add(data.clock_speed); sys_data.add(data.internal_temp);
+
+    JsonArray baro_data = doc.createNestedArray("baro_data");
+        baro_data.add(data.raw_bmp.pressure);
+        baro_data.add(data.raw_bmp.temperature);
+    
+    JsonArray ori_data = doc.createNestedArray("IMU_data");
+        ori_data.add(data.bmi_temp);
+        ori_data.add(data.racc.x); ori_data.add(data.racc.y); ori_data.add(data.racc.z);
+        ori_data.add(data.wfacc.x); ori_data.add(data.wfacc.y); ori_data.add(data.wfacc.z);
+        ori_data.add(data.vel.x); ori_data.add(data.vel.y); ori_data.add(data.vel.z);
+        ori_data.add(data.pos.x); ori_data.add(data.pos.y); ori_data.add(data.pos.z);
+        ori_data.add(data.rgyr.x); ori_data.add(data.rgyr.y); ori_data.add(data.rgyr.z);
+        ori_data.add(data.rel_ori.x); ori_data.add(data.rel_ori.y); ori_data.add(data.rel_ori.z);
+        ori_data.add(data.relative.w); ori_data.add(data.relative.x); ori_data.add(data.relative.y); ori_data.add(data.relative.z);
+        ori_data.add(data.rmag.x); ori_data.add(data.rmag.y); ori_data.add(data.rmag.z);
+        ori_data.add(data.fmag.x); ori_data.add(data.fmag.y); ori_data.add(data.fmag.z);
+    
+    JsonArray external_data = doc.createNestedArray("external_data");
+        external_data.add(data.raw_TDS); external_data.add(data.filt_TDS);
+        external_data.add(data.raw_ext_pres); external_data.add(data.filt_ext_pres);
+
+
+    JsonArray step_data = doc.createNestedArray("step_data");
+        step_data.add(data.dive_stepper.limit_state);
+        step_data.add(data.dive_stepper.homed);
+        step_data.add(data.dive_stepper.current_position);
+        step_data.add(data.dive_stepper.current_position_mm);
+        step_data.add(data.dive_stepper.target_position);
+        step_data.add(data.dive_stepper.target_position_mm);
+        step_data.add(data.dive_stepper.speed);
+        step_data.add(data.dive_stepper.acceleration);
+        step_data.add(data.dive_stepper.max_speed);
+
+        step_data.add(data.pitch_stepper.limit_state);
+        step_data.add(data.pitch_stepper.homed);
+        step_data.add(data.pitch_stepper.current_position);
+        step_data.add(data.pitch_stepper.current_position_mm);
+        step_data.add(data.pitch_stepper.target_position);
+        step_data.add(data.pitch_stepper.target_position_mm);
+        step_data.add(data.pitch_stepper.speed);
+        step_data.add(data.pitch_stepper.acceleration);
+        step_data.add(data.pitch_stepper.max_speed);
+    
+
+    JsonArray optics_data = doc.createNestedArray("optics");
+        optics_data.add(data.optical_data.capture_time);
+        optics_data.add(data.optical_data.save_time);
+        optics_data.add(data.optical_data.FIFO_length);
+}
+
 /**
  * @brief logs our data to the SD card
  * 
@@ -302,7 +364,7 @@ bool SD_Logger::init()
  * @return true 
  * @return false 
  */
-bool SD_Logger::logData(Data data)
+bool SD_Logger::logData(Data &data)
 {
     //Update the capacity from the capacity we calculated in initialization
     if(!m_inital_cap_updated)
@@ -314,18 +376,23 @@ bool SD_Logger::logData(Data data)
     int64_t current_time = scoped_timer.elapsed();
     if(current_time - m_previous_log_time >= m_log_interval)
     {
+        constexpr int json_capacity = JSON_OBJECT_SIZE(67);
+        StaticJsonDocument<json_capacity> json_data;
+
+        data_to_json<json_capacity>(data, json_data);
+
         //If our sd card is busy we add to our buffer
         if(file.isBusy())
         {
             INFO_LOG("SD Card is busy, adding to buffer");
-            write_buf.push(data); //adding buffer to queue data structure (FIFO)
+            write_buf.push(json_data); //adding buffer to queue data structure (FIFO)
         }
         else
         {
             //If nothing is in the buffer we directly write to the sd card
             if(write_buf.size() == 0)
             {
-                file.write((const uint8_t*)&data, sizeof(data));
+                serializeMsgPack(json_data, file);
                 //Counting how many times we write to the sd card.
                 //This is used to calculate how many times to rewind when converting the binary 
                 //to ascci after the mission is over
@@ -335,10 +402,10 @@ bool SD_Logger::logData(Data data)
             else
             {
                 //If there is data in the buffer we move it into the buffer and write the oldest data to the sd card
-                write_buf.push(data);
-                data = write_buf.front();
+                write_buf.push(json_data);
+                json_data = write_buf.front();
                 write_buf.pop();
-                file.write((const uint8_t*)&data, sizeof(data));
+                serializeMsgPack(json_data, file);
                 m_write_iterations++;
             }
         }
@@ -353,7 +420,7 @@ bool SD_Logger::logData(Data data)
     {
         INFO_LOG("Buffer is full, slowing down data logging rate");
         //Clear the old data if it gets too large by swapping with an empty queue
-        std::queue<Data> empty;
+        std::queue<StaticJsonDocument<67>> empty;
         std::swap(write_buf, empty);
 
         m_log_interval+= 10000000; //If the buffer is too large we increase the log interval to prevent overflow
@@ -364,178 +431,6 @@ bool SD_Logger::logData(Data data)
     capacity_updater.void_tick(data.sd_capacity);
     
     return true;
-}
-
-/**
- * @brief converts binary file to csv file
- * reads a line of the binary file, saves it to a buffer several times
- * closes binary file, opens csv file, writes buffer to csv file
- * keep doing till all data is converted
- * 
- * We do this since writing as binary is wayyyyyyyyyy faster than writing as ASCII
- * So once the mission is complete, we can spend several minutes converting
- * 
- * Since the SD files can get really large, we use large datatypes just to be safe
- * @return true conversion successful
- * @return false conversion unsuccessful
- */
-bool SD_Logger::rewindPrint()
-{
-    if(!file.close())
-    {
-        ERROR_LOG(Debug::Critical_Error, "Failed to close binary file before translation");
-        return false;
-    }
-
-    //Freeing memory from write_buffer
-    std::queue<Data> empty;
-    std::swap(write_buf, empty);
-
-    //finding a buffer size based on available memory and how much data we logged
-    //this allows us to create the largest buffer possible for less opens and closes of files
-    int buf_size = findFactors(); 
-
-    //Creating a circular buffer with a size based on the available memory
-    CircularBuffer<Data> read_buf(buf_size);
-
-    //How many times we need to reopen and close files
-    for(unsigned long long j = 0; j < m_write_iterations / buf_size; j++)
-    {
-        if(!file.open(m_data_filename, O_RDONLY))
-        {
-            std::string bin_file_err = "Failed to open binary file at iteration: " + j;
-            ERROR_LOG(Debug::Critical_Error, bin_file_err.c_str());
-            return false;
-        }
-
-        file.seekSet(j * sizeof(Data) * buf_size); //seeking to the correct location in the file
-        Data datacopy; //creating a copy of our data to read into
-        for(unsigned long i = 0; i < buf_size; i++)
-        {
-            file.read((uint8_t*)&datacopy, sizeof(Data)); //reading the data into our copy
-            read_buf.insert(datacopy); //pushing the data into our circular buffer
-        }
-
-
-        if(!file.close())
-        {
-            ERROR_LOG(Debug::Critical_Error, "Failed to close binary file during translation");
-            return false;
-        }
-
-        if(!file.open(m_csv_filename, O_CREAT | O_APPEND | O_WRITE))
-        {
-            ERROR_LOG(Debug::Critical_Error, "Failed to open csv file during translation");
-            return false;
-        }
-
-        Data data;
-        
-        //Printing the copied data into the csv fie
-        for(int i = 0; i < buf_size; i++)
-        {
-            read_buf.get(data);
-            printData(file, data);
-        }   
-        if(!file.close())
-        {
-            ERROR_LOG(Debug::Critical_Error, "Failed to close csv file during translation");
-        }
-
-
-        read_buf.reset();
-    }
-
-    SUCCESS_LOG("Finished converting binary file to csv file");
-    return true;
-}
-
-void SD_Logger::printData(Print &printer, Data &data)
-{
-    char* comma = (char*)","; //We use comma so much, better to use as a variable
-    //Translating integer system state into readable characters
-    CurrentState state = static_cast<CurrentState>(data.system_state);
-
-    printer.print(data.time_ns); printer.print(comma); printer.print(data.loop_time); printer.print(comma);
-
-    StateAutomation::printState(printer, state); printer.print(comma);
-
-    printer.print(data.delta_time,10); printer.print(comma);
-
-    printer.print(data.raw_bmp.pressure); printer.print(comma); printer.print(data.raw_bmp.temperature); printer.print(comma);
-    
-    printer.print(data.racc.x); printer.print(comma); printer.print(data.racc.y); printer.print(comma); printer.print(data.racc.z); printer.print(comma);
-    printer.print(data.wfacc.x); printer.print(comma); printer.print(data.wfacc.y); printer.print(comma); printer.print(data.wfacc.z); printer.print(comma);
-    printer.print(data.vel.x); printer.print(comma); printer.print(data.vel.y); printer.print(comma); printer.print(data.vel.z); printer.print(comma);
-    printer.print(data.pos.x); printer.print(comma); printer.print(data.pos.y); printer.print(comma); printer.print(data.pos.z); printer.print(comma);
-    
-    printer.print(data.rgyr.x); printer.print(comma); printer.print(data.rgyr.y); printer.print(comma); printer.print(data.rgyr.z); printer.print(comma);
-    printer.print(data.rel_ori.x); printer.print(comma); printer.print(data.rel_ori.y); printer.print(comma); printer.print(data.rel_ori.z); printer.print(comma);
-    
-    printer.print(data.relative.w); printer.print(comma); printer.print(data.relative.x); printer.print(comma); printer.print(data.relative.y); printer.print(comma); printer.print(data.relative.z); printer.print(comma);
-    
-    printer.print(data.bmi_temp); printer.print(comma);
-    printer.print(data.rmag.x); printer.print(comma); printer.print(data.rmag.y); printer.print(comma); printer.print(data.rmag.z); printer.print(comma);
-    printer.print(data.fmag.x); printer.print(comma); printer.print(data.fmag.y); printer.print(comma); printer.print(data.fmag.z); printer.print(comma);
-
-    printer.print(data.raw_TDS); printer.print(comma); printer.print(data.filt_TDS); printer.print(comma);
-    printer.print(data.raw_ext_pres); printer.print(comma); printer.print(data.filt_ext_pres); printer.print(comma);
-
-    printer.print(data.raw_voltage); printer.print(comma); printer.print(data.filt_voltage); printer.print(comma);
-    printer.print(data.clock_speed); printer.print(comma); printer.print(data.internal_temp); printer.print(comma);
-    printer.print(data.dive_stepper.limit_state); printer.print(comma); printer.print(data.dive_stepper.homed); printer.print(comma); 
-    printer.print(data.dive_stepper.current_position); printer.print(comma); printer.print(data.dive_stepper.current_position_mm); printer.print(comma); printer.print(data.dive_stepper.target_position); printer.print(comma); printer.print(data.dive_stepper.target_position_mm); printer.print(comma);
-    printer.print(data.dive_stepper.speed); printer.print(comma); printer.print(data.dive_stepper.acceleration); printer.print(comma); printer.print(data.dive_stepper.max_speed); printer.print(comma);
-    printer.print(data.pitch_stepper.limit_state); printer.print(comma); printer.print(data.pitch_stepper.homed); printer.print(comma);
-    printer.print(data.pitch_stepper.current_position); printer.print(comma); printer.print(data.pitch_stepper.current_position_mm); printer.print(comma); printer.print(data.pitch_stepper.target_position); printer.print(comma); printer.print(data.pitch_stepper.target_position_mm); printer.print(comma);
-    printer.print(data.pitch_stepper.speed); printer.print(comma); printer.print(data.pitch_stepper.acceleration); printer.print(comma); printer.print(data.pitch_stepper.max_speed); printer.print(comma);
-    printer.print(data.optical_data.capture_time); printer.print(comma); printer.print(data.optical_data.save_time); printer.print(comma); printer.print(data.optical_data.FIFO_length); printer.print(comma);
-    printer.println(data.sd_capacity);
-}
-
-/**
- * @brief Finds how much heap memory we have
- * 
- * @return unsigned int free memory amount
- */
-int SD_Logger::freeMemory()
-{
-    return (char *)&_heap_end - __brkval; 
-}
-
-/**
- * @brief finds the greatest common factor of our iterations based on free memory available
- * 
- * @return unsigned int greates common factor
- */
-int SD_Logger::findFactors()
-{
-    //We save all the factors found into a vector
-    //TODO: Make this better :(
-    std::vector<unsigned int> factors;
-    for(unsigned int i = 1; i <= m_write_iterations; i++)
-    {
-        if(m_write_iterations % i == 0)
-        {
-            factors.push_back(i);
-        }
-    }
-
-    unsigned int free_mem = freeMemory();
-    unsigned int factor_to_use = 0;
-
-    //Reverse iterate to find largest factor
-    for(auto i = factors.rbegin(); i != factors.rend(); i++)
-    {
-        //Make sure that the largest factor we find can fit within are free memory
-        if(*i * sizeof(Data) <= free_mem - 200) //leave 200 bytes free to ensure we dont over do it
-        {
-            factor_to_use = *i;
-            break;
-        }
-    }
-
-    return factor_to_use;
 }
 
 
