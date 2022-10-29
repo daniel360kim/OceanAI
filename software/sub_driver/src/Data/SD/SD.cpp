@@ -111,7 +111,7 @@ bool SD_Logger::log_crash_report()
 bool SD_Logger::init()
 {
     //Creating binary file 
-    DataFile bin("data", DataFile::MSGPACK);
+    DataFile bin("data", DataFile::JSON);
     if(!bin.createFile())
     {
         ERROR_LOG(Debug::Fatal, "Failed to create binary file");
