@@ -20,6 +20,7 @@
 #include <string>
 #include <stddef.h>
 #include <numeric>
+#include <Arduino.h>
 
 
 #include "SD.h"
@@ -298,6 +299,7 @@ bool SD_Logger::init()
 template <int N>
 void SD_Logger::data_to_json(Data &data, StaticJsonDocument<N> &doc)
 {
+    doc.clear();
     doc["time"] = data.time_ns;
     doc["loop_time"] = data.loop_time;
     doc["sys_state"] = data.system_state;
@@ -392,7 +394,7 @@ bool SD_Logger::logData(Data &data)
             //If nothing is in the buffer we directly write to the sd card
             if(write_buf.size() == 0)
             {
-                serializeMsgPack(json_data, file);
+                serializeJson(json_data, file);
                 //Counting how many times we write to the sd card.
                 //This is used to calculate how many times to rewind when converting the binary 
                 //to ascci after the mission is over
@@ -405,7 +407,7 @@ bool SD_Logger::logData(Data &data)
                 write_buf.push(json_data);
                 json_data = write_buf.front();
                 write_buf.pop();
-                serializeMsgPack(json_data, file);
+                serializeJson(json_data, file);
                 m_write_iterations++;
             }
         }

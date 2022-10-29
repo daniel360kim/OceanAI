@@ -333,19 +333,11 @@ void SD_translate::enter(StateAutomation* state)
     currentState = CurrentState::SD_TRANSLATE;
     signal.on();
     LEDa.setColor(255, 255, 255);
+    logger.closeFile();
 }
 
 void SD_translate::run(StateAutomation* state)
 {
-    Time::NamedTimer sd_timer("SD Translation");
-    if(!logger.rewindPrint())
-    {
-        state->setState(ErrorIndication::getInstance());
-        return;
-    }
-    sd_timer.showElapsed();
-    LEDa.setColor(0, 255, 0);
-    
     while(1)
     {
         //just stop the program for now. add reinitialization state later
