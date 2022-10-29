@@ -29,7 +29,8 @@ public:
         DAT,
         JPG,
         PNG,
-        MSGPACK
+        MSGPACK,
+        JSON
     };
 
     DataFile(const char* file_name, ENDING ending);

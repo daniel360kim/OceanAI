@@ -48,6 +48,10 @@ DataFile::DataFile(const char* file_name, ENDING ending)
 		case MSGPACK:
 			m_filename = appendChars(file_name, "00.msgpack");
 			break;
+
+		case JSON:
+			m_filename = appendChars(file_name, "00.json");
+			break;
 		
 		default:
 			m_filename = appendChars(file_name, "00.txt"); //default to .txt
