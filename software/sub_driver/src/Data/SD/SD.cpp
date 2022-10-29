@@ -34,10 +34,6 @@
 #include "../../core/Timer.h"
 #include "../../core/StateAutomation.h"
 
-extern unsigned long _heap_start;
-extern unsigned long _heap_end;
-extern char *__brkval;
-
 SdFs sd;
 FsFile file;
 cid_t cid;
