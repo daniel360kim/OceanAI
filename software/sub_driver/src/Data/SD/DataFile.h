@@ -30,7 +30,7 @@ public:
         JPG,
         PNG,
         MSGPACK,
-        JSON
+        JSON,
     };
 
     DataFile(const char* file_name, ENDING ending);

@@ -90,7 +90,7 @@ void continuousFunctions()
 
     
 #if OPTICS_ON == true
-    camera.capture(1000000, &data.optical_data.capture_time, &data.optical_data.save_time, &data.optical_data.FIFO_length, logger.closeFile, logger.reopenFile, logger.data_filename);
+    camera.capture(1000000, &data.optical_data.capture_time, &data.optical_data.save_time, &data.optical_data.FIFO_length, logger.closeFile, logger.reopenFile, logger.get_data_filename());
 #endif
 
     signal.blink(80);

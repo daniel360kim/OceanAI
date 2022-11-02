@@ -46,6 +46,7 @@ public:
     template<int N>
     void data_to_json(Data &data, StaticJsonDocument<N> &doc);
 
+    const char* get_data_filename() const { return m_data_filename; }
 
 private:
     const char* m_data_filename; //name of the binary data

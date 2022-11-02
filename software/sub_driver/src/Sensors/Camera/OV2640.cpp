@@ -25,8 +25,8 @@
 #include "../../core/config.h"
 #include "../../core/pins.h"
 
-FsFile image_file;
 
+FsFile image_file;
 
 namespace Optics
 {
@@ -115,19 +115,22 @@ namespace Optics
         if(current_micros - previous_log >= delay_micros)
         {
             Serial.println("Capture start");
-            closeCurrentFile();
+            closeCurrentFile(); 
+            Serial.println("File closed");
             camera.flush_fifo();
             camera.clear_fifo_flag();
 
             camera.OV2640_set_JPEG_size(Settings::IMAGE_SIZE);
-
+            Serial.println("Image size set");
             camera.start_capture();
             
             uint64_t total_time = scoped_timer.elapsed();
             while ( !camera.get_bit(ARDUCHIP_TRIG, CAP_DONE_MASK));
 
+
             *capture_time = total_time - scoped_timer.elapsed();
             
+            Serial.print("Capture time: "); Serial.println(*capture_time);
             total_time = scoped_timer.elapsed();
 
             read_fifo_burst();

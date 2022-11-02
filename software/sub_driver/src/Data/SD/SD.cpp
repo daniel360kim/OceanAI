@@ -47,7 +47,7 @@ cid_t cid;
 SD_Logger::SD_Logger(const int64_t duration, int log_interval_ns) 
 {
     //Calculate log file size based on interval so we can preallocate
-    m_log_file_size = sizeof(Data) * (duration / 1e+9) * 1.0 / (log_interval_ns / 1e+9);
+    m_log_file_size = 1536 * (duration / 1e+9) * 1.0 / (log_interval_ns / 1e+9);
     Serial.print("Log file size: "); Serial.println(m_log_file_size);
     m_log_interval = log_interval_ns;
 
@@ -374,7 +374,7 @@ bool SD_Logger::logData(Data &data)
     int64_t current_time = scoped_timer.elapsed();
     if(current_time - m_previous_log_time >= m_log_interval)
     {
-        constexpr int json_capacity = JSON_OBJECT_SIZE(67);
+        constexpr int json_capacity = 1536; // https://arduinojson.org/v6/assistant/#/step3
         StaticJsonDocument<json_capacity> json_data;
 
         data_to_json<json_capacity>(data, json_data);
@@ -390,7 +390,7 @@ bool SD_Logger::logData(Data &data)
             //If nothing is in the buffer we directly write to the sd card
             if(write_buf.size() == 0)
             {
-                serializeJson(json_data, file);
+                serializeJsonPretty(json_data, file);
                 //Counting how many times we write to the sd card.
                 //This is used to calculate how many times to rewind when converting the binary 
                 //to ascci after the mission is over
@@ -403,7 +403,7 @@ bool SD_Logger::logData(Data &data)
                 write_buf.push(json_data);
                 json_data = write_buf.front();
                 write_buf.pop();
-                serializeJson(json_data, file);
+                serializeJsonPretty(json_data, file);
                 m_write_iterations++;
             }
         }
@@ -434,7 +434,7 @@ bool SD_Logger::logData(Data &data)
 
 void SD_Logger::flush(void*)
 {
-    file.flush();
+    file.sync();
 }
 
 void SD_Logger::getCapacity(uint32_t &capacity)
