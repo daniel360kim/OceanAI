@@ -41,7 +41,7 @@ namespace Time
             start_time = epoch;
         }
 
-        int64_t elapsed()
+        FASTRUN int64_t elapsed()
         {
             return std::chrono::duration_cast<std::chrono::nanoseconds>(teensy_clock::now() - start_time).count();
         }

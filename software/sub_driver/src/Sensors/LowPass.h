@@ -11,6 +11,8 @@
 #ifndef LowPass_h
 #define LowPass_h
 
+#include <Arduino.h>
+
 namespace Filter
 {
   template <int order> // order is 1 or 2
@@ -66,7 +68,7 @@ namespace Filter
       }
     }
 
-    double filt(double xn, double dt)
+    FASTRUN double filt(double xn, double dt)
     {
       // Provide me with the current raw value: x
       // I will give you the current filtered value: y

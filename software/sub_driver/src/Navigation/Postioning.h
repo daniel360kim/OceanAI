@@ -20,9 +20,9 @@ class Positioning
 public:
     Positioning() {};
 
-    void Integrate(double parameter, double dt);
+    inline void Integrate(double parameter, double dt);
 
-    double returnProduct();
+    inline double returnProduct();
 
 protected:
     double product;

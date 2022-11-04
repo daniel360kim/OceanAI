@@ -78,7 +78,6 @@ FASTRUN void continuousFunctions()
 
     data.loop_time = 1.0 / data.delta_time;
 
-
     UnifiedSensors::getInstance().logToStruct(data);
     OS::getInstance().log_cpu_state(data);
 

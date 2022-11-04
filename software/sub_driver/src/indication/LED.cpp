@@ -109,7 +109,7 @@ void RGBLED::randomColors()
  * @brief displays a spectrum of colors across the LED
  * 
  */
-void RGBLED::displaySpectrum()
+FASTRUN void RGBLED::displaySpectrum()
 {
 
     unsigned long currentAnimation = millis();
@@ -271,7 +271,7 @@ void LED::off()
  * 
  * @param interval interval at which the LED should blink
  */
-void LED::blink(unsigned long interval)
+FASTRUN void LED::blink(unsigned long interval)
 {
     unsigned long current_millis = millis();
 

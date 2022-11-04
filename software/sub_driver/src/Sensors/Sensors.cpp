@@ -244,7 +244,7 @@ void UnifiedSensors::setGyroBias()
     configs.gyro_bias.y = gyro_bias.y;
     configs.gyro_bias.z = gyro_bias.z;
 }
-BMP388Data UnifiedSensors::returnRawBaro()
+FASTRUN BMP388Data UnifiedSensors::returnRawBaro()
 {
     BMP388Data data;
     double pres_hpa = 0;
@@ -255,7 +255,7 @@ BMP388Data UnifiedSensors::returnRawBaro()
     return data;
 }
 
-Angles_3D UnifiedSensors::returnRawAccel()
+FASTRUN Angles_3D UnifiedSensors::returnRawAccel()
 {
     Angles_3D accel_data;
 
@@ -272,7 +272,7 @@ double UnifiedSensors::returnAccelTempC()
     return accel.getTemperature_C();
 }
 
-Angles_3D UnifiedSensors::returnRawGyro()
+FASTRUN Angles_3D UnifiedSensors::returnRawGyro()
 {
     Angles_3D gyro_data;
 
@@ -284,7 +284,7 @@ Angles_3D UnifiedSensors::returnRawGyro()
     return gyro_data;
 }
 
-Angles_3D UnifiedSensors::returnRawMag()
+FASTRUN Angles_3D UnifiedSensors::returnRawMag()
 {
     Angles_3D mag_data;
 
@@ -308,7 +308,7 @@ double UnifiedSensors::readTDS()
 
 }
 
-double UnifiedSensors::readVoltage()
+FASTRUN double UnifiedSensors::readVoltage()
 {
     double voltage = analogRead(voltage_pin) * (double)VREF / 1024.0;
     voltage = voltage * (9.95 + 1.992) / 1.992;
@@ -318,14 +318,14 @@ double UnifiedSensors::readVoltage()
     return voltage;
 }
 
-double UnifiedSensors::readExternalPressure_v()
+FASTRUN double UnifiedSensors::readExternalPressure_v()
 {
     int tds = analogRead(pressure_pin);
     double voltage = tds * (double)VREF / 1024.0;
     return voltage;
 }
 
-double UnifiedSensors::readExternalPressure()
+FASTRUN double UnifiedSensors::readExternalPressure()
 {
     double voltage = 0.0;
     voltage = readExternalPressure_v();
@@ -333,7 +333,7 @@ double UnifiedSensors::readExternalPressure()
     return psi / 14.6959488; //convert to atm
 }
 
-void UnifiedSensors::logToStruct(Data &data)
+FASTRUN void UnifiedSensors::logToStruct(Data &data)
 {
     //Flags are triggered by interrupts set by the sensors
     //Mag, Accel, Gyro, and baro all have their own interrupt pins

@@ -362,7 +362,7 @@ void SD_Logger::data_to_json(Data &data, StaticJsonDocument<N> &doc)
  * @return true 
  * @return false 
  */
-bool SD_Logger::logData(Data &data)
+FASTRUN bool SD_Logger::logData(Data &data)
 {
     //Update the capacity from the capacity we calculated in initialization
     if(!m_inital_cap_updated)

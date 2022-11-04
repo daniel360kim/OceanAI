@@ -28,7 +28,7 @@ OS::OS()
  * 
  * @param data 
  */
-void OS::log_cpu_state(Data &data)
+FASTRUN void OS::log_cpu_state(Data &data)
 {
     unsigned long current_millis = millis();
     if(current_millis - previous_millis >= OS_Settings::log_millis)
