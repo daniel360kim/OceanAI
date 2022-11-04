@@ -23,6 +23,11 @@ OS::OS()
     InternalTemperature.attachHighTempInterruptCelsius(OS_Settings::HIGH_TEMP, &HighAlarmISR);
 }
 
+/**
+ * @brief logs data to the data struct
+ * 
+ * @param data 
+ */
 void OS::log_cpu_state(Data &data)
 {
     unsigned long current_millis = millis();
@@ -35,6 +40,10 @@ void OS::log_cpu_state(Data &data)
     }
 }
 
+/**
+ * @brief ISR for high temp alarm
+ * 
+ */
 void OS::HighAlarmISR()
 {
     set_arm_clock(350000000);
@@ -42,6 +51,10 @@ void OS::HighAlarmISR()
     InternalTemperature.attachLowTempInterruptCelsius (OS_Settings::LOW_TEMP, &LowAlarmISR);
 }
 
+/**
+ * @brief ISR for low temp alarm
+ * 
+ */
 void OS::LowAlarmISR()
 {
     set_arm_clock(528000000);

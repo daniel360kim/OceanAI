@@ -12,6 +12,10 @@
 #include "States.h"
 #include "Timer.h"
 
+/**
+ * @brief Anonymous namespace to avoid name collisions
+ * 
+ */
 namespace
 {
     Time::Mission mission_duration;
@@ -33,9 +37,8 @@ namespace
 
     SD_Logger logger(mission_duration.mission_time, 2000000);
 
-    bool rfInit = true;
     bool warning = false;
-
+/*
     StepperPins pins_p{
         STP_p,
         DIR_p,
@@ -43,7 +46,7 @@ namespace
         MS2_p,
         ERR_p,
         STOP_p};
-
+*/
     StepperPins pins_b{
         STP_b,
         DIR_b,
@@ -58,7 +61,7 @@ namespace
 }
 
 /**
- * @brief Functions that run no matter the state
+ * @brief Functions that run in multiple states
  * 
  */
 void continuousFunctions()

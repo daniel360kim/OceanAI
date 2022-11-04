@@ -12,10 +12,12 @@
 #include "StateAutomation.h"
 #include "States.h"
 
-StateAutomation::StateAutomation()
-{
-}
-
+/**
+ * @brief Transition to new state.
+ * Runs exit of current state, then enter of new state
+ * 
+ * @param newState 
+ */
 void StateAutomation::setState(State& newState)
 {
     m_currentState->exit(this);
@@ -23,6 +25,10 @@ void StateAutomation::setState(State& newState)
     m_currentState->enter(this);
 }
 
+/**
+ * @brief Runs the current state
+ * Call in main loop
+ */
 void StateAutomation::run()
 {
     if(!m_initialized)
@@ -34,6 +40,13 @@ void StateAutomation::run()
     m_currentState->run(this);
 }
 
+/**
+ * @brief Prints out the state to a printer
+ * Converts the enum to a string
+ * 
+ * @param printer print object
+ * @param state state to print
+ */
 void StateAutomation::printState(Print &printer, CurrentState &state)
 {
     uint8_t current_state = static_cast<uint8_t>(state);

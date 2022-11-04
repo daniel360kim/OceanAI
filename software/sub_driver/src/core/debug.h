@@ -6,6 +6,11 @@
 
 #include "Timer.h"
 
+
+/**
+ * @brief Macros to print debug messages and add them to a buffer
+ * 
+ */
 #if DEBUG_ON
     #define ERROR_LOG(severity, message) Debug::error.addToBuffer(severity, message)
     #define SUCCESS_LOG(message) Debug::success.addToBuffer(Debug::Success, message)
@@ -30,7 +35,7 @@ namespace Debug
     };
     
     /**
-     * @brief message to be logged
+     * @brief message to be logged; timestamp, severity, and message
      * 
      */
     struct Message
@@ -55,6 +60,7 @@ namespace Debug
         void printBuffer_vec();
        
     };
+    //The three types of messages
     extern Print error;
     extern Print info;
     extern Print success;   

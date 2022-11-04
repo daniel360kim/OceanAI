@@ -29,6 +29,10 @@ public:
     virtual void exit(StateAutomation* state) = 0; 
 };
 
+/**
+ * @brief All the different states
+ * 
+ */
 enum class CurrentState
 {
     INITIALIZATION,
@@ -41,10 +45,14 @@ enum class CurrentState
     SD_REINITIALIZE
 };
 
+/**
+ * @brief StateAutomation class that handles the state transitions and runs current state
+ * 
+ */
 class StateAutomation
 {
 public:
-    StateAutomation();
+    StateAutomation() {}
 
     inline State* getCurrentState() { return m_currentState; }
     void run();

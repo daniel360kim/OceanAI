@@ -43,8 +43,25 @@ No remote control functionality yet
 #include "core/OS.h"
 #include "core/Timer.h"
 #include "module/stepper.h"
+/*
+Each state of our submarine is its own class and has 3 functions:
+    enter: runs when the state is entered
+    run: runs every loop
+    exit: runs when the state is exited
 
+Each state is a singleton and is accessed through the static function getInstance()
 
+To add a new state, just create a new class with the three functions and the singleton functions
+
+All states must inherit the State abstract class to access the enter, run, and exit functions
+
+*/
+
+/**
+ * @brief Initialization state
+ * Runs all the initializations when the submarine starts up
+ * 
+ */
 class Initialization : public State
 {
 public:
@@ -61,6 +78,10 @@ private:
     static Initialization instance;
 };
 
+/**
+ * @brief What to do when there is a critical error 
+ * 
+ */
 class ErrorIndication : public State
 {
 public:
@@ -77,6 +98,10 @@ private:
     static ErrorIndication instance;
 };
 
+/**
+ * @brief Idle state. Used when under remote control and waiting for commands
+ * 
+ */
 class IdleMode : public State
 {
 public:
@@ -93,6 +118,10 @@ private:
     static IdleMode instance;
 };
 
+/**
+ * @brief Diving state. Used when the submarine is diving
+ * 
+ */
 class Diving : public State
 {
 public:
@@ -109,6 +138,10 @@ private:
     static Diving instance;
 };
 
+/**
+ * @brief Resurfacing state. Used when the submarine is resurfacing
+ * 
+ */
 class Resurfacing : public State
 {
 public:
@@ -125,6 +158,10 @@ private:
     static Resurfacing instance;
 };
 
+/**
+ * @brief Surface state. Used to resurface the submarine
+ * 
+ */
 class Surfaced : public State
 {
 public:
@@ -141,6 +178,7 @@ private:
     static Surfaced instance;
 };
 
+//TODO: remove these since we use JSON now
 class SD_translate : public State
 {
 public:

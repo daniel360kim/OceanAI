@@ -11,6 +11,7 @@
 #ifndef Data_struct_h
 #define Data_struct_h
 
+#include <Arduino.h>
 #include <stdint.h>
 
 struct StepperData
@@ -53,8 +54,9 @@ struct BMP388Data
 
 
 //To do: organize into different structs for optimization and organization
-struct Data
+class Data
 {
+public:
     int64_t time_ns;
     int loop_time;
     int system_state;
@@ -93,6 +95,81 @@ struct Data
     
     OpticalData optical_data;
 
+    /**
+     * @brief Prints out all the data to a printing object
+     * 
+     * @param p printer
+     * @param delim how the data should be delimited
+     * @param data data class to be printed
+     */
+    static void printData(Print &p, const char* delim, const Data &data)
+    {
+        p.print(data.time_ns); p.print(delim);
+        p.print(data.loop_time); p.print(delim);
+        p.print(data.system_state); p.print(delim);
+        p.print(data.delta_time); p.print(delim);
+        p.print(data.sd_capacity); p.print(delim);
+        p.print(data.raw_voltage); p.print(delim);
+        p.print(data.filt_voltage); p.print(delim);
+        p.print(data.clock_speed); p.print(delim);
+        p.print(data.internal_temp); p.print(delim);
+        p.print(data.raw_bmp.pressure); p.print(delim);
+        p.print(data.raw_bmp.temperature); p.print(delim);
+        p.print(data.bmi_temp); p.print(delim);
+        p.print(data.racc.x); p.print(delim);
+        p.print(data.racc.y); p.print(delim);
+        p.print(data.racc.z); p.print(delim);
+        p.print(data.wfacc.x); p.print(delim);
+        p.print(data.wfacc.y); p.print(delim);
+        p.print(data.wfacc.z); p.print(delim);
+        p.print(data.vel.x); p.print(delim);
+        p.print(data.vel.y); p.print(delim);
+        p.print(data.vel.z); p.print(delim);
+        p.print(data.pos.x); p.print(delim);
+        p.print(data.pos.y); p.print(delim);
+        p.print(data.pos.z); p.print(delim);
+        p.print(data.rgyr.x); p.print(delim);
+        p.print(data.rgyr.y); p.print(delim);
+        p.print(data.rgyr.z); p.print(delim);
+        p.print(data.rel_ori.x); p.print(delim);
+        p.print(data.rel_ori.y); p.print(delim);
+        p.print(data.rel_ori.z); p.print(delim);
+        p.print(data.relative.w); p.print(delim);
+        p.print(data.relative.x); p.print(delim);
+        p.print(data.relative.y); p.print(delim);
+        p.print(data.relative.z); p.print(delim);
+        p.print(data.rmag.x); p.print(delim);
+        p.print(data.rmag.y); p.print(delim);
+        p.print(data.rmag.z); p.print(delim);
+        p.print(data.fmag.x); p.print(delim);
+        p.print(data.fmag.y); p.print(delim);
+        p.print(data.fmag.z); p.print(delim);
+        p.print(data.raw_TDS); p.print(delim);
+        p.print(data.filt_TDS); p.print(delim);
+        p.print(data.raw_ext_pres); p.print(delim);
+        p.print(data.filt_ext_pres); p.print(delim);
+        p.print(data.dive_stepper.limit_state); p.print(delim);
+        p.print(data.dive_stepper.homed); p.print(delim);
+        p.print(data.dive_stepper.current_position); p.print(delim);
+        p.print(data.dive_stepper.current_position_mm); p.print(delim);
+        p.print(data.dive_stepper.target_position); p.print(delim);
+        p.print(data.dive_stepper.target_position_mm); p.print(delim);
+        p.print(data.dive_stepper.speed); p.print(delim);
+        p.print(data.dive_stepper.acceleration); p.print(delim);
+        p.print(data.dive_stepper.max_speed); p.print(delim);
+        p.print(data.pitch_stepper.limit_state); p.print(delim);
+        p.print(data.pitch_stepper.homed); p.print(delim);
+        p.print(data.pitch_stepper.current_position); p.print(delim);
+        p.print(data.pitch_stepper.current_position_mm); p.print(delim);
+        p.print(data.pitch_stepper.target_position); p.print(delim);
+        p.print(data.pitch_stepper.target_position_mm); p.print(delim);
+        p.print(data.pitch_stepper.speed); p.print(delim);
+        p.print(data.pitch_stepper.acceleration); p.print(delim);
+        p.print(data.pitch_stepper.max_speed); p.print(delim);
+        p.print(data.optical_data.capture_time); p.print(delim);
+        p.print(data.optical_data.save_time); p.print(delim);
+        p.print(data.optical_data.FIFO_length); p.print("\n");
+    }
     
     //65 total elements
 };
