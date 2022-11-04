@@ -62,9 +62,9 @@ namespace
 
 /**
  * @brief Functions that run in multiple states
- * 
+ * FASTRUN is a macro where the function data is copied to ITCM in RAM and runs from there
  */
-void continuousFunctions()
+FASTRUN void continuousFunctions()
 {
     data.time_ns = scoped_timer.elapsed(); //scoped timer is a global object to measure time since program epoch
     data.delta_time = (scoped_timer.elapsed() - previous_time) / 1000000000.0;
@@ -116,9 +116,16 @@ void continuousFunctions()
  * Initialization state functions
  */
 
+/**
+ * @brief All the initialization functions
+ * 
+ * @param state 
+ */
 void Initialization::enter(StateAutomation* state)
 {
-    start_time = teensy_clock::now();
+    start_time = teensy_clock::now(); //begin the scoped timer
+
+    //If there was a crash from the last run, report it to SD
     if(CrashReport)
     {
         if(!logger.log_crash_report())
@@ -127,9 +134,10 @@ void Initialization::enter(StateAutomation* state)
         }
     }
 
+    // Flashy lights!
     output.startupSequence();
 
-    #if DEBUG == true
+    #if LIVE_DEBUG == true
         while(!Serial); //Wait for serial montior to open
     #endif
     Serial.begin(2000000);
@@ -137,27 +145,32 @@ void Initialization::enter(StateAutomation* state)
     LEDa.setColor(255, 0, 255);
     LEDb.setColor(255, 0, 255);
 
+    //I2C Scanner
     UnifiedSensors::getInstance().scanAddresses();
-    Serial.println("Addresses scanned");
+    SUCCESS_LOG("I2C Scanner Complete");
 
     LEDa.setColor(0, 255, 255);
     LEDb.setColor(0, 255, 255);
+
+    //Initialize the navigation sensors (IMU, Barometer, Magnetometer)
     if(!UnifiedSensors::getInstance().initNavSensors())
     {
         state->setState(ErrorIndication::getInstance());
         return;
     }
-    Serial.println("Nav sensors initialized");
 
+    UnifiedSensors::getInstance().setInterrupts(BAR_int, ACC_int, GYR_int, MAG_int);
+    SUCCESS_LOG("Nav Sensor Initialization Complete");
+
+    //Initialize voltage, solute sensor, and external pressure sensor
     UnifiedSensors::getInstance().initVoltmeter(v_div, 2e+7, 10.0);
     UnifiedSensors::getInstance().initTDS(TDS, 2e+7, 10.0);
     UnifiedSensors::getInstance().initPressureSensor(TX_GPS, 2e+7, 20.0);
+    SUCCESS_LOG("Voltage, Solute, and Pressure Sensor Initialization Complete");
 
-    UnifiedSensors::getInstance().setInterrupts(BAR_int, ACC_int, GYR_int, MAG_int);
+    UnifiedSensors::getInstance().setGyroBias(); //Read readings from gyroscopes and set them as bias
 
-    UnifiedSensors::getInstance().setGyroBias();
-    Serial.println("Other sensors initialized");
-
+    //Initialize the optical camera
     #if OPTICS_ON == true
         if (!camera.begin())
         {
@@ -165,29 +178,32 @@ void Initialization::enter(StateAutomation* state)
         }
     #endif
 
+    //Initialize the SD card
     if (!logger.init())
     {
         state->setState(ErrorIndication::getInstance());
         return;
     }
-    Serial.println("Logger initialized");
+    SUCCESS_LOG("SD Card Initialization Complete");
 
     LEDb.blink(255, 0, 0, 1000);
     LEDa.blink(255, 0, 0, 1000);
 
     currentState = CurrentState::INITIALIZATION;
 
-    //buoyancy.calibrate();
+    //buoyancy.calibrate(); //Calibrate the stepper motors
 }
 
 void Initialization::run(StateAutomation* state)
 {
+    //initialization happens once and we move on...
     state->setState(Diving::getInstance());
 }
 
 void Initialization::exit(StateAutomation* state)
 {
     output.indicateCompleteStartup();
+    //set previous time before main loop
     previous_time = scoped_timer.elapsed();
 }
 
@@ -208,36 +224,45 @@ void ErrorIndication::exit(StateAutomation* state)
 
 void Diving::enter(StateAutomation* state)
 {
+    //Set current state for reading
     currentState = CurrentState::DIVING_MODE;
+
+    //Initialize stepper settings
     buoyancy.setMaxSpeed(10000);
     buoyancy.setSpeed(10000);
     buoyancy.setAcceleration(10000);
     buoyancy.setResolution(Stepper::Resolution::HALF);
-    buoyancy.setMinPulseWidth(1);
-    buoyancy.sink();
+    buoyancy.setMinPulseWidth(1); //how long to wait between high and low pulses
+    buoyancy.sink(); //set the direction of the stepper motors
 }
 
 void Diving::run(StateAutomation* state)
 {
+    //If we have filled the ballast start resurfacing
+    //Probably want to add some type of pressure parameter so the sub goes to a certain depth
     if(buoyancy.sinking && buoyancy.currentPosition() == buoyancy.targetPosition())
     {
         state->setState(Resurfacing::getInstance());
         return;
     }
-    buoyancy.update();
+
+    buoyancy.update(); //update the stepper motors
     if(buoyancy.currentPosition() == buoyancy.targetPosition())
     {
         state->setState(Resurfacing::getInstance());
     }
 
+    //call the continuous loop functions
     continuousFunctions();
 
+    //Log to SD card
     if(!logger.logData(data))
     {
         state->setState(ErrorIndication::getInstance());
         return;
     }
 
+    //If we reached the end of the mission, we move to the end
     if(mission_duration.time_remaining_mission(scoped_timer.elapsed()) <= 0)
     {
         state->setState(SD_translate::getInstance());
@@ -249,6 +274,7 @@ void Diving::run(StateAutomation* state)
 
 void Diving::exit(StateAutomation* state)
 {
+    //nothing here
 }
 
 void Resurfacing::enter(StateAutomation* state)
@@ -264,13 +290,14 @@ void Resurfacing::enter(StateAutomation* state)
 
 void Resurfacing::run(StateAutomation* state)
 {
+    //If we emptied the ballast, we move to the surface
     if(buoyancy.rising && buoyancy.currentPosition() == buoyancy.targetPosition())
     {
         state->setState(Diving::getInstance());
         return;
     }
 
-    buoyancy.run();
+    buoyancy.run();//update the stepper motors
     //Just filling and refilling syringe at this point. need to check accelerometers and pressure
     //sensors to check minimums and maximums of our dive
     if(buoyancy.currentPosition() == buoyancy.targetPosition())
@@ -297,6 +324,7 @@ void Resurfacing::run(StateAutomation* state)
 
 void Resurfacing::exit(StateAutomation* state)
 {
+    //nothing here
 }
 
 void Surfaced::enter(StateAutomation* state)

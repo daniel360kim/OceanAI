@@ -15,4 +15,3 @@ The project's directories are built with PlatformIO. To build the project, open 
 * Must delete utility folder from Buzzer library and remove the include from the source header file.
 
 
-
