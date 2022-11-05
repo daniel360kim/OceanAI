@@ -402,6 +402,7 @@ FASTRUN bool SD_Logger::logData(Data &data)
                 write_buf.push(json_data);
                 json_data = write_buf.front();
                 write_buf.pop();
+                Serial.print("Wrote from buffer at time: "); Serial.println(current_time);
                 serializeJson(json_data, file);
                 m_write_iterations++;
             }

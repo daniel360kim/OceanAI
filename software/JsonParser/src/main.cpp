@@ -15,13 +15,16 @@ void read_lines(std::ifstream &file, std::vector<std::string> &json)
 
     while(std::getline(file, output))
     {
-        json.push_back(output);
+        if(!output.empty())
+        {
+            json.push_back(output);
+        }
     }
 }
 
 int main()
 {
-    std::ifstream json_input("../data/data19.json");
+    std::ifstream json_input("../data/data00.json");
 
     if(!json_input.is_open())
     {
@@ -49,44 +52,41 @@ int main()
 
         std::cout << "Number of elements: " << json_elements << std::endl;
 
-        for(unsigned long i = 0; i < json_elements; i++)
+        for(unsigned long i = 1; i < json_elements; i++)
         {
             nlohmann::json json = nlohmann::json::parse(json_vector[i], nullptr, false, true);
             csv << json["time"] << delimiter;
-            for(int i = 0; i < json["sys_data"].size(); i++)
+            for(int j = 0; j < json["sys_data"].size(); j++)
             {
-                csv << json["sys_data"][i] << delimiter;
+                csv << json["sys_data"][j] << delimiter;
             }
 
-            for(int i = 0; i < json["baro_data"].size(); i++)
+            for(int j = 0; j < json["baro_data"].size(); j++)
             {
-                csv << json["baro_data"][i] << delimiter;
+                csv << json["baro_data"][j] << delimiter;
             }
 
-            for(int i = 0; i < json["IMU_data"].size(); i++)
+            for(int j = 0; j < json["IMU_data"].size(); j++)
             {
-                csv << json["IMU_data"][i] << delimiter;
+                csv << json["IMU_data"][j] << delimiter;
             }
 
-            for(int i = 0; i < json["external_data"].size(); i++)
+            for(int j = 0; j < json["external_data"].size(); j++)
             {
-                csv << json["external_data"][i] << delimiter;
+                csv << json["external_data"][j] << delimiter;
             }
 
-            for(int i = 0; i < json["step_data"].size(); i++)
+            for(int j = 0; j < json["step_data"].size(); j++)
             {
-                csv << json["step_data"][i] << delimiter;
+                csv << json["step_data"][j] << delimiter;
             }
 
-            for(int i = 0; i < json["optics"].size(); i++)
+            for(int j = 0; j < json["optics"].size(); j++)
             {
-                csv << json["optics"][i] << delimiter;
+                csv << json["optics"][j] << delimiter;
             }
             csv << "\n";
         }
-
-
-        
         
     }
 }
