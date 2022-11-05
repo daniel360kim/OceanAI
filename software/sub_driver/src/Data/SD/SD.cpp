@@ -292,17 +292,14 @@ bool SD_Logger::init()
     return true; //everything went well! SD card is ready to go
 }
 
-template <int N>
-void SD_Logger::data_to_json(Data &data, StaticJsonDocument<N> &doc)
+void SD_Logger::data_to_json(Data &data, DynamicJsonDocument &doc)
 {
     doc.clear();
     doc["time"] = data.time_ns;
-    doc["loop_time"] = data.loop_time;
-    doc["sys_state"] = data.system_state;
-    doc["delta_time"] = data.delta_time;
-    doc["sd_cap"] = data.sd_capacity;
 
     JsonArray sys_data = doc.createNestedArray("sys_data");
+        sys_data.add(data.loop_time); sys_data.add(data.system_state); 
+        sys_data.add(data.delta_time); sys_data.add(data.sd_capacity);
         sys_data.add(data.raw_voltage); sys_data.add(data.filt_voltage);
         sys_data.add(data.clock_speed); sys_data.add(data.internal_temp);
 
@@ -353,6 +350,8 @@ void SD_Logger::data_to_json(Data &data, StaticJsonDocument<N> &doc)
         optics_data.add(data.optical_data.capture_time);
         optics_data.add(data.optical_data.save_time);
         optics_data.add(data.optical_data.FIFO_length);
+
+    file.print("\n");
 }
 
 /**
@@ -375,9 +374,9 @@ FASTRUN bool SD_Logger::logData(Data &data)
     if(current_time - m_previous_log_time >= m_log_interval)
     {
         constexpr int json_capacity = 1536; // https://arduinojson.org/v6/assistant/#/step3
-        StaticJsonDocument<json_capacity> json_data;
+        DynamicJsonDocument json_data(1536);
 
-        data_to_json<json_capacity>(data, json_data);
+        data_to_json(data, json_data);
 
         //If our sd card is busy we add to our buffer
         if(file.isBusy())
@@ -390,7 +389,7 @@ FASTRUN bool SD_Logger::logData(Data &data)
             //If nothing is in the buffer we directly write to the sd card
             if(write_buf.size() == 0)
             {
-                serializeJsonPretty(json_data, file);
+                serializeJson(json_data, file);
                 //Counting how many times we write to the sd card.
                 //This is used to calculate how many times to rewind when converting the binary 
                 //to ascci after the mission is over
@@ -403,7 +402,7 @@ FASTRUN bool SD_Logger::logData(Data &data)
                 write_buf.push(json_data);
                 json_data = write_buf.front();
                 write_buf.pop();
-                serializeJsonPretty(json_data, file);
+                serializeJson(json_data, file);
                 m_write_iterations++;
             }
         }
@@ -418,7 +417,7 @@ FASTRUN bool SD_Logger::logData(Data &data)
     {
         INFO_LOG("Buffer is full, slowing down data logging rate");
         //Clear the old data if it gets too large by swapping with an empty queue
-        std::queue<StaticJsonDocument<67>> empty;
+        std::queue<DynamicJsonDocument> empty;
         std::swap(write_buf, empty);
 
         m_log_interval+= 10000000; //If the buffer is too large we increase the log interval to prevent overflow

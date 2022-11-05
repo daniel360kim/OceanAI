@@ -5,7 +5,7 @@
 #define LIVE_DEBUG true
 #define PRINT_STATE false
 
-#define OPTICS_ON true
+#define OPTICS_ON false
 
 
 #endif
