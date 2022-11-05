@@ -6,6 +6,8 @@ Software to control the submarine driver board.
 The project's directories are built with PlatformIO. To build the project, open the project in PlatformIO and click the build button.
 
 ## Dependencies Modifications
+Dependencies can be modified by going to the .pio/libdeps directory within the project. 
+
 * Must delete 
     ```cpp
     #define swap 
