@@ -3,8 +3,7 @@
 
 #include "../../Data/data_struct.h"
 #include "SensorFusion.h"
-
-
+#include "../Orientation.h"
 
 class Fusion
 {

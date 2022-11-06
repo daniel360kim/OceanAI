@@ -22,13 +22,15 @@
 #include "BMI088/BMI088.h"
 #include "LIS3MDL/LIS3MDL.h"
 
+#include "thermistor.h"
+#include "tds.h"
+#include "transducer.h"
+
 #include "LowPass.h"
 
 #include "../core/timed_function.h"
 #include "../core/Timer.h"
 #include "../Data/data_struct.h"
-
-constexpr double VREF = 3.3;
 
 class UnifiedSensors
 {
@@ -39,9 +41,6 @@ public:
     }
     void scanAddresses();
     bool initNavSensors();
-    void initTDS(uint8_t TDS_pin, uint32_t interval, double filt_cutoff);
-    void initVoltmeter(uint8_t input_pin , uint32_t interval, double filt_cutoff);
-    void initPressureSensor(uint8_t input_pin , uint32_t interval, double filt_cutoff);
     void setInterrupts(const uint8_t bar_int, const uint8_t accel_int, const uint8_t gyro_int, const uint8_t mag_int);
     void setGyroBias();
 
@@ -50,13 +49,9 @@ public:
     double returnAccelTempC();
     Angles_3D returnRawGyro();
     Angles_3D returnRawMag();
-    
-    void logToStruct(Data &data);
 
-    double readTDS();
-    double readVoltage();
-    double readExternalPressure_v();
-    double readExternalPressure();
+    void logIMUToStruct(Data &data);
+    void logExternalSensorToStruct(Data &data);
 
     Angles_3D gyro_bias;
     Angles_3D mag_bias = { 0.36, 0.39, 0.49 };
@@ -71,14 +66,9 @@ private:
     Bmi088Gyro gyro;
     LIS3MDL mag;
 
-
-
     static UnifiedSensors instance;
 
     uint8_t TDS_pin, voltage_pin, pressure_pin;
-    static double temp;
-
-    double temp_measurements[2];
 
     bool m_pressure_sensor_connected = false;
 
@@ -104,12 +94,6 @@ private:
     Filter::LowPass<1> mag_x;
     Filter::LowPass<1> mag_y;
     Filter::LowPass<1> mag_z;
-
-    Filter::LowPass<1> tds_filter;
-    Filter::LowPass<1> voltage_filter;
-    Filter::LowPass<1> ext_temp;
-    Filter::LowPass<1> ext_pres;
-
     
 };
 

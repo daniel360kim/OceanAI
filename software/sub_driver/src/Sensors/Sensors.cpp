@@ -28,8 +28,6 @@ volatile bool UnifiedSensors::accel_flag = false;
 volatile bool UnifiedSensors::gyro_flag = false;
 volatile bool UnifiedSensors::mag_flag = true;
 
-double UnifiedSensors::temp = 0;
-
 void UnifiedSensors::scanAddresses()
 {
     uint8_t error = 0;
@@ -161,52 +159,6 @@ bool UnifiedSensors::initNavSensors()
     return true;
 }
 
-void UnifiedSensors::initTDS(uint8_t TDS_pin, uint32_t interval, double filt_cutoff)
-{
-    pinMode(TDS_pin, INPUT);
-    this->TDS_pin = TDS_pin;
-
-    m_tds_interval_ns = interval;
-    
-
-    tds_filter.setCutoff(filt_cutoff);
-}
-
-void UnifiedSensors::initVoltmeter(uint8_t input_pin, uint32_t interval, double filt_cutoff)
-{
-    pinMode(input_pin, INPUT);
-    voltage_pin = input_pin;
-    
-    m_volt_interval_ns = interval;
-
-    voltage_filter.setCutoff(filt_cutoff);
-}
-
-void UnifiedSensors::initPressureSensor(uint8_t input_pin, uint32_t interval, double filt_cutoff)
-{
-    pressure_pin = input_pin;
-    pinMode(pressure_pin, INPUT);
-
-    double pressure_voltage = readExternalPressure_v();
-
-    /*Pressure sensor outputs at least 0.1V, so it is malfunctional or disconnected if it outputs less than 0.1V*/
-    if(pressure_voltage <= 0.1)
-    {
-        ERROR_LOG(Debug::Fatal, "Pressure Sensor Malfunction");
-
-        m_pressure_sensor_connected = false;
-        return;
-    }
-    else
-    {
-        SUCCESS_LOG("Pressure Sensor Connected");
-        
-        m_pressure_sensor_connected = true;
-        m_ext_pres_interval_ns = interval;
-    }
-
-    ext_pres.setCutoff(filt_cutoff);
-}
 
 void UnifiedSensors::setInterrupts(const uint8_t bar_int, const uint8_t accel_int, const uint8_t gyro_int, const uint8_t mag_int)
 {
@@ -297,43 +249,7 @@ FASTRUN Angles_3D UnifiedSensors::returnRawMag()
     return mag_data;
 }
 
-double UnifiedSensors::readTDS()
-{
-    int tds = analogRead(TDS_pin);
-
-    double averageVoltage = tds * (double)VREF / 1024.0;
-    double compensationCoefficient = 1.0 + 0.02 * (temp - 25.0);                                                                                                                            // temperature compensation formula: fFinalResult(25^C) = fFinalResult(current)/(1.0+0.02*(fTP-25.0));
-    double compensationVolatge = averageVoltage / compensationCoefficient;                                                                                                                  // temperature compensation
-    return (133.42 * compensationVolatge * compensationVolatge * compensationVolatge - 255.86 * compensationVolatge * compensationVolatge + 857.39 * compensationVolatge) * 0.5;            // convert voltage value to tds value
-
-}
-
-FASTRUN double UnifiedSensors::readVoltage()
-{
-    double voltage = analogRead(voltage_pin) * (double)VREF / 1024.0;
-    voltage = voltage * (9.95 + 1.992) / 1.992;
-
-    if (voltage <= 0.1)
-        voltage = 0.0;
-    return voltage;
-}
-
-FASTRUN double UnifiedSensors::readExternalPressure_v()
-{
-    int tds = analogRead(pressure_pin);
-    double voltage = tds * (double)VREF / 1024.0;
-    return voltage;
-}
-
-FASTRUN double UnifiedSensors::readExternalPressure()
-{
-    double voltage = 0.0;
-    voltage = readExternalPressure_v();
-    double psi = (100.0 / 3.0) * voltage + (50.0 - ((100.0 / 3.0) * (3.3 / 2.0))); //pressure = 25psi * voltage - 12.5psi (linear)
-    return psi / 14.6959488; //convert to atm
-}
-
-FASTRUN void UnifiedSensors::logToStruct(Data &data)
+FASTRUN void UnifiedSensors::logIMUToStruct(Data &data)
 {
     //Flags are triggered by interrupts set by the sensors
     //Mag, Accel, Gyro, and baro all have their own interrupt pins
@@ -353,8 +269,6 @@ FASTRUN void UnifiedSensors::logToStruct(Data &data)
         data.racc = returnRawAccel();
         data.bmi_temp = returnAccelTempC();
 
-        temp_measurements[1] = data.bmi_temp;
-
         UnifiedSensors::accel_flag = false;
 
         data.rgyr = returnRawGyro();
@@ -365,32 +279,8 @@ FASTRUN void UnifiedSensors::logToStruct(Data &data)
     if (UnifiedSensors::bar_flag)
     {
         data.raw_bmp = returnRawBaro();
-        temp_measurements[0] = data.raw_bmp.temperature;
 
         UnifiedSensors::bar_flag = false;
     }
 
-    int64_t current_time = scoped_timer.elapsed();
-
-    
-    if(current_time - m_tds_prev_log >= m_tds_interval_ns)
-    {
-        data.raw_TDS = readTDS();
-        data.filt_TDS = tds_filter.filt(data.raw_TDS, data.delta_time);
-    }
-
-    if(current_time - m_volt_prev_log >= m_volt_interval_ns)
-    {
-        data.raw_voltage = readVoltage();
-        data.filt_voltage = voltage_filter.filt(data.raw_voltage, data.delta_time);
-    }
-
-    if(current_time - m_ext_pres_prev_log >= m_ext_pres_interval_ns)
-    {
-        data.raw_ext_pres = readExternalPressure();
-        data.filt_ext_pres = ext_pres.filt(data.raw_ext_pres, data.delta_time);
-    }
-
- 
-    
 }

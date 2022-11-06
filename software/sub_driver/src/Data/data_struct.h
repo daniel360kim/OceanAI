@@ -90,6 +90,9 @@ public:
     double raw_ext_pres;
     double filt_ext_pres;
 
+    double raw_ext_temp;
+    double filt_ext_temp;
+
     StepperData dive_stepper;
     StepperData pitch_stepper;
     

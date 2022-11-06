@@ -25,8 +25,7 @@ namespace Time
     /**
      * @brief Calls functions at certain intervals      
      * 
-     * @tparam interval how many nanoseconds between calls
-     * @tparam scoped based on the time since program epoch or since instantiation: true for program epoch, false for instantiation
+     
      * @tparam T return type of the function to be called
      * @tparam P variadic parameters of the function to be called
      */
@@ -39,7 +38,7 @@ namespace Time
             reset();
         }
 
-        Async(int64_t interval, T(*func)(P...)) : Timer()
+        Async(const long interval, T(*func)(P...)) : Timer()
         {
             #if interval < 0
                 #error "interval cannot be negative"

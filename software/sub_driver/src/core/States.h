@@ -19,7 +19,11 @@ No remote control functionality yet
 #include "StateAutomation.h"
 
 #include "Sensors/Sensors.h"
-#include "navigation/Orientation.h"
+#include "Sensors/thermistor.h"
+#include "Sensors/transducer.h"
+#include "Sensors/tds.h"
+#include "Sensors/voltage.h"
+#include "Sensors/Camera/OV2640.h"
 
 #include "pins.h"
 
@@ -34,9 +38,8 @@ No remote control functionality yet
 #include <chrono>
 
 #include "Navigation/SensorFusion/Fusion.h"
+#include "navigation/Orientation.h"
 #include "Navigation/Postioning.h"
-#include "Sensors/Camera/OV2640.h"
-
 
 #include "debug.h"
 #include "Time.h"

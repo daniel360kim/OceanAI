@@ -19,7 +19,12 @@
 namespace
 {
     Time::Mission mission_duration;
+
     Fusion SFori;
+    Sensors::Thermistor external_temp(RX_GPS, 10000, 4100, 25, 30, 10000000);
+    Sensors::Transducer external_pres(TX_GPS, 30, 10000000);
+    Sensors::TotalDissolvedSolids total_dissolved_solids(TDS, 30, 10000000);
+    Sensors::Voltage voltmeter(v_div, 30, 10000000);
 
     Optics::Camera camera(CS_VD);
 
@@ -35,7 +40,7 @@ namespace
 
     Data data;
 
-    SD_Logger logger(mission_duration.mission_time, 2000000);
+    SD_Logger logger(mission_duration.mission_time, 4000000);
 
     bool warning = false;
 /*
@@ -78,7 +83,13 @@ FASTRUN void continuousFunctions()
 
     data.loop_time = 1.0 / data.delta_time;
 
-    UnifiedSensors::getInstance().logToStruct(data);
+    UnifiedSensors::getInstance().logIMUToStruct(data);
+    
+    external_temp.logToStruct(data);
+    external_pres.logToStruct(data);
+    total_dissolved_solids.logToStruct(data);
+    voltmeter.logToStruct(data);
+
     OS::getInstance().log_cpu_state(data);
 
     nav_v.updateVelocity(data);
@@ -108,6 +119,8 @@ FASTRUN void continuousFunctions()
     }
 
     buoyancy.logToStruct(data);
+    Serial.println(data.raw_ext_pres);
+    
 }
 ///****************///
 
@@ -161,12 +174,6 @@ void Initialization::enter(StateAutomation* state)
     UnifiedSensors::getInstance().setInterrupts(BAR_int, ACC_int, GYR_int, MAG_int);
     SUCCESS_LOG("Nav Sensor Initialization Complete");
 
-    //Initialize voltage, solute sensor, and external pressure sensor
-    UnifiedSensors::getInstance().initVoltmeter(v_div, 2e+7, 10.0);
-    UnifiedSensors::getInstance().initTDS(TDS, 2e+7, 10.0);
-    UnifiedSensors::getInstance().initPressureSensor(TX_GPS, 2e+7, 20.0);
-    SUCCESS_LOG("Voltage, Solute, and Pressure Sensor Initialization Complete");
-
     UnifiedSensors::getInstance().setGyroBias(); //Read readings from gyroscopes and set them as bias
 
     //Initialize the optical camera
@@ -190,13 +197,14 @@ void Initialization::enter(StateAutomation* state)
 
     currentState = CurrentState::INITIALIZATION;
 
+    buoyancy.setMinPulseWidth(1);
     //buoyancy.calibrate(); //Calibrate the stepper motors
 }
 
 void Initialization::run(StateAutomation* state)
 {
     //initialization happens once and we move on...
-    state->setState(Diving::getInstance());
+    state->setState(Resurfacing::getInstance());
 }
 
 void Initialization::exit(StateAutomation* state)

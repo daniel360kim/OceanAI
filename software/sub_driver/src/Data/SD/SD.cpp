@@ -292,7 +292,8 @@ bool SD_Logger::init()
     return true; //everything went well! SD card is ready to go
 }
 
-void SD_Logger::data_to_json(Data &data, DynamicJsonDocument &doc)
+template <int size>
+void SD_Logger::data_to_json(Data &data, StaticJsonDocument<size> &doc)
 {
     doc.clear();
     doc["time"] = data.time_ns;
@@ -322,6 +323,7 @@ void SD_Logger::data_to_json(Data &data, DynamicJsonDocument &doc)
     JsonArray external_data = doc.createNestedArray("external_data");
         external_data.add(data.raw_TDS); external_data.add(data.filt_TDS);
         external_data.add(data.raw_ext_pres); external_data.add(data.filt_ext_pres);
+        external_data.add(data.raw_ext_temp); external_data.add(data.filt_ext_temp);
 
 
     JsonArray step_data = doc.createNestedArray("step_data");
@@ -374,14 +376,13 @@ FASTRUN bool SD_Logger::logData(Data &data)
     if(current_time - m_previous_log_time >= m_log_interval)
     {
         constexpr int json_capacity = 1536; // https://arduinojson.org/v6/assistant/#/step3
-        DynamicJsonDocument json_data(1536);
+        StaticJsonDocument<json_capacity> json_data;
 
-        data_to_json(data, json_data);
+        data_to_json<json_capacity>(data, json_data);
 
         //If our sd card is busy we add to our buffer
         if(file.isBusy())
         {
-            INFO_LOG("SD Card is busy, adding to buffer");
             write_buf.push(json_data); //adding buffer to queue data structure (FIFO)
         }
         else
@@ -402,8 +403,8 @@ FASTRUN bool SD_Logger::logData(Data &data)
                 write_buf.push(json_data);
                 json_data = write_buf.front();
                 write_buf.pop();
-                Serial.print("Wrote from buffer at time: "); Serial.println(current_time);
                 serializeJson(json_data, file);
+
                 m_write_iterations++;
             }
         }
@@ -414,11 +415,11 @@ FASTRUN bool SD_Logger::logData(Data &data)
     * If the buffer reaches this threshold, we probably are logging data to fast anyways
     * So we slow down the data logging rate
     */
-    if(write_buf.size() > 500) 
+    if(write_buf.size() > 100) 
     {
         INFO_LOG("Buffer is full, slowing down data logging rate");
         //Clear the old data if it gets too large by swapping with an empty queue
-        std::queue<DynamicJsonDocument> empty;
+        std::queue<StaticJsonDocument<1536>> empty;
         std::swap(write_buf, empty);
 
         m_log_interval+= 10000000; //If the buffer is too large we increase the log interval to prevent overflow

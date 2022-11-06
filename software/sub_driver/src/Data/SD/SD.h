@@ -43,7 +43,8 @@ public:
 
     static bool reopenFile(const char* filename);
 
-    void data_to_json(Data &data, DynamicJsonDocument &doc);
+    template <int size>
+    void data_to_json(Data &data, StaticJsonDocument<size> &doc);
 
     const char* get_data_filename() const { return m_data_filename; }
 
@@ -56,7 +57,7 @@ private:
     static void flush(void*);
     static void getCapacity(uint32_t &capacity);
 
-    std::queue<DynamicJsonDocument> write_buf;
+    std::queue<StaticJsonDocument<1536>> write_buf;
 
     Time::Async<void, void*> flusher;
     Time::Async<void, uint32_t&> capacity_updater;
