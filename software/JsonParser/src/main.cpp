@@ -43,7 +43,7 @@ int main()
         csv << "bmi_temp(°C),rax(m/s^2),ray(m/s^2),raz(m/s^2),wfax(m/s^2),wfay(m/s^2),wfaz(m/s^2),velx(m/s),vely(m/s),velz(m/s),posx(m),posy(m),posz(m),";
         csv << "rgx(rad/s),rgy(rad/s),rgz(rad/s),ori_x(deg),ori_y(deg),ori_z(deg),q_w,q_x,q_y,q_z,";
         csv << "rmagx(uT),rmagy(uT),rmagz(uT),fmagx(uT),fmagy(uT),fmagz(uT),";
-        csv << "rTDS,fTDS,r_ext_pres,f_ext_pres,";
+        csv << "rTDS,fTDS,r_ext_pres,f_ext_pres,r_ext_temp,f_ext_temp,";
         csv << "dive_limit,dive_homed,dive_current_position,dive_current_position_mm,dive_target_position,dive_target_position_mm,dive_speed,dive_acceleration,dive_maxspeed,";
         csv << "pitch_limit,pitch_homed,pitch_current_position,pitch_current_position_mm,pitch_target_position,pitch_target_position_mm,pitch_speed,pitch_acceleration,pitch_maxspeed,";
         csv << "cap_time(ms),save_time(ms),fifo_length(bytes)\n";
