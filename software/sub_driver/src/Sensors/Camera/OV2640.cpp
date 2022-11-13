@@ -238,7 +238,7 @@ namespace Optics
         }
 
         camera.CS_HIGH();
-        Serial.println("Burst Done");
+
         return 1;
     }
 };

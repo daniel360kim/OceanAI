@@ -76,8 +76,6 @@ void SF::computeAngles()
 	anglesComputed = 1;
 }
 
-
-
 //============================================================================================
 // Mahony AHRS algorithm update
 

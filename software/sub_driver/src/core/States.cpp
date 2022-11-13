@@ -119,7 +119,6 @@ FASTRUN void continuousFunctions()
     }
 
     buoyancy.logToStruct(data);
-    Serial.println(data.raw_ext_pres);
     
 }
 ///****************///
@@ -148,6 +147,12 @@ void Initialization::enter(StateAutomation* state)
 
     // Flashy lights!
     output.startupSequence();
+
+    if(voltmeter.readRaw() <= 11.1 && voltmeter.readRaw() >= 6)
+    {
+        ERROR_LOG(Debug::Critical_Error, "Low battery voltage");
+        state->setState(ErrorIndication::getInstance());
+    }
 
     #if LIVE_DEBUG == true
         while(!Serial); //Wait for serial montior to open
@@ -198,13 +203,13 @@ void Initialization::enter(StateAutomation* state)
     currentState = CurrentState::INITIALIZATION;
 
     buoyancy.setMinPulseWidth(1);
-    //buoyancy.calibrate(); //Calibrate the stepper motors
+    buoyancy.calibrate(); //Calibrate the stepper motors
 }
 
 void Initialization::run(StateAutomation* state)
 {
     //initialization happens once and we move on...
-    state->setState(Resurfacing::getInstance());
+    state->setState(Diving::getInstance());
 }
 
 void Initialization::exit(StateAutomation* state)
@@ -235,9 +240,9 @@ void Diving::enter(StateAutomation* state)
     currentState = CurrentState::DIVING_MODE;
 
     //Initialize stepper settings
-    buoyancy.setMaxSpeed(10000);
-    buoyancy.setSpeed(10000);
-    buoyancy.setAcceleration(10000);
+    buoyancy.setMaxSpeed(7000);
+    buoyancy.setSpeed(7000);
+    buoyancy.setAcceleration(6000);
     buoyancy.setResolution(Stepper::Resolution::HALF);
     buoyancy.setMinPulseWidth(1); //how long to wait between high and low pulses
     buoyancy.sink(); //set the direction of the stepper motors
@@ -287,9 +292,9 @@ void Diving::exit(StateAutomation* state)
 void Resurfacing::enter(StateAutomation* state)
 {
     currentState = CurrentState::RESURFACING;
-    buoyancy.setMaxSpeed(10000);
-    buoyancy.setSpeed(10000);
-    buoyancy.setAcceleration(10000);
+    buoyancy.setMaxSpeed(7000);
+    buoyancy.setSpeed(7000);
+    buoyancy.setAcceleration(6000);
     buoyancy.setResolution(Stepper::Resolution::HALF);
     buoyancy.rise();
     buoyancy.setMinPulseWidth(1);

@@ -81,6 +81,9 @@ bool LIS3MDL::init(deviceType device, sa1State sa1)
     case device_LIS3MDL:
       address = (sa1 == sa1_high) ? LIS3MDL_SA1_HIGH_ADDRESS : LIS3MDL_SA1_LOW_ADDRESS;
       break;
+    case device_auto:
+      // this case should be impossible, making compiler warnings happy
+      break;
   }
 
   return true;
