@@ -6,6 +6,11 @@
 
 #include "Timer.h"
 
+#define DEBUG_ON true
+#define LIVE_DEBUG true
+#define PRINT_STATE true
+
+#define OPTICS_ON true
 
 /**
  * @brief Macros to print debug messages and add them to a buffer
@@ -15,6 +20,7 @@
     #define ERROR_LOG(severity, message) Debug::error.addToBuffer(severity, message)
     #define SUCCESS_LOG(message) Debug::success.addToBuffer(Debug::Success, message)
     #define INFO_LOG(message) Debug::info.addToBuffer(Debug::Info, message)
+    
 #else
     #define SUCCESS_LOG(message) 
     #define ERROR_LOG(Severity, message)

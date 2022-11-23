@@ -3,7 +3,6 @@
 #include <memory>
 
 #include "debug.h"
-#include "config.h"
 
 #include "Timer.h"
 
@@ -26,8 +25,6 @@ namespace Debug
 
     void Print::printBuffer_vec()
     {
-        
-        
         for(unsigned int i = 0; i < printBuffer.size(); i++)
         {   
             Serial.print(printBuffer[i].timestamp); Serial.print("\t");

@@ -26,8 +26,6 @@ namespace
     Sensors::TotalDissolvedSolids total_dissolved_solids(TDS, 30, 10000000);
     Sensors::Voltage voltmeter(v_div, 30, 10000000);
 
-    Optics::Camera camera(CS_VD);
-
     Orientation ori;
 
     LED signal(SIGNAL);
@@ -63,6 +61,10 @@ namespace
     Buoyancy buoyancy(pins_b, Stepper::Resolution::HALF, StepperProperties(169.0, 76000));
 
     CurrentState currentState;
+
+    Resolution resolution = RESOLUTION_640x480;
+    Frame_Number frame_number = ONE_PHOTO;
+    OV2640_Mini camera(CS_VD, resolution, frame_number, true);
 }
 
 /**
@@ -101,9 +103,13 @@ FASTRUN void continuousFunctions()
 
     data.relative = static_cast<Angles_4D>(relative);
 
+
+
     
 #if OPTICS_ON == true
-    camera.capture(1000000, &data.optical_data.capture_time, &data.optical_data.save_time, &data.optical_data.FIFO_length, logger.closeFile, logger.reopenFile, logger.get_data_filename());
+    camera.capture();
+    INFO_LOG("Captured image");
+    logger.log_image(camera);
 #endif
 
     signal.blink(80);
@@ -183,9 +189,15 @@ void Initialization::enter(StateAutomation* state)
 
     //Initialize the optical camera
     #if OPTICS_ON == true
-        if (!camera.begin())
+        camera.saveSettings();
+        if(!camera.initialize())
         {
-            warning = true;
+            ERROR_LOG(Debug::Critical_Error, "Camera Initialization Failed");
+            state->setState(ErrorIndication::getInstance());
+        }
+        else
+        {
+            SUCCESS_LOG("Camera Initialization Complete");
         }
     #endif
 
@@ -203,7 +215,7 @@ void Initialization::enter(StateAutomation* state)
     currentState = CurrentState::INITIALIZATION;
 
     buoyancy.setMinPulseWidth(1);
-    buoyancy.calibrate(); //Calibrate the stepper motors
+    //buoyancy.calibrate(); //Calibrate the stepper motors
 }
 
 void Initialization::run(StateAutomation* state)

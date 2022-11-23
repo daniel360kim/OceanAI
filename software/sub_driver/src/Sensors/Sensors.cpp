@@ -14,7 +14,6 @@
 #include <stdint.h>
 #include <array>
 
-#include "../core/config.h"
 #include "../core/debug.h"
 #include "LowPass.h"
 #include "../core/timed_function.h"

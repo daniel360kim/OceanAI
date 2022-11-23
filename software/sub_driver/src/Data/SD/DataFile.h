@@ -16,7 +16,6 @@
 #include <stdint.h>
 
 #include "SD.h"
-#include "../../core/config.h"
 #include "../../core/debug.h"
 
 class DataFile 
@@ -38,7 +37,9 @@ public:
     static bool createFolder(const char* folder_name);
     bool createFile();
 
-    inline const char* getFileName() const { return m_filename; }
+    inline char* getFileName() const { return m_filename; }
+
+    static char* incrementFileName(char* file_name, std::size_t name_length);
 
 private:
     static bool initializeSD();

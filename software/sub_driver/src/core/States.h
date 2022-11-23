@@ -23,7 +23,7 @@ No remote control functionality yet
 #include "Sensors/transducer.h"
 #include "Sensors/tds.h"
 #include "Sensors/voltage.h"
-#include "Sensors/Camera/OV2640.h"
+#include "Sensors/Camera/camera.h"
 
 #include "pins.h"
 

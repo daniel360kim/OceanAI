@@ -12,7 +12,6 @@
 
 
 #include "SD.h"
-#include "../../core/config.h"
 #include "../../core/debug.h"
 
 #include <Arduino.h>
@@ -23,6 +22,7 @@ bool DataFile::file_initialized = false;
 DataFile::DataFile(const char* file_name, ENDING ending)
 {
 	m_filename_length = strlen(file_name);
+
 	switch(ending)
 	{
 		case CSV:
@@ -55,7 +55,6 @@ DataFile::DataFile(const char* file_name, ENDING ending)
 		
 		default:
 			m_filename = appendChars(file_name, "00.txt"); //default to .txt
-	
 	}	
 }
 
@@ -144,6 +143,33 @@ bool DataFile::initializeSD()
 		DataFile::file_initialized = true; //after an initialization, we set this to true so we don't initialize again
 	}
 	return true;
+}
+
+/**
+ * @brief Gets a filename and increments its number by 1
+ * 
+ * @param file_name initial file name: must be followed by two digits 
+ * @param file_name_length length of the file name (not including the two digits)
+ * @return char* new file name with incremented number
+ */
+char* DataFile::incrementFileName(char* file_name, std::size_t file_name_length)
+{
+	if(file_name[file_name_length + 1] != '9')
+	{
+		file_name[file_name_length + 1]++;
+	}
+	else if(file_name[file_name_length] != '9')
+	{
+		file_name[file_name_length + 1] = '0';
+		file_name[file_name_length]++;
+	}
+	else
+	{
+		ERROR_LOG(Debug::Fatal, "Could not number files");
+		return nullptr;
+	}
+
+	return file_name;
 }
 
 

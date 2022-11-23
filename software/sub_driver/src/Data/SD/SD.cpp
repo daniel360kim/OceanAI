@@ -29,7 +29,6 @@
 #include "queue.hpp"
 
 #include "../../core/debug.h"
-#include "../../core/config.h"
 #include "../StartInfo.h"
 #include "../../core/Timer.h"
 #include "../../core/StateAutomation.h"
@@ -112,14 +111,30 @@ bool SD_Logger::init()
 {
     //Creating binary file 
     DataFile bin("data", DataFile::JSON);
+
     if(!bin.createFile())
     {
         ERROR_LOG(Debug::Fatal, "Failed to create binary file");
         return false;
     }
+
     m_data_filename = bin.getFileName(); //Get the file name and save to the class
     configs.bin_file = bin.getFileName(); //Save the file name to configs so we can read it in the start file
 
+    if(!DataFile::createFolder("images"))
+    {
+        ERROR_LOG(Debug::Fatal, "Failed to create image folder");
+        return false;
+    }
+
+    //Creating initial image file
+    DataFile img("images/img00", DataFile::JPG);
+    if(!img.createFile())
+    {
+        ERROR_LOG(Debug::Fatal, "Failed to create image file");
+        return false;
+    }
+    m_current_image_filename = img.getFileName(); //Get the file name and save to the class
 
     //Creating CSV file
     DataFile csv("ASCII", DataFile::CSV);
@@ -434,6 +449,99 @@ FASTRUN bool SD_Logger::logData(Data &data)
     return true;
 }
 
+void SD_Logger::log_image(OV2640_Mini &camera)
+{
+    uint32_t length = camera.getCamera()->read_fifo_length();
+    uint8_t buf[256] = {0};
+
+    if(length >= MAX_FIFO_SIZE)
+    {
+        ERROR_LOG(Debug::Warning, "FIFO length is too large");
+        return;
+    }
+    else if(length == 0)
+    {
+        ERROR_LOG(Debug::Warning, "FIFO length is 0");
+        return;
+    }
+
+    camera.getCamera()->CS_LOW();
+    camera.getCamera()->set_fifo_burst();
+
+    int i = 0; //buffer index
+    uint8_t temp = 0;
+    uint8_t temp_last = 0;
+
+    while(length--)
+    {
+        temp_last = temp;
+        temp = SPI.transfer(0x00);
+
+        //Read JPEG data from FIFO
+        if((temp == 0xD9) && (temp_last == 0xFF))
+        {
+            buf[i++] = temp; //save the last 0XD9
+            camera.getCamera()->CS_HIGH();
+            //WRITE TO SD!!
+            file.write(buf, i);
+
+            DataFile::incrementFileName(m_current_image_filename, 10);
+            file.close();
+
+            reopenFile(m_data_filename); //reopen the data file so we can relog
+            camera.set_header(false);
+            camera.getCamera()->CS_HIGH();
+            camera.getCamera()->set_fifo_burst();
+            i = 0;
+        }
+        if(camera.is_header())
+        {
+            if(i < 256)
+            {
+                buf[i++] = temp;
+            }
+            else
+            {
+                camera.getCamera()->CS_HIGH();
+                //FILE WRITE
+                i = 0;
+                buf[i++] = temp;
+                camera.getCamera()->CS_LOW();
+                camera.getCamera()->set_fifo_burst();
+            }
+        }
+        else if((temp == 0xD8) & (temp_last == 0xFF))
+        {
+            camera.set_header(true);
+            camera.getCamera()->CS_HIGH();
+            
+            // Close the current file we were working on
+            if(!file.close())
+            {
+                ERROR_LOG(Debug::Warning, "Failed to close file");
+                return;
+            }
+
+            if(!file.open(m_current_image_filename, O_WRITE | O_CREAT))
+            {
+                ERROR_LOG(Debug::Warning, "Failed to open file for writing");
+                return;
+            }
+            if(!file.preAllocate(35000))
+            {
+                file.close();
+                ERROR_LOG(Debug::Warning, "Failed to preallocate file");
+            }
+
+            camera.getCamera()->CS_LOW();
+            camera.getCamera()->set_fifo_burst();
+
+            buf[i++] = temp_last;
+            buf[i++] = temp;
+        }
+        
+    }
+}
 
 void SD_Logger::flush(void*)
 {
