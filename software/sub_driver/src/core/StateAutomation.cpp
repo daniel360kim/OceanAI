@@ -80,4 +80,5 @@ void StateAutomation::printState(Print &printer, CurrentState &state)
         printer.print("Unknown State");
         break;
     }
+    printer.print("\n");
 }

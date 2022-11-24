@@ -6,11 +6,12 @@
 
 #include "Timer.h"
 
-#define DEBUG_ON true
-#define LIVE_DEBUG true
-#define PRINT_STATE true
+#define DEBUG_ON false
+#define LIVE_DEBUG false
+#define PRINT_STATE false
+#define PRINT_DATA false
 
-#define OPTICS_ON true
+#define OPTICS_ON false
 
 /**
  * @brief Macros to print debug messages and add them to a buffer

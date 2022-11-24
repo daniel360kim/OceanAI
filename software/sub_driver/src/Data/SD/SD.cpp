@@ -406,7 +406,10 @@ FASTRUN bool SD_Logger::logData(Data &data)
             if(write_buf.size() == 0)
             {
                 serializeJson(json_data, file);
-                serializeJson(json_data, Serial);
+
+                #if PRINT_DATA
+                    serializeJson(json_data, Serial);
+                #endif
                 //Counting how many times we write to the sd card.
                 //This is used to calculate how many times to rewind when converting the binary 
                 //to ascci after the mission is over
@@ -420,7 +423,9 @@ FASTRUN bool SD_Logger::logData(Data &data)
                 json_data = write_buf.front();
                 write_buf.pop();
                 serializeJson(json_data, file);
-                serializeJson(json_data, Serial);
+                #if PRINT_DATA
+                    serializeJson(json_data, Serial);
+                #endif
 
                 m_write_iterations++;
             }
