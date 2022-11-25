@@ -102,9 +102,6 @@ FASTRUN void continuousFunctions()
     data.wfacc = ori.convertAccelFrame(relative, data.racc.x, data.racc.y, data.racc.z);
 
     data.relative = static_cast<Angles_4D>(relative);
-
-
-
     
 #if OPTICS_ON == true
     camera.capture();
@@ -215,7 +212,7 @@ void Initialization::enter(StateAutomation* state)
     currentState = CurrentState::INITIALIZATION;
 
     buoyancy.setMinPulseWidth(1);
-    //buoyancy.calibrate(); //Calibrate the stepper motors
+    buoyancy.calibrate(); //Calibrate the stepper motors
 }
 
 void Initialization::run(StateAutomation* state)

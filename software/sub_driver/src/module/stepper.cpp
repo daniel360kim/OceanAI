@@ -298,9 +298,9 @@ FASTRUN void Buoyancy::logToStruct(Data &data)
 
 void Buoyancy::calibrate()
 {
-    setMaxSpeed(3000);
-    setAcceleration(3000);
-    setSpeed(3000);
+    setMaxSpeed(4000);
+    setAcceleration(2000);
+    setSpeed(4000);
     setResolution(Resolution::HALF);
 
     calibrate_noCheck();

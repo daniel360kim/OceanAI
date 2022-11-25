@@ -46,8 +46,7 @@ cid_t cid;
 SD_Logger::SD_Logger(const int64_t duration, int log_interval_ns) 
 {
     //Calculate log file size based on interval so we can preallocate
-    m_log_file_size = 1536 * (duration / 1e+9) * 1.0 / (log_interval_ns / 1e+9);
-    Serial.print("Log file size: "); Serial.println(m_log_file_size);
+    m_log_file_size = (1536 * (duration / 1e+9) * 1.0 / (log_interval_ns / 1e+9)) + 10000; // 1536 bytes per log, 10000 bytes extra for safety
     m_log_interval = log_interval_ns;
 
     //Flush files every 30 seconds to ensure data saves
