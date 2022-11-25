@@ -22,9 +22,12 @@ void read_lines(std::ifstream &file, std::vector<std::string> &json)
     }
 }
 
-int main()
+int main(int argc, char const *argv[])
 {
-    std::ifstream json_input("../data/data04.json");
+    std::string input_file(argv[1]);
+
+    std::string output_file = input_file.substr(0, input_file.find_last_of(".")) + ".csv";
+    std::ifstream json_input(input_file);
 
     if(!json_input.is_open())
     {
@@ -36,7 +39,7 @@ int main()
         std::vector<std::string> json_vector;
         read_lines(json_input, json_vector);
 
-        std::ofstream csv("../data/data04.csv");
+        std::ofstream csv(output_file);
         constexpr char delimiter = ',';
         csv << "time(ns),loop_time(hz),system_state,delta_time(s),sd_capacity(bytes),r_voltage,f_voltage,clockspeed(hz),internal_temp(°C),";
         csv << "bmp_pres(atm),bmp_temp(°C),";
