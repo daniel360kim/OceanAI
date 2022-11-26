@@ -245,56 +245,7 @@ public:
             optics_data.add(data.optical_data.FIFO_length);
     }
 
-    static void data_to_transmission_json(Data &data, StaticJsonDocument<STATIC_JSON_DOC_SIZE> &doc)
-    {
-        doc.clear();
-        doc["time"] = data.time_ns;
 
-        JsonArray sys_data = doc.createNestedArray("sys_data");
-            sys_data.add(data.loop_time); sys_data.add(data.system_state); 
-            sys_data.add(data.filt_voltage);
-            sys_data.add(data.clock_speed); sys_data.add(data.internal_temp);
-
-        JsonArray baro_data = doc.createNestedArray("baro_data");
-            baro_data.add(data.raw_bmp.pressure);
-            baro_data.add(data.raw_bmp.temperature);
-        
-        JsonArray ori_data = doc.createNestedArray("IMU_data");
-            ori_data.add(data.bmi_temp);
-            ori_data.add(data.racc.x); ori_data.add(data.racc.y); ori_data.add(data.racc.z);
-            ori_data.add(data.wfacc.x); ori_data.add(data.wfacc.y); ori_data.add(data.wfacc.z);
-            ori_data.add(data.vel.x); ori_data.add(data.vel.y); ori_data.add(data.vel.z);
-            ori_data.add(data.pos.x); ori_data.add(data.pos.y); ori_data.add(data.pos.z);
-            ori_data.add(data.rgyr.x); ori_data.add(data.rgyr.y); ori_data.add(data.rgyr.z);
-            ori_data.add(data.rel_ori.x); ori_data.add(data.rel_ori.y); ori_data.add(data.rel_ori.z);
-            ori_data.add(data.fmag.x); ori_data.add(data.fmag.y); ori_data.add(data.fmag.z);
-        
-        JsonArray external_data = doc.createNestedArray("external_data");
-            external_data.add(data.raw_TDS); external_data.add(data.filt_TDS);
-            external_data.add(data.raw_ext_pres); external_data.add(data.filt_ext_pres);
-            external_data.add(data.raw_ext_temp); external_data.add(data.filt_ext_temp);
-
-        JsonArray step_data = doc.createNestedArray("step_data");
-            step_data.add(data.dive_stepper.limit_state);
-            step_data.add(data.dive_stepper.homed);
-            step_data.add(data.dive_stepper.current_position);
-            step_data.add(data.dive_stepper.current_position_mm);
-            step_data.add(data.dive_stepper.target_position);
-            step_data.add(data.dive_stepper.target_position_mm);
-            step_data.add(data.dive_stepper.speed);
-            step_data.add(data.dive_stepper.acceleration);
-            step_data.add(data.dive_stepper.max_speed);
-
-            step_data.add(data.pitch_stepper.limit_state);
-            step_data.add(data.pitch_stepper.homed);
-            step_data.add(data.pitch_stepper.current_position);
-            step_data.add(data.pitch_stepper.current_position_mm);
-            step_data.add(data.pitch_stepper.target_position);
-            step_data.add(data.pitch_stepper.target_position_mm);
-            step_data.add(data.pitch_stepper.speed);
-            step_data.add(data.pitch_stepper.acceleration);
-            step_data.add(data.pitch_stepper.max_speed);
-    }
 };
 
 

@@ -17,6 +17,11 @@
 #include <chrono>
 #include <map>
 
+#define SEC_TO_NS(sec) (sec * 1000000000)
+#define MS_TO_NS(ms) (ms * 1000000)
+#define US_TO_NS(us) (us * 1000)
+
+#define HZ_TO_NS(hz) ((1 / hz) * 1000000000)
 /**
  * @brief Timing executions and saving the info
  * 

@@ -21,10 +21,10 @@ namespace
     Time::Mission mission_duration;
 
     Fusion SFori;
-    Sensors::Thermistor external_temp(RX_GPS, 10000, 4100, 25, 30, 10000000);
-    Sensors::Transducer external_pres(TX_GPS, 30, 10000000);
-    Sensors::TotalDissolvedSolids total_dissolved_solids(TDS, 30, 10000000);
-    Sensors::Voltage voltmeter(v_div, 30, 10000000);
+    Sensors::Thermistor external_temp(RX_RF, 10000, 4100, 25, 30, HZ_TO_NS(50));
+    Sensors::Transducer external_pres(TX_RF, 30, 10000000);
+    Sensors::TotalDissolvedSolids total_dissolved_solids(TDS, 30, HZ_TO_NS(50));
+    Sensors::Voltage voltmeter(v_div, 30, HZ_TO_NS(50));
 
     Orientation ori;
 
@@ -38,7 +38,7 @@ namespace
 
     Data data;
 
-    SD_Logger logger(mission_duration.mission_time, 4000000);
+    SD_Logger logger(mission_duration.mission_time, HZ_TO_NS(250));
 
     bool warning = false;
 /*
@@ -65,6 +65,11 @@ namespace
     Resolution resolution = RESOLUTION_640x480;
     Frame_Number frame_number = ONE_PHOTO;
     OV2640_Mini camera(CS_VD, resolution, frame_number, true);
+
+    StaticJsonDocument<STATIC_JSON_DOC_SIZE> data_json;
+    StaticJsonDocument<STATIC_JSON_DOC_SIZE> telemetry_json;
+
+    Telemetry telemetry;
 }
 
 /**
@@ -122,6 +127,18 @@ FASTRUN void continuousFunctions()
     }
 
     buoyancy.logToStruct(data);
+
+    logger.update_sd_capacity(data);
+
+    Data::data_to_json(data, data_json);
+    Data::data_to_transmission_json(data, telemetry_json);
+    if(!logger.logData(data_json))
+    {
+        warning = true;
+        return;
+    }
+
+    telemetry.sendTelemetry(telemetry_json);
     
 }
 ///****************///
@@ -161,6 +178,7 @@ void Initialization::enter(StateAutomation* state)
         while(!Serial); //Wait for serial montior to open
     #endif
     Serial.begin(2000000);
+    telemetry.init(2000000, HZ_TO_NS(1));
 
     LEDa.setColor(255, 0, 255);
     LEDb.setColor(255, 0, 255);
@@ -277,11 +295,6 @@ void Diving::run(StateAutomation* state)
     continuousFunctions();
 
     //Log to SD card
-    if(!logger.logData(data))
-    {
-        state->setState(ErrorIndication::getInstance());
-        return;
-    }
 
     //If we reached the end of the mission, we move to the end
     if(mission_duration.time_remaining_mission(scoped_timer.elapsed()) <= 0)
@@ -328,12 +341,6 @@ void Resurfacing::run(StateAutomation* state)
 
     continuousFunctions();
 
-    if(!logger.logData(data))
-    {
-        state->setState(ErrorIndication::getInstance());
-        return;
-    }
-
     if(mission_duration.time_remaining_mission(scoped_timer.elapsed()) <= 0)
     {
         state->setState(SD_translate::getInstance());
@@ -360,12 +367,6 @@ void Surfaced::enter(StateAutomation* state)
 void Surfaced::run(StateAutomation* state)
 {
     continuousFunctions();
-
-    if(!logger.logData(data))
-    {
-        state->setState(ErrorIndication::getInstance());
-        return;
-    }
 
     if(mission_duration.time_remaining_mission(scoped_timer.elapsed()) <= 0)
     {

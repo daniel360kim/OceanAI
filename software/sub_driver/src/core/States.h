@@ -18,16 +18,17 @@ No remote control functionality yet
 
 #include "StateAutomation.h"
 
-#include "Sensors/Sensors.h"
-#include "Sensors/thermistor.h"
-#include "Sensors/transducer.h"
-#include "Sensors/tds.h"
-#include "Sensors/voltage.h"
-#include "Sensors/Camera/camera.h"
+#include "../Sensors/Sensors.h"
+#include "../Sensors/thermistor.h"
+#include "../Sensors/transducer.h"
+#include "../Sensors/tds.h"
+#include "../Sensors/voltage.h"
+#include "../Sensors/Camera/camera.h"
 
 #include "pins.h"
 
-#include "Data/SD/SD.h"
+#include "../Data/SD/SD.h"
+#include "../Data/Comms/comms.h"
 
 #include "indication/OutputFuncs.h"
 #include "indication/LED.h"

@@ -41,18 +41,17 @@ public:
 
     bool log_crash_report();
     bool init();
-    bool logData(Data &data);
+    bool logData(StaticJsonDocument<STATIC_JSON_DOC_SIZE> &doc);
 
     static bool closeFile() { return file.close(); }
 
     static bool reopenFile(const char* filename);
 
-    template <int size>
-    void data_to_json(Data &data, StaticJsonDocument<size> &doc);
-
     void log_image(OV2640_Mini &camera);
 
     const char* get_data_filename() const { return m_data_filename; }
+
+    void update_sd_capacity(Data &data);
 
 private:
     const char* m_data_filename; //name of the binary data

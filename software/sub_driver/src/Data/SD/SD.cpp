@@ -305,71 +305,6 @@ bool SD_Logger::init()
      
     return true; //everything went well! SD card is ready to go
 }
-
-template <int size>
-void SD_Logger::data_to_json(Data &data, StaticJsonDocument<size> &doc)
-{
-    doc.clear();
-    doc["time"] = data.time_ns;
-
-    JsonArray sys_data = doc.createNestedArray("sys_data");
-        sys_data.add(data.loop_time); sys_data.add(data.system_state); 
-        sys_data.add(data.delta_time); sys_data.add(data.sd_capacity);
-        sys_data.add(data.raw_voltage); sys_data.add(data.filt_voltage);
-        sys_data.add(data.clock_speed); sys_data.add(data.internal_temp);
-
-    JsonArray baro_data = doc.createNestedArray("baro_data");
-        baro_data.add(data.raw_bmp.pressure);
-        baro_data.add(data.raw_bmp.temperature);
-    
-    JsonArray ori_data = doc.createNestedArray("IMU_data");
-        ori_data.add(data.bmi_temp);
-        ori_data.add(data.racc.x); ori_data.add(data.racc.y); ori_data.add(data.racc.z);
-        ori_data.add(data.wfacc.x); ori_data.add(data.wfacc.y); ori_data.add(data.wfacc.z);
-        ori_data.add(data.vel.x); ori_data.add(data.vel.y); ori_data.add(data.vel.z);
-        ori_data.add(data.pos.x); ori_data.add(data.pos.y); ori_data.add(data.pos.z);
-        ori_data.add(data.rgyr.x); ori_data.add(data.rgyr.y); ori_data.add(data.rgyr.z);
-        ori_data.add(data.rel_ori.x); ori_data.add(data.rel_ori.y); ori_data.add(data.rel_ori.z);
-        ori_data.add(data.relative.w); ori_data.add(data.relative.x); ori_data.add(data.relative.y); ori_data.add(data.relative.z);
-        ori_data.add(data.rmag.x); ori_data.add(data.rmag.y); ori_data.add(data.rmag.z);
-        ori_data.add(data.fmag.x); ori_data.add(data.fmag.y); ori_data.add(data.fmag.z);
-    
-    JsonArray external_data = doc.createNestedArray("external_data");
-        external_data.add(data.raw_TDS); external_data.add(data.filt_TDS);
-        external_data.add(data.raw_ext_pres); external_data.add(data.filt_ext_pres);
-        external_data.add(data.raw_ext_temp); external_data.add(data.filt_ext_temp);
-
-
-    JsonArray step_data = doc.createNestedArray("step_data");
-        step_data.add(data.dive_stepper.limit_state);
-        step_data.add(data.dive_stepper.homed);
-        step_data.add(data.dive_stepper.current_position);
-        step_data.add(data.dive_stepper.current_position_mm);
-        step_data.add(data.dive_stepper.target_position);
-        step_data.add(data.dive_stepper.target_position_mm);
-        step_data.add(data.dive_stepper.speed);
-        step_data.add(data.dive_stepper.acceleration);
-        step_data.add(data.dive_stepper.max_speed);
-
-        step_data.add(data.pitch_stepper.limit_state);
-        step_data.add(data.pitch_stepper.homed);
-        step_data.add(data.pitch_stepper.current_position);
-        step_data.add(data.pitch_stepper.current_position_mm);
-        step_data.add(data.pitch_stepper.target_position);
-        step_data.add(data.pitch_stepper.target_position_mm);
-        step_data.add(data.pitch_stepper.speed);
-        step_data.add(data.pitch_stepper.acceleration);
-        step_data.add(data.pitch_stepper.max_speed);
-    
-
-    JsonArray optics_data = doc.createNestedArray("optics");
-        optics_data.add(data.optical_data.capture_time);
-        optics_data.add(data.optical_data.save_time);
-        optics_data.add(data.optical_data.FIFO_length);
-
-    file.print("\n");
-}
-
 /**
  * @brief logs our data to the SD card
  * 
@@ -377,34 +312,24 @@ void SD_Logger::data_to_json(Data &data, StaticJsonDocument<size> &doc)
  * @return true 
  * @return false 
  */
-FASTRUN bool SD_Logger::logData(Data &data)
+FASTRUN bool SD_Logger::logData(StaticJsonDocument<STATIC_JSON_DOC_SIZE> &doc)
 {
-    //Update the capacity from the capacity we calculated in initialization
-    if(!m_inital_cap_updated)
-    {
-        data.sd_capacity = configs.sd_cap;
-        m_inital_cap_updated = true;
-    }
     //Logging at a certain interval set by the constructor
     int64_t current_time = scoped_timer.elapsed();
     if(current_time - m_previous_log_time >= m_log_interval)
     {
-        constexpr int json_capacity = 1536; // https://arduinojson.org/v6/assistant/#/step3
-        StaticJsonDocument<json_capacity> json_data;
-
-        data_to_json<json_capacity>(data, json_data);
-
         //If our sd card is busy we add to our buffer
         if(file.isBusy())
         {
-            write_buf.push(json_data); //adding buffer to queue data structure (FIFO)
+            write_buf.push(doc); //adding buffer to queue data structure (FIFO)
         }
         else
         {
             //If nothing is in the buffer we directly write to the sd card
             if(write_buf.size() == 0)
             {
-                serializeJson(json_data, file);
+                serializeJson(doc, file);
+                file.print("\n");
 
                 #if PRINT_DATA
                     serializeJson(json_data, Serial);
@@ -418,12 +343,14 @@ FASTRUN bool SD_Logger::logData(Data &data)
             else
             {
                 //If there is data in the buffer we move it into the buffer and write the oldest data to the sd card
-                write_buf.push(json_data);
-                json_data = write_buf.front();
+                write_buf.push(doc);
+                doc = write_buf.front();
                 write_buf.pop();
-                serializeJson(json_data, file);
+                serializeJson(doc, file);
+                file.print("\n");
                 #if PRINT_DATA
                     serializeJson(json_data, Serial);
+                    file.print("\n");
                 #endif
 
                 m_write_iterations++;
@@ -440,7 +367,7 @@ FASTRUN bool SD_Logger::logData(Data &data)
     {
         INFO_LOG("Buffer is full, slowing down data logging rate");
         //Clear the old data if it gets too large by swapping with an empty queue
-        std::queue<StaticJsonDocument<1536>> empty;
+        std::queue<StaticJsonDocument<STATIC_JSON_DOC_SIZE>> empty;
         std::swap(write_buf, empty);
 
         m_log_interval+= 10000000; //If the buffer is too large we increase the log interval to prevent overflow
@@ -448,9 +375,19 @@ FASTRUN bool SD_Logger::logData(Data &data)
 
     //Update our timers continuously so they can update/flush when needed
     flusher.void_tick(this);
-    capacity_updater.void_tick(data.sd_capacity);
     
     return true;
+}
+
+void SD_Logger::update_sd_capacity(Data &data)
+{
+    //Update the capacity from the capacity we calculated in initialization
+    if(!m_inital_cap_updated)
+    {
+        data.sd_capacity = configs.sd_cap;
+        m_inital_cap_updated = true;
+    }
+    capacity_updater.void_tick(data.sd_capacity);
 }
 
 void SD_Logger::log_image(OV2640_Mini &camera)
