@@ -270,9 +270,9 @@ public:
             ori_data.add(data.fmag.x); ori_data.add(data.fmag.y); ori_data.add(data.fmag.z);
         
         JsonArray external_data = doc.createNestedArray("external_data");
-            external_data.add(data.raw_TDS); external_data.add(data.filt_TDS);
-            external_data.add(data.raw_ext_pres); external_data.add(data.filt_ext_pres);
-            external_data.add(data.raw_ext_temp); external_data.add(data.filt_ext_temp);
+            external_data.add(data.filt_TDS);
+            external_data.add(data.filt_ext_pres);
+            external_data.add(data.filt_ext_temp);
 
         JsonArray step_data = doc.createNestedArray("step_data");
             step_data.add(data.dive_stepper.limit_state);

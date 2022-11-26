@@ -24,8 +24,7 @@ bool Telemetry::receive(Data &data)
         DeserializationError error = deserializeMsgPack(doc, Serial1);
         if(error == DeserializationError::Ok)
         {
-            serializeJson(doc, Serial);
-            Serial.println();
+            Data::json_to_data(data, doc);
         }
         else
         {
