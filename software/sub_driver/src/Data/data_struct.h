@@ -284,16 +284,6 @@ public:
             step_data.add(data.dive_stepper.speed);
             step_data.add(data.dive_stepper.acceleration);
             step_data.add(data.dive_stepper.max_speed);
-
-            step_data.add(data.pitch_stepper.limit_state);
-            step_data.add(data.pitch_stepper.homed);
-            step_data.add(data.pitch_stepper.current_position);
-            step_data.add(data.pitch_stepper.current_position_mm);
-            step_data.add(data.pitch_stepper.target_position);
-            step_data.add(data.pitch_stepper.target_position_mm);
-            step_data.add(data.pitch_stepper.speed);
-            step_data.add(data.pitch_stepper.acceleration);
-            step_data.add(data.pitch_stepper.max_speed);
     }
 };
 

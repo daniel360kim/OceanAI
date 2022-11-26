@@ -87,7 +87,6 @@ public:
     double filt_ext_temp;
 
     StepperData dive_stepper;
-    StepperData pitch_stepper;
     
     static void printData(Print &p, const char* delim, const Data &data)
     {
@@ -138,16 +137,6 @@ public:
         p.print(data.dive_stepper.acceleration); p.print(delim);
         p.print(data.dive_stepper.max_speed); p.print(delim);
 
-        p.print(data.pitch_stepper.limit_state); p.print(delim);
-        p.print(data.pitch_stepper.homed); p.print(delim);
-        p.print(data.pitch_stepper.current_position); p.print(delim);
-        p.print(data.pitch_stepper.current_position_mm); p.print(delim);
-        p.print(data.pitch_stepper.target_position); p.print(delim);
-        p.print(data.pitch_stepper.target_position_mm); p.print(delim);
-        p.print(data.pitch_stepper.speed); p.print(delim);
-        p.print(data.pitch_stepper.acceleration); p.print(delim);
-        p.print(data.pitch_stepper.max_speed); p.print(delim);
-
         p.println();
 
     }
@@ -186,16 +175,6 @@ public:
         data.dive_stepper.speed = doc["step_data"][6];
         data.dive_stepper.acceleration = doc["step_data"][7];
         data.dive_stepper.max_speed = doc["step_data"][8];
-
-        data.pitch_stepper.limit_state = doc["step_data"][9];
-        data.pitch_stepper.homed = doc["step_data"][10];
-        data.pitch_stepper.current_position = doc["step_data"][11];
-        data.pitch_stepper.current_position_mm = doc["step_data"][12];
-        data.pitch_stepper.target_position = doc["step_data"][13];
-        data.pitch_stepper.target_position_mm = doc["step_data"][14];
-        data.pitch_stepper.speed = doc["step_data"][15];
-        data.pitch_stepper.acceleration = doc["step_data"][16];
-        data.pitch_stepper.max_speed = doc["step_data"][17];
     }
 
 };
