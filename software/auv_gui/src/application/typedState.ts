@@ -10,9 +10,9 @@ declare global {
     [messageID: string]: any
 
     // Example messageID typings
-    led_blink: number
-    led_state: number
-    lit_time: number
+    orixDS: number
+    oriyDS: number
+    orizDS: number
   }
   interface ElectricUIDeviceMetadataState {
     name: string

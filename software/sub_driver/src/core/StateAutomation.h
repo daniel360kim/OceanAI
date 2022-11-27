@@ -41,6 +41,7 @@ enum class CurrentState
     DIVING_MODE,
     RESURFACING,
     SURFACED,
+    CALIBRATE,
     SD_TRANSLATE,
     SD_REINITIALIZE
 };

@@ -268,7 +268,7 @@ public:
             ori_data.add(data.rgyr.x); ori_data.add(data.rgyr.y); ori_data.add(data.rgyr.z);
             ori_data.add(data.rel_ori.x); ori_data.add(data.rel_ori.y); ori_data.add(data.rel_ori.z);
             ori_data.add(data.fmag.x); ori_data.add(data.fmag.y); ori_data.add(data.fmag.z);
-        
+            ori_data.add(data.relative.w); ori_data.add(data.relative.x); ori_data.add(data.relative.y); ori_data.add(data.relative.z);
         JsonArray external_data = doc.createNestedArray("external_data");
             external_data.add(data.filt_TDS);
             external_data.add(data.filt_ext_pres);

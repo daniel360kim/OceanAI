@@ -17,17 +17,17 @@
 
 struct StepperData
 {
-    bool limit_state;
-    bool homed;
-    double current_position;
-    double current_position_mm;
+    uint8_t limit_state;
+    uint8_t homed;
+    float current_position;
+    float current_position_mm;
 
-    double target_position;
-    double target_position_mm;
+    float target_position;
+    float target_position_mm;
 
-    double speed;
-    double acceleration;
-    double max_speed;
+    float speed;
+    float acceleration;
+    float max_speed;
 };
 
 struct OpticalData
@@ -39,18 +39,18 @@ struct OpticalData
 
 struct Angles_3D
 {
-    double x, y, z;
+    float x, y, z;
 };
 
 struct Angles_4D
 {
-    double w, x, y, z;
+    float w, x, y, z;
 };
 
 struct BMP388Data
 {
-    double pressure;
-    double temperature;
+    float pressure;
+    float temperature;
 };
 
 
@@ -60,16 +60,17 @@ class Data
 {
 public:
     int64_t time_ns;
-    int loop_time;
-    int system_state;
+    uint32_t time_ms;
+    uint16_t loop_time;
+    uint16_t system_state;
 
-    double filt_voltage;
-    int clock_speed;
-    double internal_temp;
+    float filt_voltage;
+    uint16_t clock_speed;
+    float internal_temp;
 
     BMP388Data raw_bmp;
 
-    double bmi_temp;
+    float bmi_temp;
     Angles_3D racc;
     Angles_3D wfacc;
     Angles_3D vel;
@@ -80,11 +81,13 @@ public:
 
     Angles_3D fmag;
 
-    double filt_TDS;
-    
-    double filt_ext_pres;
+    Angles_4D relative;
 
-    double filt_ext_temp;
+    float filt_TDS;
+    
+    float filt_ext_pres;
+
+    float filt_ext_temp;
 
     StepperData dive_stepper;
     
@@ -144,6 +147,7 @@ public:
     static void json_to_data(Data &data, StaticJsonDocument<1536> &doc)
     {
         data.time_ns = doc["time"];
+        data.time_ms = data.time_ns / 1000000;
         data.loop_time = doc["sys_data"][0];
         data.system_state = doc["sys_data"][1];
         data.filt_voltage = doc["sys_data"][2];
@@ -161,6 +165,7 @@ public:
         data.rgyr.x = doc["IMU_data"][13]; data.rgyr.y = doc["IMU_data"][14]; data.rgyr.z = doc["IMU_data"][15];
         data.rel_ori.x = doc["IMU_data"][16]; data.rel_ori.y = doc["IMU_data"][17]; data.rel_ori.z = doc["IMU_data"][18];
         data.fmag.x = doc["IMU_data"][19]; data.fmag.y = doc["IMU_data"][20]; data.fmag.z = doc["IMU_data"][21];
+        data.relative.w = doc["IMU_data"][22]; data.relative.x = doc["IMU_data"][23]; data.relative.y = doc["IMU_data"][24]; data.relative.z = doc["IMU_data"][25];
 
         data.filt_TDS = doc["external_data"][0];
         data.filt_ext_pres = doc["external_data"][1];

@@ -153,7 +153,7 @@ const serialConsumer = new DiscoveryHintConsumer({
       path: identification.path,
       baudRate: configuration.baudRate,
       // if you have an Arduino that resets on connection, uncomment this line to delay the connection
-      // attachmentDelay: 2500,
+      //attachmentDelay: 2500,
     }
 
     return options

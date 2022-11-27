@@ -47,6 +47,7 @@ No remote control functionality yet
 #include "core/OS.h"
 #include "core/Timer.h"
 #include "module/stepper.h"
+#include "module/limit.h"
 /*
 Each state of our submarine is its own class and has 3 functions:
     enter: runs when the state is entered
@@ -180,6 +181,21 @@ private:
     Surfaced &operator=(const Surfaced &);
 
     static Surfaced instance;
+};
+
+class Calibrate : public State
+{
+public:
+    void enter(StateAutomation *state);
+    void run(StateAutomation *state);
+    void exit(StateAutomation *state);
+    static Calibrate &getInstance();
+private:
+    Calibrate() {}
+    Calibrate(const Calibrate &);
+    Calibrate &operator=(const Calibrate &);
+
+    static Calibrate instance;
 };
 
 //TODO: remove these since we use JSON now

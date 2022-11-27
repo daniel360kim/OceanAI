@@ -178,7 +178,7 @@ void Initialization::enter(StateAutomation* state)
         while(!Serial); //Wait for serial montior to open
     #endif
     Serial.begin(2000000);
-    telemetry.init(2000000, HZ_TO_NS(1));
+    telemetry.init(2000000, HZ_TO_NS(50));
 
     LEDa.setColor(255, 0, 255);
     LEDb.setColor(255, 0, 255);
@@ -228,15 +228,12 @@ void Initialization::enter(StateAutomation* state)
     LEDa.blink(255, 0, 0, 1000);
 
     currentState = CurrentState::INITIALIZATION;
-
-    buoyancy.setMinPulseWidth(1);
-    buoyancy.calibrate(); //Calibrate the stepper motors
 }
 
 void Initialization::run(StateAutomation* state)
 {
     //initialization happens once and we move on...
-    state->setState(Diving::getInstance());
+    state->setState(Calibrate::getInstance());
 }
 
 void Initialization::exit(StateAutomation* state)
@@ -379,6 +376,34 @@ void Surfaced::run(StateAutomation* state)
 
 void Surfaced::exit(StateAutomation* state)
 {
+}
+
+void Calibrate::enter(StateAutomation* state)
+{
+    currentState = CurrentState::CALIBRATE;
+    buoyancy.setMaxSpeed(3000);
+    buoyancy.setSpeed(3000);
+    buoyancy.setAcceleration(3000);
+    buoyancy.setResolution(Stepper::Resolution::HALF);
+    buoyancy.setMinPulseWidth(1);
+
+    buoyancy.move(-100000000);
+}
+
+void Calibrate::run(StateAutomation* state)
+{
+    continuousFunctions();
+    buoyancy.run();
+    
+    if(buoyancy.limit.state() == true)
+    {
+        state->setState(Resurfacing::getInstance());
+    }    
+}
+
+void Calibrate::exit(StateAutomation* state)
+{
+   buoyancy.setCurrentPosition(0);
 }
 
 void SD_translate::enter(StateAutomation* state)

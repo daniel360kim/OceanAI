@@ -93,6 +93,16 @@ export const Header = (
               }}
               active={page === 'secondary'}
             />
+            <Button
+              minimal
+              large
+              icon = "delta"
+              text = "Navigation"
+              onClick={() => {
+                navigate(`/devices/${props.deviceID}/navigation`)
+              }}
+              active={page === 'navigation'}
+              />
           </Navbar.Group>{' '}
         </div>
       </Navbar>

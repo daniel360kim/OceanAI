@@ -70,9 +70,10 @@ public:
 
     StepperProperties properties;
 
+    Limit limit;
+
 
 protected:
-    Limit limit;
     Resolution resolution;
     StepperPins pins;
 

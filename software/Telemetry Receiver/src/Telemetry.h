@@ -23,6 +23,8 @@ public:
     void init(int baud_rate);
 
     bool receive(Data &data);
+private:
+    Data previous_data;
 };
 
 
