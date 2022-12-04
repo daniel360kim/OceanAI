@@ -38,7 +38,7 @@ namespace
 
     Data data;
 
-    SD_Logger logger(mission_duration.mission_time, HZ_TO_NS(250));
+    SD_Logger logger(mission_duration.mission_time, HZ_TO_NS(50));
 
     bool warning = false;
 /*
@@ -58,7 +58,7 @@ namespace
         ERR_b,
         STOP_b};
 
-    Buoyancy buoyancy(pins_b, Stepper::Resolution::HALF, StepperProperties(169.0, 76000));
+    Buoyancy buoyancy(pins_b, Stepper::Resolution::HALF, StepperProperties(169.0, 38000));
 
     CurrentState currentState;
 
@@ -67,9 +67,13 @@ namespace
     OV2640_Mini camera(CS_VD, resolution, frame_number, true);
 
     StaticJsonDocument<STATIC_JSON_DOC_SIZE> data_json;
-    StaticJsonDocument<STATIC_JSON_DOC_SIZE> telemetry_json;
+    StaticJsonDocument<TELEM_STATIC_JSON_DOC_SIZE> fast_telem_json;
+    StaticJsonDocument<TELEM_STATIC_JSON_DOC_SIZE> slow_telem_json;
 
-    Telemetry telemetry;
+    Telemetry::FastData fast_telem_data;
+    Telemetry::SlowData slow_telem_data;
+
+    Telemetry::Telemetry telemetry;
 }
 
 /**
@@ -131,15 +135,18 @@ FASTRUN void continuousFunctions()
     logger.update_sd_capacity(data);
 
     Data::data_to_json(data, data_json);
-    Data::data_to_transmission_json(data, telemetry_json);
+
+    
+    fast_telem_data.update_from_data(data);
+    slow_telem_data.update_from_data(data);
+
     if(!logger.logData(data_json))
     {
         warning = true;
         return;
     }
 
-    telemetry.sendTelemetry(telemetry_json);
-    
+    telemetry.sendTelemetry(fast_telem_data, slow_telem_data);
 }
 ///****************///
 
@@ -178,7 +185,7 @@ void Initialization::enter(StateAutomation* state)
         while(!Serial); //Wait for serial montior to open
     #endif
     Serial.begin(2000000);
-    telemetry.init(2000000, HZ_TO_NS(50));
+    telemetry.init(2000000, HZ_TO_NS(4), HZ_TO_NS(0.5));
 
     LEDa.setColor(255, 0, 255);
     LEDb.setColor(255, 0, 255);
@@ -381,13 +388,13 @@ void Surfaced::exit(StateAutomation* state)
 void Calibrate::enter(StateAutomation* state)
 {
     currentState = CurrentState::CALIBRATE;
-    buoyancy.setMaxSpeed(3000);
-    buoyancy.setSpeed(3000);
-    buoyancy.setAcceleration(3000);
+    buoyancy.setMaxSpeed(6000);
+    buoyancy.setSpeed(6000);
+    buoyancy.setAcceleration(6000);
     buoyancy.setResolution(Stepper::Resolution::HALF);
     buoyancy.setMinPulseWidth(1);
 
-    buoyancy.move(-100000000);
+    buoyancy.move(500000);
 }
 
 void Calibrate::run(StateAutomation* state)
@@ -439,6 +446,7 @@ IdleMode IdleMode::instance;
 Diving Diving::instance;
 Resurfacing Resurfacing::instance;
 Surfaced Surfaced::instance;
+Calibrate Calibrate::instance;
 SD_translate SD_translate::instance;
 SD_reinitialize SD_reinitialize::instance;
 
@@ -468,6 +476,11 @@ Resurfacing& Resurfacing::getInstance()
 }
 
 Surfaced& Surfaced::getInstance()
+{
+    return instance;
+}
+
+Calibrate& Calibrate::getInstance()
 {
     return instance;
 }

@@ -15,6 +15,12 @@
 #include <stdint.h>
 #include <ArduinoJson.h>
 
+#define ARDUINO_JSON_USE_DOUBLE 0
+#define ARDUINO_JSON_USE_LONG_LONG 0
+
+static constexpr int STATIC_JSON_DOC_SIZE = 1536;
+static constexpr int TELEM_STATIC_JSON_DOC_SIZE = 512;
+
 struct StepperData
 {
     bool limit_state;
@@ -54,7 +60,6 @@ struct BMP388Data
 };
 
 
-static constexpr int STATIC_JSON_DOC_SIZE = 1536;
 //To do: organize into different structs for optimization and organization
 class Data
 {
@@ -179,7 +184,7 @@ public:
     //65 total elements
 
     /**
-     * @brief Converts data to json
+     * @brief Converts data to json that is then logged to SD
      * @details Should only be called when there is a new JSON doc
      * @param data data struct to be used
      * @param doc reference to json document. must match size of specified json doc in parameters
@@ -244,49 +249,61 @@ public:
             optics_data.add(data.optical_data.save_time);
             optics_data.add(data.optical_data.FIFO_length);
     }
-
-    static void data_to_transmission_json(Data &data, StaticJsonDocument<STATIC_JSON_DOC_SIZE> &doc)
-    {
-        doc.clear();
-        doc["time"] = data.time_ns;
-
-        JsonArray sys_data = doc.createNestedArray("sys_data");
-            sys_data.add(data.loop_time); sys_data.add(data.system_state); 
-            sys_data.add(data.filt_voltage);
-            sys_data.add(data.clock_speed); sys_data.add(data.internal_temp);
-
-        JsonArray baro_data = doc.createNestedArray("baro_data");
-            baro_data.add(data.raw_bmp.pressure);
-            baro_data.add(data.raw_bmp.temperature);
-        
-        JsonArray ori_data = doc.createNestedArray("IMU_data");
-            ori_data.add(data.bmi_temp);
-            ori_data.add(data.racc.x); ori_data.add(data.racc.y); ori_data.add(data.racc.z);
-            ori_data.add(data.wfacc.x); ori_data.add(data.wfacc.y); ori_data.add(data.wfacc.z);
-            ori_data.add(data.vel.x); ori_data.add(data.vel.y); ori_data.add(data.vel.z);
-            ori_data.add(data.pos.x); ori_data.add(data.pos.y); ori_data.add(data.pos.z);
-            ori_data.add(data.rgyr.x); ori_data.add(data.rgyr.y); ori_data.add(data.rgyr.z);
-            ori_data.add(data.rel_ori.x); ori_data.add(data.rel_ori.y); ori_data.add(data.rel_ori.z);
-            ori_data.add(data.fmag.x); ori_data.add(data.fmag.y); ori_data.add(data.fmag.z);
-            ori_data.add(data.relative.w); ori_data.add(data.relative.x); ori_data.add(data.relative.y); ori_data.add(data.relative.z);
-        JsonArray external_data = doc.createNestedArray("external_data");
-            external_data.add(data.filt_TDS);
-            external_data.add(data.filt_ext_pres);
-            external_data.add(data.filt_ext_temp);
-
-        JsonArray step_data = doc.createNestedArray("step_data");
-            step_data.add(data.dive_stepper.limit_state);
-            step_data.add(data.dive_stepper.homed);
-            step_data.add(data.dive_stepper.current_position);
-            step_data.add(data.dive_stepper.current_position_mm);
-            step_data.add(data.dive_stepper.target_position);
-            step_data.add(data.dive_stepper.target_position_mm);
-            step_data.add(data.dive_stepper.speed);
-            step_data.add(data.dive_stepper.acceleration);
-            step_data.add(data.dive_stepper.max_speed);
-    }
 };
 
+
+namespace Telemetry
+{
+    //Some packets will be sent faster than others
+    //This enum is used as an identifier
+    enum class PacketType
+    {
+        Fast = 0x00,
+        Intermediate = 0x01,
+        Slow = 0x02
+    };
+
+    class Packet
+    {
+    public:
+        virtual ~Packet() {}
+        virtual void to_json(StaticJsonDocument<TELEM_STATIC_JSON_DOC_SIZE> &doc) = 0;
+        virtual void update_from_data(Data &data) = 0;
+    };
+
+    /**
+     * @brief Data that is sent at a fast rate
+     * 
+     */
+    class TransmissionData : public Packet
+    {
+    public:
+        TransmissionData() {}
+        ~TransmissionData() {}
+
+        uint16_t loop_time;
+        uint8_t system_state;
+        double delta_time;
+        double internal_temp;
+
+        Angles_3D wfacc;
+        Angles_3D rgyr;
+        Angles_3D mag;
+        Angles_3D rel_ori;
+
+        double filt_ext_pres;
+        double filt_ext_temp;
+        
+        StepperData dive_stepper;
+
+        void to_json(StaticJsonDocument<TELEM_STATIC_JSON_DOC_SIZE> &doc)
+        {
+            doc.clear();
+            doc
+        }
+    
+    };  
+};
 
 
 

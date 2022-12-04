@@ -159,7 +159,7 @@ namespace Time
         //resets are when the sub will resurface, save all the data, and restart the mission
 
         static constexpr uint16_t days = 0;
-        static constexpr uint16_t hours = 3;
+        static constexpr uint16_t hours = 1;
         static constexpr uint32_t minutes = 0;
         static constexpr uint32_t seconds = 30;
 
