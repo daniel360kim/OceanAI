@@ -30,11 +30,6 @@ import {
   ControlledGroup,
 } from '@electricui/components-desktop-three'
 
-//const IMU_tempDS = new MessageDataSource('bmi_temp')
-const wfaxDS = new MessageDataSource('wfacc_x')
-const wfayDS = new MessageDataSource('wfacc_y')
-const wfazDS = new MessageDataSource('wfacc_z')
-
 /*
 const vxDS = new MessageDataSource("vel_x")
 const vyDS = new MessageDataSource("vel_y")
@@ -46,21 +41,19 @@ const pzDS = new MessageDataSource("pos_z")
 
 GLTF.preload(IMUmodel)
 const timeDS = new MessageDataSource('time_ms')
+const axDS = new MessageDataSource('wfacc_x')
+const ayDS = new MessageDataSource('wfacc_y')
+const azDS = new MessageDataSource('wfacc_z')
 const gxDS = new MessageDataSource('rgyr_x')
 const gyDS = new MessageDataSource('rgyr_y')
 const gzDS = new MessageDataSource('rgyr_z')
-const orixDS = new MessageDataSource('rel_ori_x')
-const oriyDS = new MessageDataSource('rel_ori_y')
-const orizDS = new MessageDataSource('rel_ori_z')
 const mxDs = new MessageDataSource('mag_x')
 const myDs = new MessageDataSource('mag_y')
 const mzDs = new MessageDataSource('mag_z')
-const rwDS = new MessageDataSource('rel_w')
 const rxDS = new MessageDataSource('rel_x')
 const ryDS = new MessageDataSource('rel_y')
 const rzDS = new MessageDataSource('rel_z')
 
-const ori = new MessageDataSource('ori')
 const navigationLayoutDescription = `
     IMUNumbers Chart
     Light Other1 
@@ -77,24 +70,18 @@ export const NavigationPage = (props: RouteComponentProps) => {
     <React.Fragment>
       <IntervalRequester
         variables={[
-          'time_ms',
           'wfacc_x',
           'wfacc_y',
           'wfacc_z',
           'rgyr_x',
           'rgyr_y',
           'rgyr_z',
-          'rel_ori_x',
-          'rel_ori_y',
-          'rel_ori_z',
           'mag_x',
           'mag_y',
           'mag_z',
-          'rel_w',
           'rel_x',
           'rel_y',
           'rel_z',
-          'ori',
         ]}
         interval={50}
       />
@@ -113,9 +100,9 @@ export const NavigationPage = (props: RouteComponentProps) => {
                   <b>Orientation</b>
                 </div>
                 <ChartContainer>
-                  <LineChart dataSource={orixDS} />
-                  <LineChart dataSource={oriyDS} />
-                  <LineChart dataSource={orizDS} />
+                  <LineChart dataSource={rxDS} />
+                  <LineChart dataSource={ryDS} />
+                  <LineChart dataSource={rzDS} />
                   <RealTimeDomain window={10000} />
                   <TimeAxis label="Time (s)" />
                   <VerticalAxis label="Orientation (deg)" />
@@ -139,9 +126,9 @@ export const NavigationPage = (props: RouteComponentProps) => {
                   <b>Acceleration</b>
                 </div>
                 <ChartContainer>
-                  <LineChart dataSource={wfaxDS} />
-                  <LineChart dataSource={wfayDS} />
-                  <LineChart dataSource={wfazDS} />
+                  <LineChart dataSource={axDS} />
+                  <LineChart dataSource={ayDS} />
+                  <LineChart dataSource={azDS} />
                   <RealTimeDomain window={10000} />
                   <TimeAxis label="Time (s)" />
                   <VerticalAxis label="Acceleration (m/s/s)" />

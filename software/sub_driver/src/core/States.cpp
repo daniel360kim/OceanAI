@@ -67,13 +67,9 @@ namespace
     OV2640_Mini camera(CS_VD, resolution, frame_number, true);
 
     StaticJsonDocument<STATIC_JSON_DOC_SIZE> data_json;
-    StaticJsonDocument<TELEM_STATIC_JSON_DOC_SIZE> fast_telem_json;
-    StaticJsonDocument<TELEM_STATIC_JSON_DOC_SIZE> slow_telem_json;
-
-    Telemetry::FastData fast_telem_data;
-    Telemetry::SlowData slow_telem_data;
 
     Telemetry::Telemetry telemetry;
+    Telemetry::TransmissionData telemetry_data;
 }
 
 /**
@@ -136,17 +132,14 @@ FASTRUN void continuousFunctions()
 
     Data::data_to_json(data, data_json);
 
-    
-    fast_telem_data.update_from_data(data);
-    slow_telem_data.update_from_data(data);
-
     if(!logger.logData(data_json))
     {
         warning = true;
         return;
     }
 
-    telemetry.sendTelemetry(fast_telem_data, slow_telem_data);
+    telemetry_data.update_from_data(data);
+    telemetry.sendTelemetry(telemetry_data);
 }
 ///****************///
 
@@ -185,7 +178,7 @@ void Initialization::enter(StateAutomation* state)
         while(!Serial); //Wait for serial montior to open
     #endif
     Serial.begin(2000000);
-    telemetry.init(2000000, HZ_TO_NS(4), HZ_TO_NS(0.5));
+    telemetry.init(2000000, HZ_TO_NS(5));
 
     LEDa.setColor(255, 0, 255);
     LEDb.setColor(255, 0, 255);
@@ -285,28 +278,37 @@ void Diving::run(StateAutomation* state)
     //Probably want to add some type of pressure parameter so the sub goes to a certain depth
     if(buoyancy.sinking && buoyancy.currentPosition() == buoyancy.targetPosition())
     {
-        state->setState(Resurfacing::getInstance());
-        return;
+        //state->setState(Resurfacing::getInstance());
+        //return;
+        while(true)
+        {
+            continuousFunctions();
+        }
     }
 
     buoyancy.update(); //update the stepper motors
     if(buoyancy.currentPosition() == buoyancy.targetPosition())
     {
-        state->setState(Resurfacing::getInstance());
+        //state->setState(Resurfacing::getInstance());
+        while(true)
+        {
+            continuousFunctions();
+        }
+
     }
 
     //call the continuous loop functions
     continuousFunctions();
 
     //Log to SD card
-
+/*
     //If we reached the end of the mission, we move to the end
     if(mission_duration.time_remaining_mission(scoped_timer.elapsed()) <= 0)
     {
         state->setState(SD_translate::getInstance());
         return;
     }
-
+*/
     //ADD POWER CHECKING
 }
 
@@ -314,6 +316,9 @@ void Diving::exit(StateAutomation* state)
 {
     //nothing here
 }
+
+
+int64_t resurface_time = 0;
 
 void Resurfacing::enter(StateAutomation* state)
 {
@@ -324,6 +329,7 @@ void Resurfacing::enter(StateAutomation* state)
     buoyancy.setResolution(Stepper::Resolution::HALF);
     buoyancy.rise();
     buoyancy.setMinPulseWidth(1);
+    resurface_time = scoped_timer.elapsed();
 }
 
 void Resurfacing::run(StateAutomation* state)
@@ -356,7 +362,7 @@ void Resurfacing::run(StateAutomation* state)
 
 void Resurfacing::exit(StateAutomation* state)
 {
-    //nothing here
+
 }
 
 void Surfaced::enter(StateAutomation* state)
@@ -377,7 +383,6 @@ void Surfaced::run(StateAutomation* state)
         state->setState(SD_translate::getInstance());
         return;
     }
-
     state->setState(Diving::getInstance());
 }
 
@@ -465,7 +470,7 @@ IdleMode& IdleMode::getInstance()
     return instance;
 }
 
-Diving& Diving::getInstance()
+Diving& Diving:: getInstance()
 {
     return instance;
 }

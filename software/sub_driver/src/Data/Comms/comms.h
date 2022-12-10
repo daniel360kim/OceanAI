@@ -28,14 +28,14 @@ namespace Telemetry
     public:
         Telemetry() {}
 
-        void init(const int baudrate, const long fast_interval_ns, const long slow_interval_ns);
+        void init(const int baudrate, const long interval_ns);
 
-        void sendTelemetry(FastData &fast_data, SlowData &slow_data);
+        void sendTelemetry(TransmissionData &send_data);
         void receiveCommand();
 
     private:
-        long m_fast_interval_ns, m_slow_interval_ns;
-        int64_t m_previous_fast_send_time, m_previous_slow_send_time;
+        long m_interval_ns;
+        int64_t m_previous_send_time;
     };
 };
 

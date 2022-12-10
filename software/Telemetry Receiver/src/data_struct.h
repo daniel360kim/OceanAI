@@ -258,9 +258,8 @@ namespace Telemetry
     //This enum is used as an identifier
     enum class PacketType
     {
-        Fast = 0x00,
-        Intermediate = 0x01,
-        Slow = 0x02
+        Send = 0x00,
+        Receive = 0x01,
     };
 
     class Packet
@@ -275,75 +274,69 @@ namespace Telemetry
      * @brief Data that is sent at a fast rate
      * 
      */
-    class FastData : public Packet
+    class TransmissionData : public Packet
     {
     public:
-        FastData() {}
-        Angles_3D wfacc;
-        Angles_3D gyro;
-        Angles_3D mag;
-        Angles_3D ori;
+        TransmissionData() {}
+        ~TransmissionData() {}
 
-        void to_json(StaticJsonDocument<TELEM_STATIC_JSON_DOC_SIZE> &doc)
-        {
-            doc.clear();
-            JsonArray fast_data = doc.createNestedArray("telem");
-            fast_data.add(static_cast<uint8_t>(PacketType::Fast));
-            fast_data.add(wfacc.x); fast_data.add(wfacc.y); fast_data.add(wfacc.z);
-            fast_data.add(gyro.x); fast_data.add(gyro.y); fast_data.add(gyro.z);
-            fast_data.add(mag.x); fast_data.add(mag.y); fast_data.add(mag.z);
-            fast_data.add(ori.x); fast_data.add(ori.y); fast_data.add(ori.z);
-        }
-
-        void update_from_data(Data &data)
-        {
-            wfacc = data.wfacc;
-            gyro = data.rgyr;
-            mag = data.fmag;
-            ori = data.rel_ori;
-        }
-    };
-
-    /**
-     * @brief Data that is sent at a slower rate
-     * 
-     */
-    class SlowData : public Packet
-    {
-    public:
-        SlowData() {}
         uint16_t loop_time;
-        uint16_t sys_state;
-        double filt_voltage;
-        StepperData stepper_data;
+        uint8_t system_state;
+        double delta_time;
+        double internal_temp;
+
+        Angles_3D wfacc;
+        Angles_3D rgyr;
+        Angles_3D mag;
+        Angles_3D rel_ori;
+
+        double filt_ext_pres;
+        double filt_ext_temp;
+        
+        StepperData dive_stepper;
 
         void to_json(StaticJsonDocument<TELEM_STATIC_JSON_DOC_SIZE> &doc)
         {
             doc.clear();
-            JsonArray slow_data = doc.createNestedArray("telem");
-            slow_data.add(static_cast<uint8_t>(PacketType::Slow));
-            slow_data.add(loop_time);
-            slow_data.add(sys_state);
-            slow_data.add(filt_voltage);
-            slow_data.add(stepper_data.current_position);
-            slow_data.add(stepper_data.target_position);
-            slow_data.add(stepper_data.speed);
-            slow_data.add(stepper_data.acceleration);
-            slow_data.add(stepper_data.max_speed);
+            doc.add(loop_time);
+            doc.add(system_state);
+            doc.add(delta_time);
+            doc.add(internal_temp);
+            doc.add(wfacc.x); doc.add(wfacc.y); doc.add(wfacc.z);
+            doc.add(rgyr.x); doc.add(rgyr.y); doc.add(rgyr.z);
+            doc.add(mag.x); doc.add(mag.y); doc.add(mag.z);
+            doc.add(rel_ori.x); doc.add(rel_ori.y); doc.add(rel_ori.z);
+
+            doc.add(filt_ext_pres);
+            doc.add(filt_ext_temp);
+            
+            doc.add(dive_stepper.limit_state);
+            doc.add(dive_stepper.current_position);
+            doc.add(dive_stepper.target_position);
+            doc.add(dive_stepper.speed);
+            doc.add(dive_stepper.acceleration);
+            doc.add(dive_stepper.max_speed);
         }
 
         void update_from_data(Data &data)
         {
-            loop_time = static_cast<uint16_t>(data.loop_time);
-            sys_state = static_cast<uint16_t>(data.system_state);
-            filt_voltage = data.filt_voltage;
-            stepper_data = data.dive_stepper;
+            loop_time = data.loop_time;
+            system_state = data.system_state;
+            delta_time = data.delta_time;
+            internal_temp = data.internal_temp;
+
+            wfacc = data.wfacc;
+            rgyr = data.rgyr;
+            mag = data.fmag;
+            rel_ori = data.rel_ori;
+
+            filt_ext_pres = data.filt_ext_pres;
+            filt_ext_temp = data.filt_ext_temp;
+            
+            dive_stepper = data.dive_stepper;
         }
-    };
-
-
-
     
+    };  
 };
 
 

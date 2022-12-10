@@ -25,10 +25,10 @@ namespace Telemetry
         Telemetry() {}
         void init(int baud_rate);
 
-        bool receive(FastData &fast_data, SlowData &slow_data);
+        bool receive(TransmissionData &send_data);
 
     private:
-        Data previous_data;
+        TransmissionData prev_data;
     };
 
 }

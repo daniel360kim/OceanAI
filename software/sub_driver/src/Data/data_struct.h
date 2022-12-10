@@ -258,9 +258,8 @@ namespace Telemetry
     //This enum is used as an identifier
     enum class PacketType
     {
-        Fast = 0x00,
-        Intermediate = 0x01,
-        Slow = 0x02
+        Send = 0x00,
+        Receive = 0x01,
     };
 
     class Packet
@@ -299,7 +298,42 @@ namespace Telemetry
         void to_json(StaticJsonDocument<TELEM_STATIC_JSON_DOC_SIZE> &doc)
         {
             doc.clear();
-            doc
+            doc.add(loop_time);
+            doc.add(system_state);
+            doc.add(delta_time);
+            doc.add(internal_temp);
+            doc.add(wfacc.x); doc.add(wfacc.y); doc.add(wfacc.z);
+            doc.add(rgyr.x); doc.add(rgyr.y); doc.add(rgyr.z);
+            doc.add(mag.x); doc.add(mag.y); doc.add(mag.z);
+            doc.add(rel_ori.x); doc.add(rel_ori.y); doc.add(rel_ori.z);
+
+            doc.add(filt_ext_pres);
+            doc.add(filt_ext_temp);
+            
+            doc.add(dive_stepper.limit_state);
+            doc.add(dive_stepper.current_position);
+            doc.add(dive_stepper.target_position);
+            doc.add(dive_stepper.speed);
+            doc.add(dive_stepper.acceleration);
+            doc.add(dive_stepper.max_speed);
+        }
+
+        void update_from_data(Data &data)
+        {
+            loop_time = data.loop_time;
+            system_state = data.system_state;
+            delta_time = data.delta_time;
+            internal_temp = data.internal_temp;
+
+            wfacc = data.wfacc;
+            rgyr = data.rgyr;
+            mag = data.fmag;
+            rel_ori = data.rel_ori;
+
+            filt_ext_pres = data.filt_ext_pres;
+            filt_ext_temp = data.filt_ext_temp;
+            
+            dive_stepper = data.dive_stepper;
         }
     
     };  
