@@ -43,9 +43,9 @@ export const Header = (
             {connectionRequested ? (
               <Button
                 minimal
-                intent="danger"
                 icon="cross"
                 text="Disconnect"
+                intent="danger"
                 onClick={() => {
                   disconnect().catch(err => {
                     console.warn('Failed to disconnect', err)
@@ -87,11 +87,11 @@ export const Header = (
               minimal
               large
               icon="settings"
-              text="Secondary"
+              text="Mechanics"
               onClick={() => {
-                navigate(`/devices/${props.deviceID}/secondary`)
+                navigate(`/devices/${props.deviceID}/mechanics`)
               }}
-              active={page === 'secondary'}
+              active={page === 'mechanics'}
             />
             <Button
               minimal

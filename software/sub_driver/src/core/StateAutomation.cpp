@@ -68,16 +68,7 @@ void StateAutomation::printState(Print &printer, CurrentState &state)
         printer.print("Resurfacing");
         break;
     case 5:
-        printer.print("Surfaced");
-        break;
-    case 6:
         printer.print("Calibrate");
-        break;
-    case 7: 
-        printer.print("SD Translate");
-        break;
-    case 8: 
-        printer.print("SD Reinitialize");
         break;
     default:
         printer.print("Unknown State");

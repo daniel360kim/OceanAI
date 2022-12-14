@@ -26,7 +26,8 @@ public:
     virtual ~State() {}
     virtual void enter(StateAutomation* state) = 0;
     virtual void run(StateAutomation* state) = 0;
-    virtual void exit(StateAutomation* state) = 0; 
+    virtual void exit(StateAutomation* state) = 0;
+    
 };
 
 /**
@@ -40,10 +41,7 @@ enum class CurrentState
     IDLE_MODE,
     DIVING_MODE,
     RESURFACING,
-    SURFACED,
     CALIBRATE,
-    SD_TRANSLATE,
-    SD_REINITIALIZE
 };
 
 /**

@@ -28,7 +28,6 @@ No remote control functionality yet
 #include "pins.h"
 
 #include "../Data/SD/SD.h"
-#include "../Data/Comms/comms.h"
 
 #include "indication/OutputFuncs.h"
 #include "indication/LED.h"
@@ -161,26 +160,8 @@ private:
     Resurfacing &operator=(const Resurfacing &);
 
     static Resurfacing instance;
-};
 
-/**
- * @brief Surface state. Used to resurface the submarine
- * 
- */
-class Surfaced : public State
-{
-public:
-    void enter(StateAutomation *state);
-    void run(StateAutomation *state);
-    void exit(StateAutomation *state);
-    static Surfaced &getInstance();
-
-private:
-    Surfaced() {}
-    Surfaced(const Surfaced &);
-    Surfaced &operator=(const Surfaced &);
-
-    static Surfaced instance;
+    int m_iterations = 0; //every certain iterations we recalibrate
 };
 
 class Calibrate : public State
@@ -196,39 +177,6 @@ private:
     Calibrate &operator=(const Calibrate &);
 
     static Calibrate instance;
-};
-
-//TODO: remove these since we use JSON now
-class SD_translate : public State
-{
-public:
-    void enter(StateAutomation *state);
-    void run(StateAutomation *state);
-    void exit(StateAutomation *state);
-    static SD_translate &getInstance();
-
-private:
-    SD_translate() {}
-    SD_translate(const SD_translate &);
-    SD_translate &operator=(const SD_translate &);
-
-    static SD_translate instance;
-};
-
-class SD_reinitialize : public State
-{
-public:
-    void enter(StateAutomation *state) {}
-    void run(StateAutomation *state) {}
-    void exit(StateAutomation *state) {}
-    static SD_reinitialize &getInstance();
-
-private:
-    SD_reinitialize() {}
-    SD_reinitialize(const SD_reinitialize &);
-    SD_reinitialize &operator=(const SD_reinitialize &);
-
-    static SD_reinitialize instance;
 };
 
 

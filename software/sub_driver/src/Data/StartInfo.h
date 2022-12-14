@@ -63,8 +63,8 @@ struct StartFile_d
     char* gyro_ODR;
     char* mag_ODR;
 
-    Angles_3D gyro_bias;
-    Angles_3D mag_bias;
+    Angles_3D<double> gyro_bias;
+    Angles_3D<double> mag_bias;
 };
 
 extern StartFile_d configs;

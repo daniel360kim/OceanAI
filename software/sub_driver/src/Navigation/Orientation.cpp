@@ -100,12 +100,12 @@ void Orientation::toEuler(double w, double x, double y, double z, double *X, dou
  * @param wfay converted ay
  * @param wfaz converted az
  */
-FASTRUN Angles_3D Orientation::convertAccelFrame(Quaternion orientation, double ax, double ay, double az)
+FASTRUN Angles_3D<double> Orientation::convertAccelFrame(Quaternion orientation, double ax, double ay, double az)
 {
     Quaternion acc = { 0, ax, ay, az };
     Quaternion wF_acc = Quaternion::hamiltonProduct(orientation, acc);
 
-    Angles_3D world_frame_acc;
+    Angles_3D<double> world_frame_acc;
     //A simplified hamilton product multiplied by -1
     world_frame_acc.x = (wF_acc.w * orientation.x * -1 + wF_acc.x * orientation.w + wF_acc.y * orientation.z * -1 - wF_acc.z * orientation.y * -1);
     world_frame_acc.y = wF_acc.w * orientation.y * -1 - wF_acc.x * orientation.z * -1 + wF_acc.y * orientation.w + wF_acc.z * orientation.x * -1;

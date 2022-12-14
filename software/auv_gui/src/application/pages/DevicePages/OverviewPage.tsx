@@ -1,67 +1,143 @@
-import { 
+import {
   ChartContainer,
   LineChart,
   RealTimeDomain,
   TimeAxis,
   VerticalAxis,
+  ZoomBrush
 } from '@electricui/components-desktop-charts'
 
-import { Card } from '@blueprintjs/core'
+import { Card, Colors } from '@blueprintjs/core'
 import { Composition } from 'atomic-layout'
 import { IntervalRequester } from '@electricui/components-core'
-import { LightBulb } from '../../components/LightBulb'
-import { MessageDataSource } from '@electricui/core-timeseries'
 import React from 'react'
 import { RouteComponentProps } from '@reach/router'
-import { Slider } from '@electricui/components-desktop-blueprint'
-import { Printer } from '@electricui/components-desktop'
+import { HTMLTable } from '@blueprintjs/core'
+import { Callout } from '@blueprintjs/core'
+import { Statistic, Statistics } from '@electricui/components-desktop-blueprint'
+import { StateIndicator } from 'src/application/components/StateIndication'
+import { MessageDataSource } from '@electricui/core-timeseries'
 
 const layoutDescription = `
-  Chart Chart
-  Light Slider
+  Title Info
+  LoopChart TempChart
 `
 
 //Data Inputs
- 
-const loop_timeDS = new MessageDataSource("loop_time")
-const sys_stateDS = new MessageDataSource("system_state")
 
-const filt_voltageDS = new MessageDataSource("filt_voltage")
-//const clock_speedDS = new MessageDataSource("clock_speed");
-//const internal_tempDS = new MessageDataSource("internal_temp")
+const loop_timeDS = new MessageDataSource('loop_time')
+const sys_stateDS = new MessageDataSource<number>('system_state')
+const internal_tempDS = new MessageDataSource('internal_temp')
 
-//const bmp_presDS = new MessageDataSource("raw_bmp_pressure")
-//const bmp_tempDS = new MessageDataSource("raw_bmp_temperature")
+const baseSpeed = 100
 
-
-//const tdsDS = new MessageDataSource("tds")
-const ext_presDS = new MessageDataSource("ext_pres")
-const ext_tempDS = new MessageDataSource("ext_temp")
-
-/*
-const limit_stateDS = new MessageDataSource("limit_state")
-const homedDS = new MessageDataSource("homed")
-const step_posDS = new MessageDataSource("pos")
-const step_pos_mmDS = new MessageDataSource("pos_mm")
-const step_tarDS = new MessageDataSource("target_pos")
-const step_tar_mmDS = new MessageDataSource("target_pos_mm")
-const step_speedDS = new MessageDataSource("step_speed")
-const step_accelDS = new MessageDataSource("step_accel")
-const step_max_speedDS = new MessageDataSource("step_max_speed")
-
-*/
 export const OverviewPage = (props: RouteComponentProps) => {
   return (
     <React.Fragment>
-      <IntervalRequester
-        variables={['time_ms', 'loop_time', 'system_state', 'filt_voltage', 'ext_pres', 'ext_temp',]}
-        interval={50}
-      />
 
       <Composition areas={layoutDescription} gap={10} autoCols="1fr">
         {Areas => (
           <React.Fragment>
+            <Areas.Title>
+              <Card interactive>
+                <h1>OceanAI Command Center</h1>
+                <Callout title="MCU Health" intent="success">
+                  Microcontroller is running nominally.
+                </Callout>
+                <Callout title="Nominal Loop Time" intent="warning">
+                  Loop Times should be at least 100hz to ensure proper stepper
+                  functionality
+                </Callout>
+                <HTMLTable striped interactive condensed>
+                  <thead>
+                    <tr>
+                      <h3>System Information</h3>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Processor</td>
+                      <td>MIMXRT1062</td>
+                    </tr>
+                    <tr>
+                      <td>CPU</td>
+                      <td>ARM Cortex M7</td>
+                    </tr>
+                    <tr>
+                      <td>RAM</td>
+                      <td>1024 KB</td>
+                    </tr>
+                    <tr>
+                      <td>Flash</td>
+                      <td>8 MB</td>
+                    </tr>
+                    <tr>
+                      <td>External Memory</td>
+                      <td>8 MB</td>
+                    </tr>
+                  </tbody>
+                </HTMLTable>
+              </Card>
+            </Areas.Title>
 
+            <Areas.Info>
+              <Card interactive>
+                <h2>System Status</h2>
+                <br />
+                <Statistics>
+                  <Statistic
+                    label="Loop Time (hz)"
+                    accessor="loop_time"
+                    color="#9f7ef7"
+                  />
+                  <Statistic
+                    label="System State"
+                    accessor="system_state"
+                    color={Colors.BLUE5}
+                  />
+                  <Statistic
+                    label="CPU Temperature (C)"
+                    accessor="internal_temp"
+                    color={Colors.RED5}
+                    precision={1}
+                  />
+                </Statistics>
+                <br />
+                <br />
+                <br />
+                <Card interactive elevation={1}>
+                  <h2>System State</h2>
+                  <StateIndicator />
+                </Card>
+                <br />
+              </Card>
+            </Areas.Info>
+            <Areas.LoopChart>
+              <Card>
+                <h2>Loop Time</h2>
+                <ChartContainer>
+                  <LineChart dataSource={loop_timeDS} />
+                  <TimeAxis label="Time (s)"/>
+                  <VerticalAxis/>
+                  <RealTimeDomain window={10000} />
+                  <ZoomBrush />
+                </ChartContainer>
+              </Card>
+            </Areas.LoopChart>
+
+            <Areas.TempChart>
+              <Card>
+                <h2>CPU Temperature</h2>
+                <ChartContainer>
+                  <LineChart dataSource={internal_tempDS} />
+                  <TimeAxis label="Time (s)"/>
+                  <VerticalAxis/>
+                  <RealTimeDomain 
+                    window={10000}/>
+                  <ZoomBrush />
+                </ChartContainer>
+              </Card>
+            </Areas.TempChart>
           </React.Fragment>
         )}
       </Composition>

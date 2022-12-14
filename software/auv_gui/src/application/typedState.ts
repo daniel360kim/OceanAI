@@ -19,11 +19,11 @@ declare global {
   }
 }
 
-// Export custom struct types for use in both codecs and the application
-export type LEDSettings = {
-  glow_time: number
-  enable: number
+export type Angles3D = {
+  x: number
+  y: number
+  z: number
+
 }
 
-// This exports these types into the dependency tree.
-export {}
+

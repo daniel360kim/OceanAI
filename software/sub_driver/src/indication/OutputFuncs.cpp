@@ -4,9 +4,9 @@
  * @brief Buzzer and led sequences
  * @version 1
  * @date 2022-06-13
- * 
+ *
  * @copyright Copyright (c) 2022 OceanAI (https://github.com/daniel360kim/OceanAI)
- * 
+ *
  */
 #include "LED.h"
 #include "OutputFuncs.h"
@@ -67,21 +67,17 @@ void OutputFuncs::loopIndication()
 
 void OutputFuncs::indicateError()
 {
-    while(1)
-    {
-        
-        for(int i = 0; i < 3; i++)
-        {
-            buzzer.sound (NOTE_E6, 10);
-            LEDa.setColor(255, 0, 0);
-            LEDb.setColor(255, 0, 0);
-            delay(100);
-            LEDa.LEDoff();
-            LEDb.LEDoff();
-        }
-        delay(300);
 
+    for (int i = 0; i < 3; i++)
+    {
+        buzzer.sound(NOTE_E6, 10);
+        LEDa.setColor(255, 0, 0);
+        LEDb.setColor(255, 0, 0);
+        delay(100);
+        LEDa.LEDoff();
+        LEDb.LEDoff();
     }
+    delay(300);
 }
 
 void OutputFuncs::indicateWarning()

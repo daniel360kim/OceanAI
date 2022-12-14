@@ -5,7 +5,7 @@ import { Header } from '../../components/Header'
 import { Intent } from '@blueprintjs/core'
 import { OverviewPage } from './OverviewPage'
 import React from 'react'
-import { SecondaryPage } from './SecondaryPage'
+import { MechanicsPage } from './MechanicsPage'
 import { NavigationPage } from './NavigationPage'
 import { navigate } from '@electricui/utility-electron'
 
@@ -38,7 +38,7 @@ export const DevicePages = (
         <div className="device-content">
           <Router primary={false}>
             <OverviewPage path="/" />
-            <SecondaryPage path="secondary" />
+            <MechanicsPage path="mechanics" />
             <NavigationPage path="navigation" />
           </Router>
         </div>

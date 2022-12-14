@@ -66,7 +66,8 @@
     "Makefile": "cpp",
     "*.tpp": "cpp",
     "system_error": "cpp",
-    "vector": "cpp"
+    "vector": "cpp",
+    "cmath": "cpp"
 },
 "C_Cpp.errorSquiggles": "Enabled"
 }

@@ -180,7 +180,7 @@ void UnifiedSensors::setGyroBias()
 
     for (uint8_t i = 0; i < 100; i++)
     {
-        Angles_3D gyro = returnRawGyro();
+        Angles_3D<double> gyro = returnRawGyro();
         gxIntegration += gyro.x;
         gyIntegration += gyro.y;
         gzIntegration += gyro.z;
@@ -206,9 +206,9 @@ FASTRUN BMP388Data UnifiedSensors::returnRawBaro()
     return data;
 }
 
-FASTRUN Angles_3D UnifiedSensors::returnRawAccel()
+FASTRUN Angles_3D<double> UnifiedSensors::returnRawAccel()
 {
-    Angles_3D accel_data;
+    Angles_3D<double> accel_data;
 
     accel.readSensor();
     accel_data.x = accel.getAccelX_mss();
@@ -223,9 +223,9 @@ double UnifiedSensors::returnAccelTempC()
     return accel.getTemperature_C();
 }
 
-FASTRUN Angles_3D UnifiedSensors::returnRawGyro()
+FASTRUN Angles_3D<double> UnifiedSensors::returnRawGyro()
 {
-    Angles_3D gyro_data;
+    Angles_3D<double> gyro_data;
 
     gyro.readSensor();
     gyro_data.x = gyro.getGyroX_rads() - gyro_bias.x;
@@ -235,9 +235,9 @@ FASTRUN Angles_3D UnifiedSensors::returnRawGyro()
     return gyro_data;
 }
 
-FASTRUN Angles_3D UnifiedSensors::returnRawMag()
+FASTRUN Angles_3D<double> UnifiedSensors::returnRawMag()
 {
-    Angles_3D mag_data;
+    Angles_3D<double> mag_data;
 
     mag.read();
     // Convert to mTesla. Rangle is +/-4 so we divide by 6842 to get gauss, then mult. by 100 to get mtesla

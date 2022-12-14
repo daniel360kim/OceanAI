@@ -5,92 +5,41 @@ import {
   TimeAxis,
   VerticalAxis,
   HorizontalAxis,
-  ZoomBrush,
   TimeSlicedLineChart,
   RealTimeSlicingDomain,
   Fog,
+  ZoomBrush,
 } from '@electricui/components-desktop-charts'
 
-import React from 'react'
-import { MessageDataSource } from '@electricui/core-timeseries'
-import { RouteComponentProps } from '@reach/router'
-import { Card } from '@blueprintjs/core'
-import { Composition } from 'atomic-layout'
-import { Printer } from '@electricui/components-desktop'
-import { IntervalRequester } from '@electricui/components-core'
-import IMUmodel from '../../components/xsens-mti300/xsens-mti300.glb'
-import { LightBulb } from '../../components/LightBulb'
-import { time } from 'console'
-import { HTMLTable } from '@blueprintjs/core'
-import { Connections } from '@electricui/components-desktop-blueprint'
 import {
-  Environment,
-  GLTF,
-  OrbitControls,
-  ControlledGroup,
-} from '@electricui/components-desktop-three'
+  Card,
+  Colors,
+} from '@blueprintjs/core'
+import { Composition } from 'atomic-layout'
+import { IntervalRequester } from '@electricui/components-core'
+import { DataSource, MessageDataSource } from '@electricui/core-timeseries'
+import React from 'react'
+import { RouteComponentProps } from '@reach/router'
 
-/*
-const vxDS = new MessageDataSource("vel_x")
-const vyDS = new MessageDataSource("vel_y")
-const vzDS = new MessageDataSource("vel_z")
-const pxDS = new MessageDataSource("pos_x")
-const pyDS = new MessageDataSource("pos_y")
-const pzDS = new MessageDataSource("pos_z")
-*/
+const rxDS = new MessageDataSource('rel_ori_x')
+const ryDS = new MessageDataSource('rel_ori_y')
+const rzDS = new MessageDataSource('rel_ori_z')
 
-GLTF.preload(IMUmodel)
-const timeDS = new MessageDataSource('time_ms')
-const axDS = new MessageDataSource('wfacc_x')
-const ayDS = new MessageDataSource('wfacc_y')
-const azDS = new MessageDataSource('wfacc_z')
-const gxDS = new MessageDataSource('rgyr_x')
-const gyDS = new MessageDataSource('rgyr_y')
-const gzDS = new MessageDataSource('rgyr_z')
-const mxDs = new MessageDataSource('mag_x')
-const myDs = new MessageDataSource('mag_y')
-const mzDs = new MessageDataSource('mag_z')
-const rxDS = new MessageDataSource('rel_x')
-const ryDS = new MessageDataSource('rel_y')
-const rzDS = new MessageDataSource('rel_z')
+const accDS = new MessageDataSource('acc')
+const gyrDS = new MessageDataSource('gyr')
 
 const navigationLayoutDescription = `
-    IMUNumbers Chart
-    Light Other1 
+    Chart TimeSlice
 `
-
-const lerp = (x: number, y: number, a: number) => x * (1 - a) + y * a
-const clamp = (a: number, min = 0, max = 1) => Math.min(max, Math.max(min, a))
-const invlerp = (x: number, y: number, a: number) => clamp((a - x) / (y - x))
-
-
 
 export const NavigationPage = (props: RouteComponentProps) => {
   return (
     <React.Fragment>
-      <IntervalRequester
-        variables={[
-          'wfacc_x',
-          'wfacc_y',
-          'wfacc_z',
-          'rgyr_x',
-          'rgyr_y',
-          'rgyr_z',
-          'mag_x',
-          'mag_y',
-          'mag_z',
-          'rel_x',
-          'rel_y',
-          'rel_z',
-        ]}
-        interval={50}
-      />
+
 
       <Composition areas={navigationLayoutDescription} gap={10} autoCols="1fr">
         {Areas => (
           <React.Fragment>
-
-
             <Areas.Chart>
               <Card>
                 <div style={{ textAlign: 'left', marginBottom: '1em' }}>
@@ -113,9 +62,22 @@ export const NavigationPage = (props: RouteComponentProps) => {
                   <b>Angular Rates</b>
                 </div>
                 <ChartContainer>
-                  <LineChart dataSource={gxDS} />
-                  <LineChart dataSource={gyDS} />
-                  <LineChart dataSource={gzDS} />
+                  <LineChart
+                    dataSource={gyrDS}
+                    accessor={(data, time) => data[0]}
+                    color={Colors.RED5}
+                  />
+                  <LineChart
+                    dataSource={gyrDS}
+                    accessor={(data, time) => data[1]}
+                    color={Colors.GREEN5}
+                  />
+                  <LineChart
+                    dataSource={gyrDS}
+                    accessor={(data, time) => data[2]}
+                    color={Colors.BLUE5}
+                  />
+
                   <RealTimeDomain window={10000} />
                   <TimeAxis label="Time (s)" />
                   <VerticalAxis label="Angular Rate (rad/s)" />
@@ -126,16 +88,75 @@ export const NavigationPage = (props: RouteComponentProps) => {
                   <b>Acceleration</b>
                 </div>
                 <ChartContainer>
-                  <LineChart dataSource={axDS} />
-                  <LineChart dataSource={ayDS} />
-                  <LineChart dataSource={azDS} />
+                <LineChart
+                    dataSource={accDS}
+                    accessor={(data, time) => data[0]}
+                    color={Colors.RED5}
+                  />
+                  <LineChart
+                    dataSource={accDS}
+                    accessor={(data, time) => data[1]}
+                    color={Colors.GREEN5}
+                  />
+                  <LineChart
+                    dataSource={accDS}
+                    accessor={(data, time) => data[2]}
+                    color={Colors.BLUE5}
+                  />
                   <RealTimeDomain window={10000} />
                   <TimeAxis label="Time (s)" />
                   <VerticalAxis label="Acceleration (m/s/s)" />
                   <ZoomBrush />
                 </ChartContainer>
+                
               </Card>
             </Areas.Chart>
+
+            <Areas.TimeSlice>
+              <Card>
+                <h1>Time Slice</h1>
+                <div style={{ textAlign: 'center', marginBottom: '1em' }}>
+                  <b>XY Acceleration</b>
+                </div>
+                <ChartContainer height="43vh">
+                  <TimeSlicedLineChart
+                    dataSource={accDS}
+                    accessor={(data, time) => ({ x: data[0], y: data[2] })}
+                    color={'#eaff00'}
+                    lineWidth={4}
+                  />
+                  <RealTimeSlicingDomain
+                    window={200}
+                    xMin={-20}
+                    xMax={20}
+                    yMin={-20}
+                    yMax={20}
+                  />
+                  <Fog color="#a1978c" />
+                  <HorizontalAxis label="X m/s²" />
+                  <VerticalAxis label="Y m/s²" />
+                </ChartContainer>
+
+                <ChartContainer height="43vh">
+                  <TimeSlicedLineChart
+                    dataSource={gyrDS}
+                    accessor={(data, time) => ({ x: data[0], y: data[2] })}
+                    color={'#eb34c3'}
+                    lineWidth={4}
+                  />
+                  <RealTimeSlicingDomain
+                    window={200}
+                    xMin={-7}
+                    xMax={7}
+                    yMin={-7}
+                    yMax={7}
+                  />
+                  <Fog color="#a1978c" />
+                  <HorizontalAxis label="X rad/s" />
+                  <VerticalAxis label="Y rad/s" />
+                </ChartContainer>
+              </Card>
+            </Areas.TimeSlice>
           </React.Fragment>
         )}
       </Composition>

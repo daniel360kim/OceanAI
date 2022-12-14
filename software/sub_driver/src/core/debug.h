@@ -11,6 +11,8 @@
 #define PRINT_STATE false
 #define PRINT_DATA false
 
+#define UI_ON true
+
 #define OPTICS_ON false
 
 /**
@@ -26,6 +28,10 @@
     #define SUCCESS_LOG(message) 
     #define ERROR_LOG(Severity, message)
     #define INFO_LOG(message)
+#endif
+
+#if LIVE_DEBUG && UI_ON
+    #warning "Live Debug and UI are both on. Both outputs to Serial monitor"
 #endif
 
 namespace Debug

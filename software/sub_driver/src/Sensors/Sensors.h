@@ -45,16 +45,16 @@ public:
     void setGyroBias();
 
     BMP388Data returnRawBaro();
-    Angles_3D returnRawAccel();
+    Angles_3D<double> returnRawAccel();
     double returnAccelTempC();
-    Angles_3D returnRawGyro();
-    Angles_3D returnRawMag();
+    Angles_3D<double> returnRawGyro();
+    Angles_3D<double> returnRawMag();
 
     void logIMUToStruct(Data &data);
     void logExternalSensorToStruct(Data &data);
 
-    Angles_3D gyro_bias;
-    Angles_3D mag_bias = { 0.36, 0.39, 0.49 };
+    Angles_3D<double> gyro_bias;
+    Angles_3D<double> mag_bias = { 0.36, 0.39, 0.49 };
 
     std::vector<uint8_t> address;
 
