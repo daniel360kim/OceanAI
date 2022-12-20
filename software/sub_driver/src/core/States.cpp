@@ -55,6 +55,7 @@ namespace
     Buoyancy buoyancy(pins_b, Stepper::Resolution::HALF, StepperProperties(STEPPER_HALF_STEPS / STEPS_PER_HALF, STEPPER_HALF_STEPS));
 
     CurrentState currentState;
+    CurrentState callbackState;
 
     Resolution resolution = RESOLUTION_640x480;
     Frame_Number frame_number = ONE_PHOTO;
@@ -66,21 +67,26 @@ namespace
     SendData telemetry_data;
     eui_message_t tracked_variables[] =
         {
-            EUI_UINT16("loop_time", telemetry_data.loop_time),
-            EUI_UINT8("system_state", telemetry_data.system_state),
-            EUI_FLOAT("internal_temp", telemetry_data.internal_temp),
+            EUI_UINT16("lt", telemetry_data.loop_time),
+            EUI_FLOAT("v", telemetry_data.voltage),
+            EUI_UINT8("sst", telemetry_data.system_state),
+            EUI_FLOAT("it", telemetry_data.internal_temp),
 
-            EUI_FLOAT("rel_ori_x", telemetry_data.rel_ori.x),
-            EUI_FLOAT("rel_ori_y", telemetry_data.rel_ori.y),
-            EUI_FLOAT("rel_ori_z", telemetry_data.rel_ori.z),
+            EUI_FLOAT("xd", telemetry_data.rel_ori.x),
+            EUI_FLOAT("yd", telemetry_data.rel_ori.y),
+            EUI_FLOAT("zd", telemetry_data.rel_ori.z),
 
-            EUI_FLOAT_ARRAY_RO("gyr", telemetry_data.gyr),
-            EUI_FLOAT_ARRAY_RO("acc", telemetry_data.acc),
+            EUI_FLOAT_ARRAY_RO("gd", telemetry_data.gyr),
+            EUI_FLOAT_ARRAY_RO("ad", telemetry_data.acc),
 
-            EUI_INT16("step_pos", telemetry_data.stepper_current_position),
-            EUI_INT16("step_tar", telemetry_data.stepper_target_position),
-            EUI_INT16("step_speed", telemetry_data.stepper_speed),
-            EUI_INT16("step_accel", telemetry_data.stepper_acceleration),
+            EUI_INT16("sp", telemetry_data.stepper_current_position),
+            EUI_INT16("st", telemetry_data.stepper_target_position),
+            EUI_INT16("ss", telemetry_data.stepper_speed),
+            EUI_INT16("sa", telemetry_data.stepper_acceleration),
+
+            EUI_UINT8("ssc", telemetry_data.system_state_command),
+            EUI_INT16("sc", telemetry_data.stepper_speed_command),
+            EUI_INT16("ac", telemetry_data.stepper_acceleration_command),
     };
 
     void serial_write(uint8_t *data, uint16_t len);
@@ -101,14 +107,19 @@ namespace
     }
 
     int64_t previous_telem_send_time = 0;
+
+    bool idle_called = false;
 #endif
+
+
+
 };
 
 /**
  * @brief Functions that run in multiple states
  * FASTRUN is a macro where the function data is copied to ITCM in RAM and runs from there
  */
-FASTRUN void continuousFunctions()
+FASTRUN void continuousFunctions(StateAutomation *state)
 {
     data.time_ns = scoped_timer.elapsed(); // scoped timer is a global object to measure time since program epoch
     data.delta_time = (scoped_timer.elapsed() - previous_time) / 1000000000.0;
@@ -175,26 +186,35 @@ FASTRUN void continuousFunctions()
     telemetry_data.convert(data);
 
     int64_t current_time = scoped_timer.elapsed();
-    if(current_time - previous_telem_send_time >= 50000000)
+    if (current_time - previous_telem_send_time >= 100000000)
     {
         previous_telem_send_time = current_time;
-        eui_send_tracked("loop_time");
-        eui_send_tracked("system_state");
-        eui_send_tracked("internal_temp");
+        eui_send_tracked("lt");
+        eui_send_tracked("v");
+        eui_send_tracked("sst");
+        eui_send_tracked("it");
 
-        eui_send_tracked("rel_ori_x");
-        eui_send_tracked("rel_ori_y");
-        eui_send_tracked("rel_ori_z");
+        eui_send_tracked("xd");
+        eui_send_tracked("yd");
+        eui_send_tracked("zd");
 
-        eui_send_tracked("gyr");
-        eui_send_tracked("acc");
+        eui_send_tracked("gd");
+        eui_send_tracked("ad");
 
-        eui_send_tracked("step_pos");
-        eui_send_tracked("step_tar");
-        eui_send_tracked("step_speed");
-        eui_send_tracked("step_accel");
+        eui_send_tracked("sp");
+        eui_send_tracked("st");
+        eui_send_tracked("ss");
+        eui_send_tracked("sa");
     }
-    
+
+    if(telemetry_data.system_state_command != 0 && !idle_called)
+    {
+        callbackState = currentState;
+        state->setState(IdleMode::getInstance());
+        idle_called = true;
+        return;
+    }
+
 #endif
 
 }
@@ -211,7 +231,6 @@ FASTRUN void continuousFunctions()
  */
 void Initialization::enter(StateAutomation *state)
 {
-    telemetry_data.system_state_command = 0;
     start_time = teensy_clock::now(); // begin the scoped timer
 
     // If there was a crash from the last run, report it to SD
@@ -294,12 +313,19 @@ void Initialization::enter(StateAutomation *state)
     EUI_TRACK(tracked_variables);
 
     // Provide a identifier to make this board easy to find in the UI
-    eui_setup_identifier((char*)"OceanAI", 8);
-    
+    eui_setup_identifier((char *)"OceanAI", 8);
+
 #endif
-    buoyancy.setMaxSpeed(2000);
-    buoyancy.setSpeed(2000);
-    buoyancy.setAcceleration(2000);
+    
+    #if UI_ON
+        buoyancy.setSpeed(telemetry_data.stepper_speed_command);
+        buoyancy.setMaxSpeed(telemetry_data.stepper_speed_command);
+        buoyancy.setAcceleration(telemetry_data.stepper_acceleration_command);
+    #else
+        buoyancy.setSpeed(2000);
+        buoyancy.setMaxSpeed(2000);
+        buoyancy.setAcceleration(2000);
+    #endif
     currentState = CurrentState::INITIALIZATION;
 }
 
@@ -318,27 +344,81 @@ void Initialization::exit(StateAutomation *state)
 
 void ErrorIndication::enter(StateAutomation *state)
 {
-    telemetry_data.system_state_command = 2;
     currentState = CurrentState::ERROR_INDICATION;
 }
 
 void ErrorIndication::run(StateAutomation *state)
 {
     output.indicateError();
-    continuousFunctions();
+    continuousFunctions(state);
 }
 
 void ErrorIndication::exit(StateAutomation *state)
 {
+
+}
+
+void IdleMode::enter(StateAutomation *state)
+{
+    currentState = CurrentState::IDLE_MODE;
+    buoyancy.setSpeed(0);
+}
+
+void IdleMode::run(StateAutomation *state)
+{
+    continuousFunctions(state);
+    buoyancy.run();
+    #if UI_ON
+    if(telemetry_data.system_state_command == 0)
+    {
+        switch(callbackState)
+        {
+            case CurrentState::CALIBRATE:
+                state->setState(Calibrate::getInstance());
+                return;
+            case CurrentState::DIVING_MODE:
+                state->setState(Diving::getInstance());
+                return;
+            case CurrentState::ERROR_INDICATION:
+                state->setState(ErrorIndication::getInstance());
+                return;
+            case CurrentState::INITIALIZATION:
+                state->setState(Initialization::getInstance());
+                return;
+            case CurrentState::RESURFACING:
+                state->setState(Resurfacing::getInstance());
+                return;
+            default:
+                state->setState(Calibrate::getInstance());
+                return;
+        }
+    }
+    #endif
+}
+
+
+void IdleMode::exit(StateAutomation *state)
+{
+    #if UI_ON
+    idle_called = false;
+    #endif
 }
 
 void Diving::enter(StateAutomation *state)
 {
-    telemetry_data.system_state_command = 3;
     // Set current state for reading
     currentState = CurrentState::DIVING_MODE;
 
     // Initialize stepper settings
+    #if UI_ON
+        buoyancy.setSpeed(telemetry_data.stepper_speed_command);
+        buoyancy.setMaxSpeed(telemetry_data.stepper_speed_command);
+        buoyancy.setAcceleration(telemetry_data.stepper_acceleration_command);
+    #else
+        buoyancy.setSpeed(2000);
+        buoyancy.setMaxSpeed(2000);
+        buoyancy.setAcceleration(2000);
+    #endif
     buoyancy.setResolution(Stepper::Resolution::HALF);
     buoyancy.setMinPulseWidth(1); // how long to wait between high and low pulses
     buoyancy.sink();              // set the direction of the stepper motors
@@ -350,38 +430,19 @@ void Diving::run(StateAutomation *state)
     // Probably want to add some type of pressure parameter so the sub goes to a certain depth
     if (buoyancy.sinking && buoyancy.currentPosition() == buoyancy.targetPosition())
     {
+        #if UI_ON
         state->setState(Resurfacing::getInstance());
         return;
+        #else
+        state->setState(Resurfacing::getInstance());
+        return;
+        #endif
     }
 
     buoyancy.update(); // update the stepper motors
 
     // call the continuous loop functions
-    continuousFunctions();
-
-    switch(telemetry_data.system_state_command)
-    {
-    case 0:
-        state->setState(Initialization::getInstance());
-        break;
-    case 1:
-        state->setState(ErrorIndication::getInstance());
-        break;
-    case 2:
-        state->setState(IdleMode::getInstance());
-        break;
-    case 3:
-        state->setState(Diving::getInstance());
-        break;
-    case 4:
-        state->setState(Resurfacing::getInstance());
-        break;
-    case 5:
-        state->setState(Calibrate::getInstance());
-        break;
-    default:
-        break;
-    }
+    continuousFunctions(state);
 }
 
 void Diving::exit(StateAutomation *state)
@@ -390,8 +451,16 @@ void Diving::exit(StateAutomation *state)
 
 void Resurfacing::enter(StateAutomation *state)
 {
-    telemetry_data.system_state_command = 4;
     currentState = CurrentState::RESURFACING;
+    #if UI_ON
+        buoyancy.setSpeed(telemetry_data.stepper_speed_command);
+        buoyancy.setMaxSpeed(telemetry_data.stepper_speed_command);
+        buoyancy.setAcceleration(telemetry_data.stepper_acceleration_command);
+    #else  
+        buoyancy.setSpeed(2000);
+        buoyancy.setMaxSpeed(2000);
+        buoyancy.setAcceleration(2000);
+    #endif
     buoyancy.setResolution(Stepper::Resolution::HALF);
     buoyancy.rise();
     buoyancy.setMinPulseWidth(1);
@@ -414,36 +483,12 @@ void Resurfacing::run(StateAutomation *state)
             return;
         }
     }
-
-    buoyancy.run(); // update the stepper motors
+    
+    buoyancy.update(); // update the stepper motors
     // Just filling and refilling syringe at this point. need to check accelerometers and pressure
     // sensors to check minimums and maximums of our dive
 
-    continuousFunctions();
-
-    switch(telemetry_data.system_state_command)
-    {
-    case 0:
-        state->setState(Initialization::getInstance());
-        break;
-    case 1:
-        state->setState(ErrorIndication::getInstance());
-        break;
-    case 2:
-        state->setState(IdleMode::getInstance());
-        break;
-    case 3:
-        state->setState(Diving::getInstance());
-        break;
-    case 4:
-        state->setState(Resurfacing::getInstance());
-        break;
-    case 5:
-        state->setState(Calibrate::getInstance());
-        break;
-    default:
-        break;
-    }
+    continuousFunctions(state);
 }
 
 void Resurfacing::exit(StateAutomation *state)
@@ -453,8 +498,17 @@ void Resurfacing::exit(StateAutomation *state)
 
 void Calibrate::enter(StateAutomation *state)
 {
-    telemetry_data.system_state_command = 5;
     currentState = CurrentState::CALIBRATE;
+    #if UI_ON
+        buoyancy.setSpeed(telemetry_data.stepper_speed_command);
+        buoyancy.setMaxSpeed(telemetry_data.stepper_speed_command);
+        buoyancy.setAcceleration(telemetry_data.stepper_acceleration_command);
+    #else
+        buoyancy.setSpeed(2000);
+        buoyancy.setMaxSpeed(2000);
+        buoyancy.setAcceleration(2000);
+    #endif
+
     buoyancy.setResolution(Stepper::Resolution::HALF);
     buoyancy.setMinPulseWidth(1);
 
@@ -463,36 +517,12 @@ void Calibrate::enter(StateAutomation *state)
 
 void Calibrate::run(StateAutomation *state)
 {
-    continuousFunctions();
-    buoyancy.run();
+    continuousFunctions(state);
+    buoyancy.update();
 
     if (buoyancy.limit.state() == true)
     {
         state->setState(Resurfacing::getInstance());
-    }
-
-    switch(telemetry_data.system_state_command)
-    {
-    case 0:
-        state->setState(Initialization::getInstance());
-        break;
-    case 1:
-        state->setState(ErrorIndication::getInstance());
-        break;
-    case 2:
-        state->setState(IdleMode::getInstance());
-        break;
-    case 3:
-        state->setState(Diving::getInstance());
-        break;
-    case 4:
-        state->setState(Resurfacing::getInstance());
-        break;
-    case 5:
-        state->setState(Calibrate::getInstance());
-        break;
-    default:
-        break;
     }
 }
 

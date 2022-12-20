@@ -347,6 +347,7 @@ class SendData
 {
 public:
     uint16_t loop_time = 0;
+    float voltage = 0.f;
     uint8_t system_state = 0;
     float internal_temp = 0.f;
 
@@ -360,10 +361,13 @@ public:
     int16_t stepper_acceleration = 0;
 
     uint8_t system_state_command = 0;
+    int16_t stepper_speed_command = 0;
+    int16_t stepper_acceleration_command = 0;
 
     void convert(Data &data)
     {
         loop_time = static_cast<uint16_t>(data.loop_time);
+        voltage = static_cast<float>(data.filt_voltage);
         system_state = static_cast<uint8_t>(data.system_state);
         internal_temp = static_cast<float>(data.bmi_temp);
 

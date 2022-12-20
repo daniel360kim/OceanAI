@@ -17,7 +17,7 @@
       "target": "dmg"
     },
     "npmRebuild": false,
-    "productName": "Electric UI",
+    "productName": "OceanAI Studio",
     "win": {
       "target": "zip"
     }

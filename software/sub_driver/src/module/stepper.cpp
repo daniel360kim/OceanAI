@@ -241,12 +241,10 @@ void Buoyancy::sink()
         calibrate();
     }
 
-    move(properties.halves_length); //go to the other side of the carriage
+    moveTo(-1 * properties.halves_length); //go to the other side of the carriage
 
     sinking = true;
     rising = false;
-
-
 }
 
 /**
@@ -255,7 +253,7 @@ void Buoyancy::sink()
  */
 void Buoyancy::rise()
 {
-    move(-1 * properties.halves_length); //moves to the very end of the carriage
+    moveTo(-1 * properties.halves_length); //moves to the very end of the carriage
 
     sinking = false;
     rising = true;

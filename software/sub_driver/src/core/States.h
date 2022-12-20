@@ -109,9 +109,9 @@ private:
 class IdleMode : public State
 {
 public:
-    void enter(StateAutomation *state) {}
-    void run(StateAutomation *state) {}
-    void exit(StateAutomation *state) {}
+    void enter(StateAutomation *state); 
+    void run(StateAutomation *state); 
+    void exit(StateAutomation *state);
     static IdleMode &getInstance();
 
 private:
@@ -178,7 +178,6 @@ private:
 
     static Calibrate instance;
 };
-
 
 
 #endif

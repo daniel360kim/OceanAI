@@ -11,7 +11,7 @@
 #define PRINT_STATE false
 #define PRINT_DATA false
 
-#define UI_ON true
+#define UI_ON false
 
 #define OPTICS_ON false
 

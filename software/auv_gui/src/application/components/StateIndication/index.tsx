@@ -11,7 +11,7 @@ type StateIndicatorProps = {
   height?: CSS.Properties['height']
 }
 export const StateIndicator = (props: StateIndicatorProps) => {
-  const state = useHardwareState('system_state')
+  const state = useHardwareState('sst')
   if (state == 0) {
     return (
       <Callout title="Initialization" intent="primary" icon="pulse"></Callout>
@@ -33,12 +33,8 @@ export const StateIndicator = (props: StateIndicatorProps) => {
         Next Up: Surfaced
     </Callout>
   } else if (state == 5) {
-    return <Callout title="Surfaced" intent="primary">
+    return <Callout title="Calibrating" intent="primary">
         Next Up: Diving
-    </Callout>
-  } else if (state == 6) {
-    return <Callout title="Calibrating" intent="danger">
-        Next Up: Resurfacing
     </Callout>
   } else {
     return <Callout title="Unknown" intent="danger" icon="error"></Callout>

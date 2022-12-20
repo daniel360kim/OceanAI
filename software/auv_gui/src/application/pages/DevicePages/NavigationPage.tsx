@@ -21,12 +21,12 @@ import { DataSource, MessageDataSource } from '@electricui/core-timeseries'
 import React from 'react'
 import { RouteComponentProps } from '@reach/router'
 
-const rxDS = new MessageDataSource('rel_ori_x')
-const ryDS = new MessageDataSource('rel_ori_y')
-const rzDS = new MessageDataSource('rel_ori_z')
+const rxDS = new MessageDataSource('xd')
+const ryDS = new MessageDataSource('yd')
+const rzDS = new MessageDataSource('zd')
 
-const accDS = new MessageDataSource('acc')
-const gyrDS = new MessageDataSource('gyr')
+const accDS = new MessageDataSource('ad')
+const gyrDS = new MessageDataSource('gd')
 
 const navigationLayoutDescription = `
     Chart TimeSlice
@@ -52,7 +52,7 @@ export const NavigationPage = (props: RouteComponentProps) => {
                   <LineChart dataSource={rxDS} />
                   <LineChart dataSource={ryDS} />
                   <LineChart dataSource={rzDS} />
-                  <RealTimeDomain window={10000} />
+                  <RealTimeDomain window={30000} />
                   <TimeAxis label="Time (s)" />
                   <VerticalAxis label="Orientation (deg)" />
                   <ZoomBrush />
@@ -78,7 +78,7 @@ export const NavigationPage = (props: RouteComponentProps) => {
                     color={Colors.BLUE5}
                   />
 
-                  <RealTimeDomain window={10000} />
+                  <RealTimeDomain window={30000} />
                   <TimeAxis label="Time (s)" />
                   <VerticalAxis label="Angular Rate (rad/s)" />
                   <ZoomBrush />
@@ -103,7 +103,7 @@ export const NavigationPage = (props: RouteComponentProps) => {
                     accessor={(data, time) => data[2]}
                     color={Colors.BLUE5}
                   />
-                  <RealTimeDomain window={10000} />
+                  <RealTimeDomain window={30000} />
                   <TimeAxis label="Time (s)" />
                   <VerticalAxis label="Acceleration (m/s/s)" />
                   <ZoomBrush />

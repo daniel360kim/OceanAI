@@ -18,6 +18,7 @@ import { Statistic, Statistics } from '@electricui/components-desktop-blueprint'
 import { StateIndicator } from 'src/application/components/StateIndication'
 import { MessageDataSource } from '@electricui/core-timeseries'
 
+
 const layoutDescription = `
   Title Info
   LoopChart TempChart
@@ -25,9 +26,10 @@ const layoutDescription = `
 
 //Data Inputs
 
-const loop_timeDS = new MessageDataSource('loop_time')
-const sys_stateDS = new MessageDataSource<number>('system_state')
-const internal_tempDS = new MessageDataSource('internal_temp')
+const loop_timeDS = new MessageDataSource('lt')
+const sys_stateDS = new MessageDataSource<number>('sst')
+const internal_tempDS = new MessageDataSource('it')
+const voltageDS = new MessageDataSource('v')
 
 const baseSpeed = 100
 
@@ -47,6 +49,9 @@ export const OverviewPage = (props: RouteComponentProps) => {
                 <Callout title="Nominal Loop Time" intent="warning">
                   Loop Times should be at least 100hz to ensure proper stepper
                   functionality
+                </Callout>
+                  <Callout title="Functional Voltage" intent="primary">
+                    Voltage must be above 4V to ensure proper stepper functionality
                 </Callout>
                 <HTMLTable striped interactive condensed>
                   <thead>
@@ -87,22 +92,28 @@ export const OverviewPage = (props: RouteComponentProps) => {
                 <Statistics>
                   <Statistic
                     label="Loop Time (hz)"
-                    accessor="loop_time"
+                    accessor="lt"
                     color="#9f7ef7"
                   />
                   <Statistic
                     label="System State"
-                    accessor="system_state"
+                    accessor="sst"
                     color={Colors.BLUE5}
                   />
                   <Statistic
                     label="CPU Temperature (C)"
-                    accessor="internal_temp"
+                    accessor="it"
                     color={Colors.RED5}
                     precision={1}
                   />
+                  <Statistic
+                    label="Voltage (V)"
+                    accessor="v"
+                    color={Colors.GREEN5}
+                    precision={2}
+                  />
+
                 </Statistics>
-                <br />
                 <br />
                 <br />
                 <Card interactive elevation={1}>
