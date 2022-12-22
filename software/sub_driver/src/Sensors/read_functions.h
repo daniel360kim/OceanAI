@@ -12,7 +12,7 @@
 #ifndef read_functions_h
 #define read_functions_h
 
-#include "../Data/data_struct.h"
+#include "../Data/logged_data.h"
 
 namespace Sensors
 {

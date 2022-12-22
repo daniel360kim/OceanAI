@@ -15,7 +15,7 @@
 #include <vector>
 #include <stdint.h>
 
-#include "data_struct.h"
+#include "logged_data.h"
 
 struct StartFile_d
 {

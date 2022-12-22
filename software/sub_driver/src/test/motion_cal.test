@@ -6,7 +6,7 @@
 #include "Orientation/Orientation.h"
 #include "pins.h"
 
-#include "Data/data_struct.h"
+#include "Data/logged_data.h"
 #include "Data/SD/SD.h"
 
 #include "indication/LED.h"

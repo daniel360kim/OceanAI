@@ -30,7 +30,7 @@
 
 #include "../core/timed_function.h"
 #include "../core/Timer.h"
-#include "../Data/data_struct.h"
+#include "../Data/logged_data.h"
 
 class UnifiedSensors
 {

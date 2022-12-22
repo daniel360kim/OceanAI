@@ -12,7 +12,7 @@
 #ifndef Positioning_h
 #define Positioning_h
 
-#include "../Data/data_struct.h"
+#include "../Data/logged_data.h"
 
 
 class Positioning

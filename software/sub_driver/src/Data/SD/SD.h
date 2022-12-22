@@ -23,7 +23,7 @@
 #include <ArduCAM.h>
 
 #include "DataFile.h"
-#include "../data_struct.h"
+#include "../logged_data.h"
 #include "../../core/Timer.h"
 #include "../../core/timed_function.h"
 #include "../../Sensors/Camera/camera.h"

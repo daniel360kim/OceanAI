@@ -2,12 +2,13 @@
 #define debug_h
 
 #include <vector>
+#include <algorithm>
 #include <Arduino.h>
 
 #include "Timer.h"
 
-#define DEBUG_ON false
-#define LIVE_DEBUG false
+#define DEBUG_ON true
+#define LIVE_DEBUG true
 #define PRINT_STATE false
 #define PRINT_DATA false
 
@@ -31,7 +32,7 @@
 #endif
 
 #if LIVE_DEBUG && UI_ON
-    #warning "Live Debug and UI are both on. Both outputs to Serial monitor"
+    #warning "Live Debug and UI are both on. Both outputs to Serial monitor causing output collisions"
 #endif
 
 namespace Debug
@@ -55,7 +56,7 @@ namespace Debug
     {
         Message(Severity severity, const char* message) : timestamp(scoped_timer.elapsed()), severity(severity), message(message) {}
         ~Message() {}
-        uint64_t timestamp;
+        int64_t timestamp;
         Severity severity;
         const char* message;
     };
@@ -77,7 +78,6 @@ namespace Debug
     extern Print error;
     extern Print info;
     extern Print success;   
-
 };
 
 

@@ -55,7 +55,6 @@ namespace
     Buoyancy buoyancy(pins_b, Stepper::Resolution::HALF, StepperProperties(STEPPER_HALF_STEPS / STEPS_PER_HALF, STEPPER_HALF_STEPS));
 
     CurrentState currentState;
-    CurrentState callbackState;
 
     Resolution resolution = RESOLUTION_640x480;
     Frame_Number frame_number = ONE_PHOTO;
@@ -64,6 +63,8 @@ namespace
     StaticJsonDocument<STATIC_JSON_DOC_SIZE> data_json;
 
 #if UI_ON
+
+    CurrentState callbackState;
     SendData telemetry_data;
     eui_message_t tracked_variables[] =
         {

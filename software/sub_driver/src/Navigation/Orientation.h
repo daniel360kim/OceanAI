@@ -12,7 +12,7 @@
 #define Orientation_h
 
 #include "Quaternion.h"
-#include "../data/data_struct.h"
+#include "../data/logged_data.h"
 
 class Orientation 
 {

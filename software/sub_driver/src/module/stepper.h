@@ -7,7 +7,8 @@
 
 #include "AccelStepper.h"
 #include "limit.h"
-#include "data/data_struct.h"
+#include "data/logged_data.h"
+#include "../core/pins.h"
 
 /**
  * @brief Properties of our stepper motor configuration
@@ -22,20 +23,6 @@ struct StepperProperties
     StepperProperties(double carriage_length, long halves_length) : carriage_length(carriage_length), halves_length(halves_length) {}
     double carriage_length; //how long is the carriage in mm
     long halves_length; //how many half steps are in the carriage
-};
-
-/**
- * @brief Pins of the TMC2208 stepper driver
- * 
- */
-struct StepperPins
-{
-    uint8_t STP;
-    uint8_t DIR;
-    uint8_t MS1;
-    uint8_t MS2;
-    uint8_t ERR;
-    uint8_t limit;
 };
 
 /**
@@ -71,8 +58,6 @@ public:
     StepperProperties properties;
 
     Limit limit;
-
-
 protected:
     Resolution resolution;
     StepperPins pins;

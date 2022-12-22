@@ -67,7 +67,8 @@
     "*.tpp": "cpp",
     "system_error": "cpp",
     "vector": "cpp",
-    "cmath": "cpp"
+    "cmath": "cpp",
+    "algorithm": "cpp"
 },
 "C_Cpp.errorSquiggles": "Enabled"
 }

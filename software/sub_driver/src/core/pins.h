@@ -87,6 +87,20 @@ constexpr uint8_t TX_5 = 20;
 constexpr uint8_t CS_VD = 10;
 constexpr uint8_t CS = 37;
 
+/**
+ * @brief Pins of the TMC2208 stepper driver
+ * 
+ */
+struct StepperPins
+{
+    uint8_t STP;
+    uint8_t DIR;
+    uint8_t MS1;
+    uint8_t MS2;
+    uint8_t ERR;
+    uint8_t limit;
+};
+
 
 
 #endif

@@ -25,7 +25,7 @@
 
 #include "SD.h"
 #include "DataFile.h"
-#include "../data_struct.h"
+#include "../logged_data.h"
 #include "queue.hpp"
 
 #include "../../core/debug.h"

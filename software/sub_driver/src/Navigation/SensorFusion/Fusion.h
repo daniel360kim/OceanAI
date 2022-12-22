@@ -1,7 +1,7 @@
 #ifndef FUSION_H
 #define FUSION_H
 
-#include "../../Data/data_struct.h"
+#include "../../Data/logged_data.h"
 #include "SensorFusion.h"
 #include "../Orientation.h"
 

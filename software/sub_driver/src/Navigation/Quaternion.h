@@ -12,7 +12,7 @@
 #ifndef Quaternion_h
 #define Quaternion_h
 
-#include "../data/data_struct.h"
+#include "../data/logged_data.h"
 
 class Quaternion
 {

@@ -1,5 +1,5 @@
 /**
- * @file data_struct.h
+ * @file logged_data.h
  * @author Daniel Kim
  * @brief the data struct where data to be logged is saved
  * @version 0.1
