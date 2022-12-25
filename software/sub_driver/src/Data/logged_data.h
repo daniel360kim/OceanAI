@@ -64,7 +64,7 @@ struct BMP388Data
 };
 
 // To do: organize into different structs for optimization and organization
-class Data
+class LoggedData
 {
 public:
     int64_t time_ns;
