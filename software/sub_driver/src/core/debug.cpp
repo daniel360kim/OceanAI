@@ -1,60 +1,197 @@
-#include <Arduino.h>
-#include <vector>
-#include <memory>
+/**
+ * @file debug.cpp
+ * @author Daniel Kim
+ * @brief debugging macros
+ * @version 0.1
+ * @date 2022-12-25 (christmas yay!)
+ * 
+ * @copyright Copyright (c) 2022 OceanAI (https://github.com/daniel360kim/OceanAI)
+ * 
+ */
+
+#include <cstdarg>
+#include <string>
 
 #include "debug.h"
 
-#include "Timer.h"
+Debug error;
+Debug success;
+Debug info;
 
-namespace Debug
+/**
+ * @brief Construct a new Debug Message:: Debug Message object
+ * Creates a debug message with a variable number of arguments
+ * 
+ * @param severity severity of message
+ * @param message the message to be printed
+ * @param ... arguments to be printed
+ */
+DebugMessage::DebugMessage(Severity severity, std::string message, ...)
 {
+    m_Timestamp = scoped_timer.elapsed();
+    m_Severity = severity;
 
-    Print error;
-    Print success;
-    Print info;
+    va_list args;
 
-    void Print::addToBuffer(Severity severity, const char* message)
+    va_start(args, message);
+
+    int i = 0;
+    while(i < message.length())
     {
-        std::unique_ptr<Message> msg = std::make_unique<Message>(severity, message);
-
-        printBuffer.push_back(*msg);
-        #if LIVE_DEBUG
-            Serial.println(message);
-        #endif
-    }
-
-    void Print::printBuffer_vec()
-    {
-        for(unsigned int i = 0; i < printBuffer.size(); i++)
-        {   
-            Serial.print(printBuffer[i].timestamp); Serial.print("\t");
-            
-            switch(printBuffer[i].severity)
+        if(message[i] == '%')
+        {
+            switch(message[i + 1])
             {
-                case Success:
-                    Serial.print(F("Success:"));
-                    break;
-
-                case Warning:
-                    Serial.print(F("Warning:"));
-                    break;
-                
-                case Fatal:
-                    Serial.print(F("Fatal:"));
-                    break;
-                
-                case Critical_Error:
-                    Serial.print(F("Critical Error:"));
-                    break;
-                
-                default:
-                    Serial.print(F("|No Flag|"));
+            case 's':
+            {
+                char* str = va_arg(args, char*);
+                m_Message = str;
+                i += 2;
+                break;
             }
-
-            Serial.print(" ");
-            Serial.println(printBuffer[i].message);
+            case 'd':
+            {
+                int num = va_arg(args, int);
+                m_Message = num;
+                i += 2;
+                break;
+            }
+            case 'f':
+            {
+                double num = va_arg(args, double);
+                m_Message = num;
+                i += 2;
+                break;
+            }
+            default:
+            {
+                break;
+            }
+            }
         }
-        
+        else
+        {
+            m_Message = message[i];
+            i++;
+        }
     }
 
-};
+    va_end(args);
+}
+
+void DebugMessage::SetTimestamp(int64_t timestamp)
+{
+    m_Timestamp = timestamp;
+}
+
+void DebugMessage::SetSeverity(Severity severity)
+{
+    m_Severity = severity;
+}
+
+void DebugMessage::SetMessage(std::string message)
+{
+    m_Message = message;
+}
+
+int64_t DebugMessage::GetTimestamp() const
+{
+    return m_Timestamp;
+}
+
+int64_t DebugMessage::GetTimestampMillis() const
+{
+    return m_Timestamp / 1000000;
+}
+
+int32_t DebugMessage::GetTimestampSeconds() const
+{
+    return m_Timestamp / 1000000000;
+}
+
+Severity DebugMessage::GetSeverity() const
+{
+    return m_Severity;
+}
+
+std::string DebugMessage::GetMessage() const
+{
+    return m_Message;
+}
+
+void DebugMessage::appendMessage(std::string message)
+{
+    m_Message += message;
+}
+//Debug Class
+
+/**
+ * @brief Adds a message to the debug message list
+ * 
+ * @param addMessage  the message to be added
+ */
+void Debug::addMessage(DebugMessage addMessage)
+{ 
+    m_Messages.push_back(addMessage);
+
+    #if LIVE_DEBUG
+        Serial.print(addMessage.GetTimestampMillis()); Serial.print("ms\t");
+        Serial.print(addMessage.GetMessage().c_str()); Serial.print("\n");
+    #endif
+
+    if(m_Messages.size() > m_maxMessages)
+    {
+        m_Messages.erase(m_Messages.begin());
+    }
+}
+
+/**
+ * @brief Prints all messages in the debug message list to the serial monitor
+ * 
+ * @param deleteMessages delete the messages after printing
+ */
+void Debug::printMessages(bool deleteMessages = false)
+{
+    for(auto message : m_Messages)
+    {
+        Serial.print(message.GetTimestampMillis()); Serial.print("ms\t");
+        Serial.print(message.GetMessage().c_str()); Serial.print("\n");
+    }
+
+    if(deleteMessages)
+    {
+        m_Messages.clear();
+    }
+}
+
+/**
+ * @brief Prints a specified number of messages in the debug message list to the serial monitor
+ * 
+ * @param numMessages how many messages to print
+ * @param deleteMessages delete the messages after printing
+ */
+void Debug::printMessages(int numMessages, bool deleteMessages = false)
+{
+    for(int i = 0; i < numMessages; i++)
+    {
+        Serial.print(m_Messages[i].GetTimestampMillis()); Serial.print("ms\t");
+        Serial.print(m_Messages[i].GetMessage().c_str()); Serial.print("\n");
+
+        if(deleteMessages)
+        {
+            m_Messages.erase(m_Messages.begin() + i);
+        }
+    }
+}
+
+/**
+ * @brief Clears all messages in the debug message list
+ * 
+ */
+void Debug::clearMessages()
+{
+    m_Messages.clear();
+}
+
+
+

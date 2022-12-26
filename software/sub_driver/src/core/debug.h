@@ -1,87 +1,99 @@
-#ifndef debug_h
-#define debug_h
-
-#include <vector>
-#include <algorithm>
-#include <Arduino.h>
-
-#include "Timer.h"
-
-#define DEBUG_ON true
-#define LIVE_DEBUG true
-#define PRINT_STATE false
-#define PRINT_DATA false
-
-#define UI_ON false
-
-#define OPTICS_ON false
-
 /**
- * @brief Macros to print debug messages and add them to a buffer
+ * @file debug.h
+ * @author Daniel Kim
+ * @brief debugging macros
+ * @version 0.1
+ * @date 2022-12-25 (christmas yay!)
+ * 
+ * @copyright Copyright (c) 2022 OceanAI (https://github.com/daniel360kim/OceanAI)
  * 
  */
+
+#ifndef DEBUG_H
+#define DEBUG_H
+
+#include <cstdint>
+#include <string>
+#include <vector>
+
+#include "timer.h"
+#include "configuration.h"
+
 #if DEBUG_ON
-    #define ERROR_LOG(severity, message) Debug::error.addToBuffer(severity, message)
-    #define SUCCESS_LOG(message) Debug::success.addToBuffer(Debug::Success, message)
-    #define INFO_LOG(message) Debug::info.addToBuffer(Debug::Info, message)
-    
+    #define ERROR_LOG(severity, message, ...) error.addMessage(DebugMessage(severity, message, ##__VA_ARGS__))
+    #define INFO_LOG(message, ...) info.addMessage(DebugMessage(Severity::INFO, message, ##__VA_ARGS__))
+    #define SUCCESS_LOG(message, ...) success.addMessage(DebugMessage(Severity::SUCCESS, message, ##__VA_ARGS__))
 #else
-    #define SUCCESS_LOG(message) 
-    #define ERROR_LOG(Severity, message)
-    #define INFO_LOG(message)
+    #define ERROR_LOG(severity, message, ...)
+    #define INFO_LOG(message, ...)
+    #define SUCCESS_LOG(message, ...)
 #endif
 
-#if LIVE_DEBUG && UI_ON
-    #warning "Live Debug and UI are both on. Both outputs to Serial monitor causing output collisions"
-#endif
 
-namespace Debug
+/**
+ * @brief What type of message is it?
+ * 
+ */
+enum class Severity
 {
-    //The severity of the message
-    enum Severity
-    {
-        Success,
-        Info,
-        Trace,
-        Warning, //Something might go wrong
-        Fatal, //A non critical component won't work (GPS, RF etc.)
-        Critical_Error //A critica component won't work (IMU, Stepper motors etc.)
-    };
-    
-    /**
-     * @brief message to be logged; timestamp, severity, and message
-     * 
-     */
-    struct Message
-    {
-        Message(Severity severity, const char* message) : timestamp(scoped_timer.elapsed()), severity(severity), message(message) {}
-        ~Message() {}
-        int64_t timestamp;
-        Severity severity;
-        const char* message;
-    };
+    SUCCESS, //success messages
+    INFO, //info messages
+    WARNING, //warning messages
+    ERROR, //error messages
+};
 
-    /**
-     * @brief buffers and prints the debug messages
-     * 
-     */
-    class Print
-    {
-    public:
-        Print() {}
-        std::vector<Message> printBuffer;
-        void addToBuffer(Severity severity, const char* message);
-        void printBuffer_vec();
-       
-    };
-    //The three types of messages
-    extern Print error;
-    extern Print info;
-    extern Print success;   
+/**
+ * @brief Holds information for debugging
+ * 
+ */
+class DebugMessage
+{
+public:
+    DebugMessage() {}
+    DebugMessage(Severity severity, std::string message) : m_Timestamp(scoped_timer.elapsed()), m_Severity(severity), m_Message(message) {}
+    DebugMessage(Severity severity, std::string message, ...);
+    ~DebugMessage() {}
+
+    void SetTimestamp(int64_t timestamp);
+    void SetSeverity(Severity severity);
+    void SetMessage(std::string message);
+
+    int64_t GetTimestamp() const;
+    int64_t GetTimestampMillis() const;
+    int32_t GetTimestampSeconds() const;
+    Severity GetSeverity() const;
+    std::string GetMessage() const;
+
+    void appendMessage(std::string message);
+
+private:
+    int64_t m_Timestamp;
+    Severity m_Severity;
+    std::string m_Message;
 };
 
 
+class Debug
+{
+public:
+    Debug() {}
+    Debug(int maxMessages = 100) : m_maxMessages(maxMessages) {}
+    ~Debug() {}
 
+    void addMessage(DebugMessage message);
+    void printMessages(bool deleteMessages = false);
+    void printMessages(int numMessages, bool deleteMessages = false);
+
+    void clearMessages();
+
+private:
+    std::vector<DebugMessage> m_Messages;
+    int m_maxMessages;
+};
+
+extern Debug error; // error messages
+extern Debug info; // info messages
+extern Debug success; // success messages
 
 
 #endif
