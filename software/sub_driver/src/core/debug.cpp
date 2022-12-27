@@ -11,12 +11,13 @@
 
 #include <cstdarg>
 #include <string>
+#include <sstream>
 
 #include "debug.h"
 
-Debug error;
-Debug success;
-Debug info;
+Debug error(100);
+Debug success(100);
+Debug info(100);
 
 /**
  * @brief Construct a new Debug Message:: Debug Message object
@@ -26,7 +27,7 @@ Debug info;
  * @param message the message to be printed
  * @param ... arguments to be printed
  */
-DebugMessage::DebugMessage(Severity severity, std::string message, ...)
+void DebugMessage::createMessagef(Severity severity, std::string message, ...)
 {
     m_Timestamp = scoped_timer.elapsed();
     m_Severity = severity;
@@ -36,47 +37,60 @@ DebugMessage::DebugMessage(Severity severity, std::string message, ...)
     va_start(args, message);
 
     int i = 0;
-    while(i < message.length())
+    
+    while (message[i] != '\0')
     {
-        if(message[i] == '%')
+        if (message[i] == '%')
         {
-            switch(message[i + 1])
+            switch(message[i+1])
             {
-            case 's':
-            {
-                char* str = va_arg(args, char*);
-                m_Message = str;
-                i += 2;
-                break;
+                case 'd':
+                {
+                    int32_t arg = va_arg(args, int32_t);
+                    std::stringstream ss;
+                    ss << arg;
+                    m_Message += ss.str();
+                    break;
+                }
+                case 'f':
+                {
+                    float arg = va_arg(args, double);
+                    std::stringstream ss;
+                    ss << arg;
+                    m_Message += ss.str();
+                    break;
+                }
+                case 's':
+                {
+                    char* arg = va_arg(args, char*);
+                    m_Message += arg;
+                    break;
+                }
+                default:
+                {
+                    m_Message += message[i];
+                    break;
+                }
             }
-            case 'd':
-            {
-                int num = va_arg(args, int);
-                m_Message = num;
-                i += 2;
-                break;
-            }
-            case 'f':
-            {
-                double num = va_arg(args, double);
-                m_Message = num;
-                i += 2;
-                break;
-            }
-            default:
-            {
-                break;
-            }
-            }
+            i++;
         }
         else
         {
-            m_Message = message[i];
-            i++;
+            m_Message += message[i];
         }
+        i++;
     }
 
     va_end(args);
+
+    Serial.print("Message: "); Serial.println(m_Message.c_str());
+}
+
+void DebugMessage::createMessage(Severity severity, std::string message)
+{
+    m_Timestamp = scoped_timer.elapsed();
+    m_Severity = severity;
+    m_Message = message;
 }
 
 void DebugMessage::SetTimestamp(int64_t timestamp)

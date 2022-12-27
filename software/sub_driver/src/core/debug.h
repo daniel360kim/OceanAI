@@ -20,9 +20,13 @@
 #include "configuration.h"
 
 #if DEBUG_ON
-    #define ERROR_LOG(severity, message, ...) error.addMessage(DebugMessage(severity, message, ##__VA_ARGS__))
-    #define INFO_LOG(message, ...) info.addMessage(DebugMessage(Severity::INFO, message, ##__VA_ARGS__))
-    #define SUCCESS_LOG(message, ...) success.addMessage(DebugMessage(Severity::SUCCESS, message, ##__VA_ARGS__))
+    #define ERROR_LOGf(severity, message, ...) DebugMessage debugMessage; debugMessage.createMessagef(severity, message, __VA_ARGS__); error.addMessage(debugMessage);
+    #define INFO_LOGf(message, ...) DebugMessage debugMessage; debugMessage.createMessagef(Severity::INFO, message, __VA_ARGS__); info.addMessage(debugMessage);
+    #define SUCCESS_LOGf(message, ...) DebugMessage debugMessage; debugMessage.createMessagef(Severity::SUCCESS, message, __VA_ARGS__); success.addMessage(debugMessage);
+
+    #define ERROR_LOG(severity, message, ...) DebugMessage debugMessage; debugMessage.createMessage(severity, message); error.addMessage(debugMessage);
+    #define INFO_LOG(message, ...) DebugMessage debugMessage; debugMessage.createMessage(Severity::INFO, message); info.addMessage(debugMessage);
+    #define SUCCESS_LOG(message, ...) DebugMessage debugMessage; debugMessage.createMessage(Severity::SUCCESS, message); success.addMessage(debugMessage);
 #else
     #define ERROR_LOG(severity, message, ...)
     #define INFO_LOG(message, ...)
@@ -50,10 +54,10 @@ class DebugMessage
 {
 public:
     DebugMessage() {}
-    DebugMessage(Severity severity, std::string message) : m_Timestamp(scoped_timer.elapsed()), m_Severity(severity), m_Message(message) {}
-    DebugMessage(Severity severity, std::string message, ...);
     ~DebugMessage() {}
 
+    void createMessagef(Severity severity, std::string message, ...);
+    void createMessage(Severity severity, std::string message);
     void SetTimestamp(int64_t timestamp);
     void SetSeverity(Severity severity);
     void SetMessage(std::string message);
