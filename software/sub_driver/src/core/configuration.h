@@ -13,6 +13,7 @@
 #define CONFIGURATION_H
 
 #include "timer.h"
+#include "../Data/logged_data.h"
 
 #define DEBUG_ON true
 #define LIVE_DEBUG true
@@ -40,6 +41,13 @@ namespace CPU
      */
     constexpr int CPU_INFO_LOG_INTERVAL = HZ_TO_NS(5);
 };
+
+
+namespace Sensors
+{
+    constexpr Angles_3D<double> mag_bias = { 0.36, 0.39, 0.49 }; // in uT: set in mag calibration script
+
+}
 
 
 #endif

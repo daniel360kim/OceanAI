@@ -139,7 +139,7 @@ FASTRUN void continuousFunctions(StateAutomation *state)
 
     CPU::log_cpu_info(data);
 
-    UnifiedSensors::getInstance().logIMUToStruct(data);
+    Sensors::logData(data);
 
     external_temp.logToStruct(data);
     external_pres.logToStruct(data);
@@ -268,23 +268,28 @@ void Initialization::enter(StateAutomation *state)
     LEDb.setColor(255, 0, 255);
 
     // I2C Scanner
-    UnifiedSensors::getInstance().scanAddresses();
+    Sensors::scanI2C();
     //SUCCESS_LOG("I2C Scanner Complete");
 
     LEDa.setColor(0, 255, 255);
     LEDb.setColor(0, 255, 255);
 
     // Initialize the navigation sensors (IMU, Barometer, Magnetometer)
-    if (!UnifiedSensors::getInstance().initNavSensors())
+    if (!Sensors::initAll())
     {
         state->setState(ErrorIndication::getInstance());
         return;
     }
 
-    UnifiedSensors::getInstance().setInterrupts(BAR_int, ACC_int, GYR_int, MAG_int);
-    //SUCCESS_LOG("Nav Sensor Initialization Complete");
+    Sensors::setInterrupts();
+    SUCCESS_LOG("Nav Sensor Initialization Complete");
 
-    UnifiedSensors::getInstance().setGyroBias(); // Read readings from gyroscopes and set them as bias
+    #if DEBUG_ON
+        Angles_3D<double> bias = Sensors::setGyroBias();
+        INFO_LOGf("Gyro bias set to x:%d y:%d z:%d", bias.x, bias.y, bias.z)
+    #else
+        Sensors::setGyroBias();
+    #endif
 
 // Initialize the optical camera
 #if OPTICS_ON == true
