@@ -1552,8 +1552,8 @@
     (property "Datasheet" "~" (id 3) (at 256.54 60.96 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "C" (uuid 6106925c-ecdc-43ad-af9d-23777616a041))
     (pin "A" (uuid 96d99613-bf1f-48da-bc30-fe64b83cc5a3))
+    (pin "C" (uuid 6106925c-ecdc-43ad-af9d-23777616a041))
   )
 
   (symbol (lib_id "power:GND") (at 153.67 135.89 0) (unit 1)

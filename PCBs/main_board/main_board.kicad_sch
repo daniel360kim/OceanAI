@@ -1611,7 +1611,7 @@
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid 1f59985f-a35e-4b77-a6bb-f2653a188625)
     (property "Reference" "J1" (id 0) (at 53.34 45.72 0))
-    (property "Value" "MS5803" (id 1) (at 53.34 48.26 0))
+    (property "Value" "I2C" (id 1) (at 53.34 48.26 0))
     (property "Footprint" "Connector_JST:JST_EH_B4B-EH-A_1x04_P2.50mm_Vertical" (id 2) (at 53.34 54.61 0)
       (effects (font (size 1.27 1.27)) hide)
     )
@@ -1859,7 +1859,7 @@
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid 7aabbbfb-9beb-40df-9d78-52f2b2efad83)
     (property "Reference" "J8" (id 0) (at 92.71 151.13 0))
-    (property "Value" "I2C" (id 1) (at 92.71 153.67 0))
+    (property "Value" "SPI" (id 1) (at 92.71 153.67 0))
     (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical" (id 2) (at 92.71 162.56 0)
       (effects (font (size 1.27 1.27)) hide)
     )
@@ -3052,7 +3052,7 @@
       (reference "IC2") (unit 1) (value "A4988SETTR-T") (footprint "A4988SETTR-T:QFN50P500X500X100-29N")
     )
     (path "/1f59985f-a35e-4b77-a6bb-f2653a188625"
-      (reference "J1") (unit 1) (value "MS5803") (footprint "Connector_JST:JST_EH_B4B-EH-A_1x04_P2.50mm_Vertical")
+      (reference "J1") (unit 1) (value "I2C") (footprint "Connector_JST:JST_EH_B4B-EH-A_1x04_P2.50mm_Vertical")
     )
     (path "/5717034c-0d15-44b4-ba92-6a7611562e6f"
       (reference "J2") (unit 1) (value "I2C") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical")
@@ -3073,7 +3073,7 @@
       (reference "J7") (unit 1) (value "JST_P") (footprint "Connector_JST:JST_EH_B4B-EH-A_1x04_P2.50mm_Vertical")
     )
     (path "/7aabbbfb-9beb-40df-9d78-52f2b2efad83"
-      (reference "J8") (unit 1) (value "I2C") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical")
+      (reference "J8") (unit 1) (value "SPI") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical")
     )
     (path "/1dba2aaa-e042-4434-844d-2dabdc52fc5a"
       (reference "J9") (unit 1) (value "HC-12") (footprint "Connector_JST:JST_EH_B5B-EH-A_1x05_P2.50mm_Vertical")
