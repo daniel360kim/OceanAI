@@ -19,6 +19,8 @@ Debug error(100);
 Debug success(100);
 Debug info(100);
 
+DebugMessage debugMessage;
+
 /**
  * @brief Construct a new Debug Message:: Debug Message object
  * Creates a debug message with a variable number of arguments
@@ -164,7 +166,7 @@ void Debug::addMessage(DebugMessage addMessage)
  * 
  * @param deleteMessages delete the messages after printing
  */
-void Debug::printMessages(bool deleteMessages = false)
+void Debug::printMessages(bool deleteMessages)
 {
     for(auto message : m_Messages)
     {
@@ -184,7 +186,7 @@ void Debug::printMessages(bool deleteMessages = false)
  * @param numMessages how many messages to print
  * @param deleteMessages delete the messages after printing
  */
-void Debug::printMessages(int numMessages, bool deleteMessages = false)
+void Debug::printMessages(int numMessages, bool deleteMessages)
 {
     for(int i = 0; i < numMessages; i++)
     {

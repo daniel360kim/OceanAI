@@ -11,6 +11,9 @@
 
 #include "States.h"
 #include "Timer.h"
+#include "cpu.h"
+
+#define UI_ON true
 
 /**
  * @brief Anonymous namespace to avoid name collisions
@@ -36,7 +39,7 @@ namespace
     Velocity nav_v;
     Position nav_p;
 
-    Data data;
+    LoggedData data;
 
     SD_Logger logger(mission_duration.mission_time, HZ_TO_NS(50));
 
@@ -134,14 +137,14 @@ FASTRUN void continuousFunctions(StateAutomation *state)
 
     data.loop_time = 1.0 / data.delta_time;
 
+    CPU::log_cpu_info(data);
+
     UnifiedSensors::getInstance().logIMUToStruct(data);
 
     external_temp.logToStruct(data);
     external_pres.logToStruct(data);
     total_dissolved_solids.logToStruct(data);
     voltmeter.logToStruct(data);
-
-    OS::getInstance().log_cpu_state(data);
 
     nav_v.updateVelocity(data);
     nav_p.updatePosition(data);
@@ -154,7 +157,7 @@ FASTRUN void continuousFunctions(StateAutomation *state)
 
 #if OPTICS_ON == true
     camera.capture();
-    INFO_LOG("Captured image");
+    //INFO_LOG("Captured image");
     logger.log_image(camera);
 #endif
 
@@ -174,7 +177,7 @@ FASTRUN void continuousFunctions(StateAutomation *state)
 
     logger.update_sd_capacity(data);
 
-    Data::data_to_json(data, data_json);
+    LoggedData::data_to_json(data, data_json);
 
     if (!logger.logData(data_json))
     {
@@ -248,9 +251,12 @@ void Initialization::enter(StateAutomation *state)
 
     if (voltmeter.readRaw() <= 11.1 && voltmeter.readRaw() >= 6)
     {
-        ERROR_LOG(Debug::Critical_Error, "Low battery voltage");
+        //ERROR_LOG(Debug::Critical_Error, "Low battery voltage");
         state->setState(ErrorIndication::getInstance());
     }
+
+    CPU::init();
+
 
 #if LIVE_DEBUG == true
     while (!Serial)
@@ -263,7 +269,7 @@ void Initialization::enter(StateAutomation *state)
 
     // I2C Scanner
     UnifiedSensors::getInstance().scanAddresses();
-    SUCCESS_LOG("I2C Scanner Complete");
+    //SUCCESS_LOG("I2C Scanner Complete");
 
     LEDa.setColor(0, 255, 255);
     LEDb.setColor(0, 255, 255);
@@ -276,7 +282,7 @@ void Initialization::enter(StateAutomation *state)
     }
 
     UnifiedSensors::getInstance().setInterrupts(BAR_int, ACC_int, GYR_int, MAG_int);
-    SUCCESS_LOG("Nav Sensor Initialization Complete");
+    //SUCCESS_LOG("Nav Sensor Initialization Complete");
 
     UnifiedSensors::getInstance().setGyroBias(); // Read readings from gyroscopes and set them as bias
 
@@ -285,12 +291,12 @@ void Initialization::enter(StateAutomation *state)
     camera.saveSettings();
     if (!camera.initialize())
     {
-        ERROR_LOG(Debug::Critical_Error, "Camera Initialization Failed");
+        //ERROR_LOG(Debug::Critical_Error, "Camera Initialization Failed");
         state->setState(ErrorIndication::getInstance());
     }
     else
     {
-        SUCCESS_LOG("Camera Initialization Complete");
+        //SUCCESS_LOG("Camera Initialization Complete");
     }
 #endif
 
@@ -300,7 +306,7 @@ void Initialization::enter(StateAutomation *state)
         state->setState(ErrorIndication::getInstance());
         return;
     }
-    SUCCESS_LOG("SD Card Initialization Complete");
+    //SUCCESS_LOG("SD Card Initialization Complete");
 
     LEDb.blink(255, 0, 0, 1000);
     LEDa.blink(255, 0, 0, 1000);

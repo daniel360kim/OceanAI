@@ -78,25 +78,25 @@ bool SD_Logger::log_crash_report()
     //Create the file
     if(!crash_file.createFile())
     {
-        ERROR_LOG(Debug::Fatal, "Failed to create crash log file");
+        //ERROR_LOG(Debug::Fatal, "Failed to create crash log file");
         return false;
     }
 
     //Open the file
     if(!file.open(crash_file.getFileName(), O_WRITE | O_CREAT))
     {
-        ERROR_LOG(Debug::Fatal, "Failed to open crash log file");
+        //ERROR_LOG(Debug::Fatal, "Failed to open crash log file");
         return false;
     }
 
     CrashReport.printTo(file); //Print all the crash data to the file
     if(!file.close())
     {
-        ERROR_LOG(Debug::Fatal, "Failed to close crash log file");
+        //ERROR_LOG(Debug::Fatal, "Failed to close crash log file");
         return false;
     }
 
-    SUCCESS_LOG("Crash Log Saved Successfully");
+    //SUCCESS_LOG("Crash Log Saved Successfully");
     return true;
 }
 
@@ -113,7 +113,7 @@ bool SD_Logger::init()
 
     if(!bin.createFile())
     {
-        ERROR_LOG(Debug::Fatal, "Failed to create binary file");
+        //ERROR_LOG(Debug::Fatal, "Failed to create binary file");
         return false;
     }
 
@@ -122,7 +122,7 @@ bool SD_Logger::init()
 
     if(!DataFile::createFolder("images"))
     {
-        ERROR_LOG(Debug::Fatal, "Failed to create image folder");
+        //ERROR_LOG(Debug::Fatal, "Failed to create image folder");
         return false;
     }
 
@@ -130,7 +130,7 @@ bool SD_Logger::init()
     DataFile img("images/img00", DataFile::JPG);
     if(!img.createFile())
     {
-        ERROR_LOG(Debug::Fatal, "Failed to create image file");
+        //ERROR_LOG(Debug::Fatal, "Failed to create image file");
         return false;
     }
     m_current_image_filename = img.getFileName(); //Get the file name and save to the class
@@ -139,7 +139,7 @@ bool SD_Logger::init()
     DataFile csv("ASCII", DataFile::CSV);
     if(!csv.createFile())
     {
-        ERROR_LOG(Debug::Fatal, "Failed to create CSV file");
+        //ERROR_LOG(Debug::Fatal, "Failed to create CSV file");
         return false;
     }
     m_csv_filename = csv.getFileName();
@@ -147,7 +147,7 @@ bool SD_Logger::init()
 
     if(!file.open(m_csv_filename, O_WRITE | O_CREAT))
     {
-        ERROR_LOG(Debug::Critical_Error, "Failed to open CSV file");
+        //ERROR_LOG(Debug::Critical_Error, "Failed to open CSV file");
         return false;
     }
 
@@ -173,7 +173,7 @@ bool SD_Logger::init()
 
     if(!file.close())
     {
-        ERROR_LOG(Debug::Critical_Error, "Failed to close CSV file");
+        //ERROR_LOG(Debug::Critical_Error, "Failed to close CSV file");
         return false;
     }
 
@@ -182,7 +182,7 @@ bool SD_Logger::init()
 
     if(!bin.createFile())
     {
-        ERROR_LOG(Debug::Critical_Error, "Failed to create binary file");
+        //ERROR_LOG(Debug::Critical_Error, "Failed to create binary file");
         return false;
     }
 
@@ -197,13 +197,13 @@ bool SD_Logger::init()
     DataFile start("start", DataFile::TXT);
     if(!start.createFile())
     {
-        ERROR_LOG(Debug::Critical_Error, "Failed to create start file");
+        //ERROR_LOG(Debug::Critical_Error, "Failed to create start file");
         return false;
     }
 
     if(!file.open(start.getFileName(), O_WRITE | O_CREAT))
     {
-        ERROR_LOG(Debug::Fatal, "Failed to open start file");
+        //ERROR_LOG(Debug::Fatal, "Failed to open start file");
         return false;
     }
 
@@ -227,7 +227,7 @@ bool SD_Logger::init()
     file.print("Optics: "); file.println(configs.optics);
     file.println("/////////////////////////////////\n");
 
-    file.println("////////// I2C Device Data //////////");
+    file.println("////////// I2C Device LoggedData //////////");
     file.println("I2C Addresses Detected:");
     if(configs.num_devices == 0)
     {
@@ -291,14 +291,14 @@ bool SD_Logger::init()
 
     if(!file.open(m_data_filename, O_WRITE | O_CREAT))
     {
-        ERROR_LOG(Debug::Critical_Error, "Failed to open binary file");
+        //ERROR_LOG(Debug::Critical_Error, "Failed to open binary file");
         return false;
     }
     
     //file must be preallocated to prevent spending lots of time searching for free clusters
     if(!file.preAllocate(m_log_file_size + 10000))
     {
-        ERROR_LOG(Debug::Critical_Error, "Failed to preallocate binary file");
+        //ERROR_LOG(Debug::Critical_Error, "Failed to preallocate binary file");
         file.close();
         return false;
     }
@@ -365,7 +365,7 @@ FASTRUN bool SD_Logger::logData(StaticJsonDocument<STATIC_JSON_DOC_SIZE> &doc)
     */
     if(write_buf.size() > 100) 
     {
-        INFO_LOG("Buffer is full, slowing down data logging rate");
+        //INFO_LOG("Buffer is full, slowing down data logging rate");
         //Clear the old data if it gets too large by swapping with an empty queue
         std::queue<StaticJsonDocument<STATIC_JSON_DOC_SIZE>> empty;
         std::swap(write_buf, empty);
@@ -379,7 +379,7 @@ FASTRUN bool SD_Logger::logData(StaticJsonDocument<STATIC_JSON_DOC_SIZE> &doc)
     return true;
 }
 
-void SD_Logger::update_sd_capacity(Data &data)
+void SD_Logger::update_sd_capacity(LoggedData &data)
 {
     //Update the capacity from the capacity we calculated in initialization
     if(!m_inital_cap_updated)
@@ -397,12 +397,12 @@ void SD_Logger::log_image(OV2640_Mini &camera)
 
     if(length >= MAX_FIFO_SIZE)
     {
-        ERROR_LOG(Debug::Warning, "FIFO length is too large");
+        //ERROR_LOG(Debug::Warning, "FIFO length is too large");
         return;
     }
     else if(length == 0)
     {
-        ERROR_LOG(Debug::Warning, "FIFO length is 0");
+        //ERROR_LOG(Debug::Warning, "FIFO length is 0");
         return;
     }
 
@@ -459,19 +459,19 @@ void SD_Logger::log_image(OV2640_Mini &camera)
             // Close the current file we were working on
             if(!file.close())
             {
-                ERROR_LOG(Debug::Warning, "Failed to close file");
+                //ERROR_LOG(Debug::Warning, "Failed to close file");
                 return;
             }
 
             if(!file.open(m_current_image_filename, O_WRITE | O_CREAT))
             {
-                ERROR_LOG(Debug::Warning, "Failed to open file for writing");
+                //ERROR_LOG(Debug::Warning, "Failed to open file for writing");
                 return;
             }
             if(!file.preAllocate(35000))
             {
                 file.close();
-                ERROR_LOG(Debug::Warning, "Failed to preallocate file");
+                //ERROR_LOG(Debug::Warning, "Failed to preallocate file");
             }
 
             camera.getCamera()->CS_LOW();

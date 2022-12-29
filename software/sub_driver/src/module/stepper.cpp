@@ -278,7 +278,7 @@ void Buoyancy::forward()
     update();
 }
 
-FASTRUN void Buoyancy::logToStruct(Data &data)
+FASTRUN void Buoyancy::logToStruct(LoggedData &data)
 {
     data.dive_stepper.current_position = currentPosition();
     data.dive_stepper.target_position = targetPosition();

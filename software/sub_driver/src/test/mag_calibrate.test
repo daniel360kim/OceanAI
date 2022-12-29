@@ -6,8 +6,8 @@
 #include "Orientation/Orientation.h"
 #include "pins.h"
 
-#include "Data/logged_data.h"
-#include "Data/SD/SD.h"
+#include "Datalogged_data.h"
+#include "DataSD/SD.h"
 
 #include "indication/LED.h"
 #include "indication/Buzzer.h"
@@ -35,7 +35,7 @@ Buzzer buzz(BUZZ);
 
 uint64_t previous_time;
 
-Data data;
+LoggedData data;
 
 SD start;
 
@@ -131,8 +131,8 @@ void loop()
 #include "Orientation/Orientation.h"
 #include "pins.h"
 
-#include "Data/logged_data.h"
-#include "Data/SD/SD.h"
+#include "Datalogged_data.h"
+#include "DataSD/SD.h"
 
 #include "indication/LED.h"
 #include "indication/Buzzer.h"
@@ -157,7 +157,7 @@ Buzzer buzz(BUZZ);
 
 uint64_t previous_time;
 
-Data data;
+LoggedData data;
 
 SD start;
 

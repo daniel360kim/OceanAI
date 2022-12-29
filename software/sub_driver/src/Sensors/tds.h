@@ -30,7 +30,7 @@ namespace Sensors
         double readRaw(const double temp);
         double readFiltered(const double delta_time, const double temp);
 
-        void logToStruct(Data &data);
+        void logToStruct(LoggedData &data);
 
     private:
         uint8_t m_pin;

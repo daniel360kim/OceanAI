@@ -43,7 +43,6 @@ No remote control functionality yet
 
 #include "debug.h"
 #include "Time.h"
-#include "core/OS.h"
 #include "core/Timer.h"
 #include "module/stepper.h"
 #include "module/limit.h"

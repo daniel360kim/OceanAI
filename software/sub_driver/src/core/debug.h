@@ -19,21 +19,6 @@
 #include "timer.h"
 #include "configuration.h"
 
-#if DEBUG_ON
-    #define ERROR_LOGf(severity, message, ...) DebugMessage debugMessage; debugMessage.createMessagef(severity, message, __VA_ARGS__); error.addMessage(debugMessage);
-    #define INFO_LOGf(message, ...) DebugMessage debugMessage; debugMessage.createMessagef(Severity::INFO, message, __VA_ARGS__); info.addMessage(debugMessage);
-    #define SUCCESS_LOGf(message, ...) DebugMessage debugMessage; debugMessage.createMessagef(Severity::SUCCESS, message, __VA_ARGS__); success.addMessage(debugMessage);
-
-    #define ERROR_LOG(severity, message, ...) DebugMessage debugMessage; debugMessage.createMessage(severity, message); error.addMessage(debugMessage);
-    #define INFO_LOG(message, ...) DebugMessage debugMessage; debugMessage.createMessage(Severity::INFO, message); info.addMessage(debugMessage);
-    #define SUCCESS_LOG(message, ...) DebugMessage debugMessage; debugMessage.createMessage(Severity::SUCCESS, message); success.addMessage(debugMessage);
-#else
-    #define ERROR_LOG(severity, message, ...)
-    #define INFO_LOG(message, ...)
-    #define SUCCESS_LOG(message, ...)
-#endif
-
-
 /**
  * @brief What type of message is it?
  * 
@@ -92,12 +77,27 @@ public:
 
 private:
     std::vector<DebugMessage> m_Messages;
-    int m_maxMessages;
+    unsigned int m_maxMessages;
 };
 
 extern Debug error; // error messages
 extern Debug info; // info messages
 extern Debug success; // success messages
+
+#if DEBUG_ON
+    extern DebugMessage debugMessage;
+    #define ERROR_LOGf(severity, message, ...) debugMessage.createMessagef(severity, message, __VA_ARGS__); error.addMessage(debugMessage);
+    #define INFO_LOGf(message, ...) debugMessage.createMessagef(Severity::INFO, message, __VA_ARGS__); info.addMessage(debugMessage);
+    #define SUCCESS_LOGf(message, ...) debugMessage.createMessagef(Severity::SUCCESS, message, __VA_ARGS__); success.addMessage(debugMessage);
+
+    #define ERROR_LOG(severity, message) debugMessage.createMessage(severity, message); error.addMessage(debugMessage);
+    #define INFO_LOG(message) debugMessage.createMessage(Severity::INFO, message); info.addMessage(debugMessage);
+    #define SUCCESS_LOG(message) debugMessage.createMessage(Severity::SUCCESS, message); success.addMessage(debugMessage);
+#else
+    #define ERROR_LOG(severity, message, ...)
+    #define INFO_LOG(message, ...)
+    #define SUCCESS_LOG(message, ...)
+#endif
 
 
 #endif

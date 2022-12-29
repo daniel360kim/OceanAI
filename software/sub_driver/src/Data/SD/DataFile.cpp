@@ -80,12 +80,12 @@ bool DataFile::createFolder(const char* folder_name)
 	{
 		if(!sd.mkdir(folder_name))
 		{
-			ERROR_LOG(Debug::Fatal, "Failed to create folder");
+			//ERROR_LOG(Debug::Fatal, "Failed to create folder");
 			return false;
 		}
 		else
 		{
-			SUCCESS_LOG("Folder created");
+			//SUCCESS_LOG("Folder created");
 			return true;
 		}
 	}
@@ -119,7 +119,7 @@ bool DataFile::createFile()
 		}
 		else
 		{
-			ERROR_LOG(Debug::Critical_Error, "Could not number files");
+			//ERROR_LOG(Debug::Critical_Error, "Could not number files");
 			return false;
 		}
 	}
@@ -133,12 +133,12 @@ bool DataFile::initializeSD()
 	{
 		if(!sd.begin(SdioConfig(FIFO_SDIO))) //Initialize SD for FIFO with TEENSY builtin
 		{
-			ERROR_LOG(Debug::Critical_Error, "SD initialization failed");
+			//ERROR_LOG(Debug::Critical_Error, "SD initialization failed");
 			return false;
 		}
 		else
 		{
-			SUCCESS_LOG("SD initialization successful");
+			//SUCCESS_LOG("SD initialization successful");
 		}
 		DataFile::file_initialized = true; //after an initialization, we set this to true so we don't initialize again
 	}
@@ -165,7 +165,7 @@ char* DataFile::incrementFileName(char* file_name, std::size_t file_name_length)
 	}
 	else
 	{
-		ERROR_LOG(Debug::Fatal, "Could not number files");
+		//ERROR_LOG(Debug::Fatal, "Could not number files");
 		return nullptr;
 	}
 

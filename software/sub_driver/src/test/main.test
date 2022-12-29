@@ -4,7 +4,7 @@
 
 #include "pins.h"
 
-#include "Data/SD/SD.h"
+#include "DataSD/SD.h"
 
 #include "indication/OutputFuncs.h"
 #include "indication/LED.h"
@@ -40,7 +40,7 @@ teensy_clock::time_point start_time;
 Velocity nav_v;
 Position nav_p;
 
-Data data;
+LoggedData data;
 GPSdata gps_data;
 
 SD_Logger logger(mission_duration, 33333333);

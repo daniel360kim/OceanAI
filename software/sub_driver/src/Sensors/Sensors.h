@@ -50,8 +50,8 @@ public:
     Angles_3D<double> returnRawGyro();
     Angles_3D<double> returnRawMag();
 
-    void logIMUToStruct(Data &data);
-    void logExternalSensorToStruct(Data &data);
+    void logIMUToStruct(LoggedData &data);
+    void logExternalSensorToStruct(LoggedData &data);
 
     Angles_3D<double> gyro_bias;
     Angles_3D<double> mag_bias = { 0.36, 0.39, 0.49 };

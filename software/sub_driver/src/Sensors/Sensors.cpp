@@ -121,39 +121,39 @@ bool UnifiedSensors::initNavSensors()
             {
             case 0:
             {
-                ERROR_LOG(Debug::Critical_Error, "BMP388 initialization failed");
+                //ERROR_LOG(Debug::Critical_Error, "BMP388 initialization failed");
                 return false;
                 break;
             }
             case 1:
             {
-                ERROR_LOG(Debug::Critical_Error, "Bmi088 Accel initialization failed");
+                //ERROR_LOG(Debug::Critical_Error, "Bmi088 Accel initialization failed");
                 return false;
                 break;
             }
             case 2:
             {
-                ERROR_LOG(Debug::Critical_Error, "Bmi088 Gyro initialization failed");
+                //ERROR_LOG(Debug::Critical_Error, "Bmi088 Gyro initialization failed");
                 return false;
                 break;
             }
 
             case 3:
             {
-                ERROR_LOG(Debug::Critical_Error, "LIS3MDL Mag initialization failed");
+                //ERROR_LOG(Debug::Critical_Error, "LIS3MDL Mag initialization failed");
                 return false;
                 break;
             }
             default:
             {
-                ERROR_LOG(Debug::Critical_Error, "Unknown sensor initialization error");
+                //ERROR_LOG(Debug::Critical_Error, "Unknown sensor initialization error");
                 return false;
             }
             }
         }
     }
 
-    SUCCESS_LOG("All sensors initialized successfully");
+    //SUCCESS_LOG("All sensors initialized successfully");
 
     return true;
 }
@@ -248,7 +248,7 @@ FASTRUN Angles_3D<double> UnifiedSensors::returnRawMag()
     return mag_data;
 }
 
-FASTRUN void UnifiedSensors::logIMUToStruct(Data &data)
+FASTRUN void UnifiedSensors::logIMUToStruct(LoggedData &data)
 {
     //Flags are triggered by interrupts set by the sensors
     //Mag, Accel, Gyro, and baro all have their own interrupt pins

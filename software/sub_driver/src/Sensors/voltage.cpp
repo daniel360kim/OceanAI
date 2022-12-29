@@ -53,7 +53,7 @@ FASTRUN double Sensors::Voltage::readFiltered(const double delta_time)
     return filtered_voltage;
 }
 
-FASTRUN void Sensors::Voltage::logToStruct(Data &data)
+FASTRUN void Sensors::Voltage::logToStruct(LoggedData &data)
 {
     int64_t current_time = scoped_timer.elapsed();
     if(current_time >= m_interval + m_prev_log_ns)

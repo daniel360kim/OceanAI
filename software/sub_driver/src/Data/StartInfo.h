@@ -43,7 +43,7 @@ struct StartFile_d
     //SD
     unsigned long sd_cap;
 
-    //I2C Data
+    //I2C LoggedData
     std::vector<uint8_t> addresses;
     std::vector<uint8_t> errors;
     int num_devices;

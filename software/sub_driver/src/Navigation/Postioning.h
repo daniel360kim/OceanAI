@@ -33,7 +33,7 @@ class Velocity : public Positioning
 {
 public:
     Velocity() {}
-    void updateVelocity(Data &data);
+    void updateVelocity(LoggedData &data);
 
 private:
     Positioning x;
@@ -45,7 +45,7 @@ class Position : public Positioning
 {
 public:
     Position() {}
-    void updatePosition(Data& data);
+    void updatePosition(LoggedData& data);
 private:
     Positioning x;
     Positioning y;

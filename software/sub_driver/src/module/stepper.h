@@ -80,7 +80,7 @@ public:
 
     void forward();
 
-    void logToStruct(Data &data);
+    void logToStruct(LoggedData &data);
 
     bool sinking = false;
     bool rising = false;

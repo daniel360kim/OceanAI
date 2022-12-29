@@ -65,7 +65,7 @@ FASTRUN double Sensors::TotalDissolvedSolids::readFiltered(const double delta_ti
  * 
  * @param data reference to struct where data is logged
  */
-FASTRUN void Sensors::TotalDissolvedSolids::logToStruct(Data &data)
+FASTRUN void Sensors::TotalDissolvedSolids::logToStruct(LoggedData &data)
 {
     int64_t current_time = scoped_timer.elapsed();
     if(current_time >= m_prev_log_ns + m_interval_ns)

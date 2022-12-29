@@ -115,7 +115,7 @@ public:
      * @param delim how the data should be delimited
      * @param data data class to be printed
      */
-    static void printData(Print &p, const char *delim, const Data &data)
+    static void printData(Print &p, const char *delim, const LoggedData &data)
     {
         p.print(data.time_ns);
         p.print(delim);
@@ -257,7 +257,7 @@ public:
      * @param data data struct to be used
      * @param doc reference to json document. must match size of specified json doc in parameters
      */
-    static void data_to_json(Data &data, StaticJsonDocument<STATIC_JSON_DOC_SIZE> &doc)
+    static void data_to_json(LoggedData &data, StaticJsonDocument<STATIC_JSON_DOC_SIZE> &doc)
     {
         doc.clear();
         doc["time"] = data.time_ns;
@@ -364,7 +364,7 @@ public:
     int16_t stepper_speed_command = 0;
     int16_t stepper_acceleration_command = 0;
 
-    void convert(Data &data)
+    void convert(LoggedData &data)
     {
         loop_time = static_cast<uint16_t>(data.loop_time);
         voltage = static_cast<float>(data.filt_voltage);

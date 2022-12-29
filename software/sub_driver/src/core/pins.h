@@ -44,7 +44,7 @@ constexpr uint8_t ERR_p = 30;
 constexpr uint8_t STOP_b = 32; //buoyancy engine limit switch
 constexpr uint8_t STOP_p = 31; //pitch manipulation limit switch
 
-/////expr Sensor (I2C) Interrupts (Data-ready only)
+/////expr Sensor (I2C) Interrupts (LoggedData-ready only)
 constexpr uint8_t ACC_int = 34; //BMI088 Accelerometer
 constexpr uint8_t GYR_int = 33; //BMI088 Gyroscope
 constexpr uint8_t BAR_int = 35; //BMP388 Barometer

@@ -51,7 +51,7 @@ public:
 
     const char* get_data_filename() const { return m_data_filename; }
 
-    void update_sd_capacity(Data &data);
+    void update_sd_capacity(LoggedData &data);
 
 private:
     const char* m_data_filename; //name of the binary data

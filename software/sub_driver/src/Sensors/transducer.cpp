@@ -71,7 +71,7 @@ FASTRUN double Sensors::Transducer::readFiltered(const double delta_time)
  * 
  * @param data reference to struct where the data is logged
  */
-FASTRUN void Sensors::Transducer::logToStruct(Data &data)
+FASTRUN void Sensors::Transducer::logToStruct(LoggedData &data)
 {
     int64_t current_time = scoped_timer.elapsed();
     if(current_time >= m_prev_log_ns + m_interval)

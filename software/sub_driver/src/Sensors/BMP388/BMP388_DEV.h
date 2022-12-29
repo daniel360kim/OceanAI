@@ -69,7 +69,7 @@ enum {
 	BMP388_INT_STATUS			 = 0x11,					// Interrupt Status register sub-address
 	BMP388_FIFO_LENGTH_0	 = 0x12,					// FIFO Length Least Significant Byte (LSB) register sub-address
 	BMP388_FIFO_LENGTH_1	 = 0x13,					// FIFO Length Most Significant Byte (MSB) register sub-address
-	BMP388_FIFO_DATA			 = 0x14,					// FIFO Data register sub-address
+	BMP388_FIFO_DATA			 = 0x14,					// FIFO LoggedData register sub-address
 	BMP388_FIFO_WTM_0			 = 0x15,					// FIFO Water Mark Least Significant Byte (LSB) register sub-address
 	BMP388_FIFO_WTM_1			 = 0x16,					// FIFO Water Mark Most Significant Byte (MSB) register sub-address
 	BMP388_FIFO_CONFIG_1   = 0x17,					// FIFO Configuration 1 register sub-address
@@ -78,7 +78,7 @@ enum {
 	BMP388_IF_CONFIG			 = 0x1A,					// Interface Configuration register sub-address
 	BMP388_PWR_CTRL				 = 0x1B,					// Power Control register sub-address
 	BMP388_OSR						 = 0x1C,					// Oversampling register sub-address
-	BMP388_ODR					   = 0x1D,					// Output Data Rate register sub-address
+	BMP388_ODR					   = 0x1D,					// Output LoggedData Rate register sub-address
 	BMP388_CONFIG					 = 0x1F,					// Configuration register sub-address
 	BMP388_TRIM_PARAMS		 = 0x31,          // Trim parameter registers' base sub-address
 	BMP388_CMD						 = 0x7E						// Command register sub-address
@@ -119,7 +119,7 @@ enum IIRFilter {
 };
 
 enum TimeStandby {
-	TIME_STANDBY_5MS       = 0x00,      		 // Time standby bit field in the Output Data Rate (ODR) register
+	TIME_STANDBY_5MS       = 0x00,      		 // Time standby bit field in the Output LoggedData Rate (ODR) register
 	TIME_STANDBY_10MS      = 0x01,
 	TIME_STANDBY_20MS      = 0x02,
 	TIME_STANDBY_40MS      = 0x03,

@@ -118,7 +118,7 @@
         EEPROM.update(6, static_cast<uint8_t>(m_white_balance));
         EEPROM.update(7, static_cast<uint8_t>(m_format));
 
-        SUCCESS_LOG("Settings saved to EEPROM");
+        //SUCCESS_LOG("Settings saved to EEPROM");
     }
 
     void OV2640_Mini::saveSettings(Resolution resolution, Frame_Number frame_number,
@@ -150,7 +150,7 @@
         m_white_balance = static_cast<White_Balance>(EEPROM.read(6));
         m_format = static_cast<Format>(EEPROM.read(7));
 
-        SUCCESS_LOG("Retrieved settings from EEPROM");
+        //SUCCESS_LOG("Retrieved settings from EEPROM");
     }
 
     void OV2640_Mini::retrieveSettings(Resolution &resolution, Frame_Number &frame_number,
@@ -165,7 +165,7 @@
         white_balance = static_cast<White_Balance>(EEPROM.read(6));
         format = static_cast<Format>(EEPROM.read(7));
 
-        SUCCESS_LOG("Settings retrieved from EEPROM");
+        //SUCCESS_LOG("Settings retrieved from EEPROM");
 
         m_resolution = resolution;
         m_frame_number = frame_number;
@@ -199,12 +199,12 @@
             temp = m_camera->read_reg(ARDUCHIP_TEST1);
             if (temp != 0x55)
             {
-                ERROR_LOG(Debug::Fatal, "OV2640 initialization failed");
+                //ERROR_LOG(Debug::Fatal, "OV2640 initialization failed");
                 return false;
             }
             else
             {
-                SUCCESS_LOG("OV2640 initialization successful");
+                //SUCCESS_LOG("OV2640 initialization successful");
                 break;
             }
         }
@@ -218,13 +218,13 @@
             m_camera->rdSensorReg8_8(OV2640_CHIPID_LOW, &pid);
             if ((vid != 0x26) && ((pid != 0x41) || (pid != 0x42)))
             {
-                ERROR_LOG(Debug::Fatal, "Can't find OV2640 module!");
+                //ERROR_LOG(Debug::Fatal, "Can't find OV2640 module!");
                 delay(1000);
                 continue;
             }
             else
             {
-                SUCCESS_LOG("OV2640 module detected");
+                //SUCCESS_LOG("OV2640 module detected");
                 break;
             }
         }
@@ -245,7 +245,7 @@
         m_camera->clear_fifo_flag();
         m_camera->write_reg(ARDUCHIP_FRAMES, 0x00);
 
-        SUCCESS_LOG("OV2640 initialization complete");
+        //SUCCESS_LOG("OV2640 initialization complete");
         return true;
     }
 
@@ -257,7 +257,7 @@
         //m_camera->OV2640_set_JPEG_size(static_cast<uint8_t>(m_resolution));
         m_camera->start_capture();
 
-        INFO_LOG("Capturing image...");
+        //INFO_LOG("Capturing image...");
         while (!m_camera->get_bit(ARDUCHIP_TRIG, CAP_DONE_MASK));
-        INFO_LOG("Image captured");
+        //INFO_LOG("Image captured");
     }
