@@ -19,7 +19,6 @@
 namespace CPU
 {
     extern "C" uint32_t set_arm_clock(uint32_t freq); // set clock speed in Hz requireed to read clock speed
-    
 
     void init();
     void HighAlarmISR();
