@@ -20,6 +20,10 @@
 
 #define UI_ON true
 
+#if UI_ON && LIVE_DEBUG
+    #warning UI and Debug outputs will collide. Disable one of them.
+#endif
+
 namespace CPU
 {
     /**
