@@ -157,6 +157,8 @@ namespace Sensors
         configs.BMP_os_p = (char *)"Pressure: X4";
         configs.BMP_os_t = (char *)"Temperature: X16";
         configs.BMP_ODR = (char *)"Standby: 80 milliseconds";
+        
+        return true;
     }
 
     /**
