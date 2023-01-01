@@ -53,7 +53,7 @@ namespace Sensors
 namespace TransportManager
 {
     constexpr int SERIAL_BAUDRATE = 115200;
-    constexpr int SEND_INTERVAL = HZ_TO_NS(10);
+    constexpr int SEND_INTERVAL = HZ_TO_NS(5);
 }
 
 
