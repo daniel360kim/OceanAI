@@ -16,18 +16,18 @@
 
 namespace Sensors
 {
-    Angles_3D<double> gyro_bias;
-    volatile bool bar_flag;
-    volatile bool accel_flag;
-    volatile bool gyro_flag;
-    volatile bool mag_flag;
+    static Angles_3D<double> gyro_bias;
+    static volatile bool bar_flag;
+    static volatile bool accel_flag;
+    static volatile bool gyro_flag;
+    static volatile bool mag_flag;
+ 
+    static Bmi088Accel accel;
+    static Bmi088Gyro gyro;
+ 
+    static LIS3MDL mag;
 
-    Bmi088Accel accel;
-    Bmi088Gyro gyro;
-
-    LIS3MDL mag;
-
-    BMP388_DEV baro;
+    static BMP388_DEV baro;
 
     /*
     BMI088 comes with built in low pass filter

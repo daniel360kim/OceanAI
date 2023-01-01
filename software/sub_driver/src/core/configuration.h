@@ -18,6 +18,8 @@
 #define DEBUG_ON true
 #define LIVE_DEBUG true
 
+#define UI_ON true
+
 namespace CPU
 {
     /**
@@ -46,7 +48,12 @@ namespace CPU
 namespace Sensors
 {
     constexpr Angles_3D<double> mag_bias = { 0.36, 0.39, 0.49 }; // in uT: set in mag calibration script
+}
 
+namespace TransportManager
+{
+    constexpr int SERIAL_BAUDRATE = 115200;
+    constexpr int SEND_INTERVAL = HZ_TO_NS(10);
 }
 
 

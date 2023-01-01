@@ -12,8 +12,7 @@
 #include "States.h"
 #include "Timer.h"
 #include "cpu.h"
-
-#define UI_ON true
+#include "../Data/TransportManager.h"
 
 /**
  * @brief Anonymous namespace to avoid name collisions
@@ -65,57 +64,9 @@ namespace
 
     StaticJsonDocument<STATIC_JSON_DOC_SIZE> data_json;
 
-#if UI_ON
-
-    CurrentState callbackState;
-    SendData telemetry_data;
-    eui_message_t tracked_variables[] =
-        {
-            EUI_UINT16("lt", telemetry_data.loop_time),
-            EUI_FLOAT("v", telemetry_data.voltage),
-            EUI_UINT8("sst", telemetry_data.system_state),
-            EUI_FLOAT("it", telemetry_data.internal_temp),
-
-            EUI_FLOAT("xd", telemetry_data.rel_ori.x),
-            EUI_FLOAT("yd", telemetry_data.rel_ori.y),
-            EUI_FLOAT("zd", telemetry_data.rel_ori.z),
-
-            EUI_FLOAT_ARRAY_RO("gd", telemetry_data.gyr),
-            EUI_FLOAT_ARRAY_RO("ad", telemetry_data.acc),
-
-            EUI_INT16("sp", telemetry_data.stepper_current_position),
-            EUI_INT16("st", telemetry_data.stepper_target_position),
-            EUI_INT16("ss", telemetry_data.stepper_speed),
-            EUI_INT16("sa", telemetry_data.stepper_acceleration),
-
-            EUI_UINT8("ssc", telemetry_data.system_state_command),
-            EUI_INT16("sc", telemetry_data.stepper_speed_command),
-            EUI_INT16("ac", telemetry_data.stepper_acceleration_command),
-    };
-
-    void serial_write(uint8_t *data, uint16_t len);
-    eui_interface_t serial_comms = EUI_INTERFACE(&serial_write);
-
-    void serial_rx_handler()
-    {
-        // While we have data, we will pass those bytes to the ElectricUI parser
-        while (Serial.available() > 0)
-        {
-            eui_parse(Serial.read(), &serial_comms); // Ingest a byte
-        }
-    }
-
-    void serial_write(uint8_t *data, uint16_t len)
-    {
-        Serial.write(data, len); // output on the main serial port
-    }
-
-    int64_t previous_telem_send_time = 0;
-
-    bool idle_called = false;
-#endif
-
-
+    #if UI_ON
+        static CurrentState callbackState; //State to go back to after going into idle
+    #endif
 
 };
 
@@ -185,40 +136,14 @@ FASTRUN void continuousFunctions(StateAutomation *state)
         return;
     }
 #if UI_ON
-    serial_rx_handler();
-
-    telemetry_data.convert(data);
-
-    int64_t current_time = scoped_timer.elapsed();
-    if (current_time - previous_telem_send_time >= 100000000)
-    {
-        previous_telem_send_time = current_time;
-        eui_send_tracked("lt");
-        eui_send_tracked("v");
-        eui_send_tracked("sst");
-        eui_send_tracked("it");
-
-        eui_send_tracked("xd");
-        eui_send_tracked("yd");
-        eui_send_tracked("zd");
-
-        eui_send_tracked("gd");
-        eui_send_tracked("ad");
-
-        eui_send_tracked("sp");
-        eui_send_tracked("st");
-        eui_send_tracked("ss");
-        eui_send_tracked("sa");
-    }
-
-    if(telemetry_data.system_state_command != 0 && !idle_called)
+    //Send/receive data to/from the UI
+    //If GUI wants to change the state, it will be handled here
+    if(TransportManager::handleTransport(data))
     {
         callbackState = currentState;
         state->setState(IdleMode::getInstance());
-        idle_called = true;
         return;
     }
-
 #endif
 
 }
@@ -315,24 +240,14 @@ void Initialization::enter(StateAutomation *state)
 
     LEDb.blink(255, 0, 0, 1000);
     LEDa.blink(255, 0, 0, 1000);
-#if UI_ON
-    while (!Serial)
-        ; // Wait for serial montior to open
-          // Provide the library with the interface we just setup
-    eui_setup_interface(&serial_comms);
 
-    // Provide the tracked variables to the library
-    EUI_TRACK(tracked_variables);
-
-    // Provide a identifier to make this board easy to find in the UI
-    eui_setup_identifier((char *)"OceanAI", 8);
-
-#endif
-    
+    TransportManager::init();
+    TransportManager::Commands stepper_commands = TransportManager::getCommands();
     #if UI_ON
-        buoyancy.setSpeed(telemetry_data.stepper_speed_command);
-        buoyancy.setMaxSpeed(telemetry_data.stepper_speed_command);
-        buoyancy.setAcceleration(telemetry_data.stepper_acceleration_command);
+        buoyancy.setSpeed(stepper_commands.stepper_speed);
+        buoyancy.setMaxSpeed(stepper_commands.stepper_speed);
+        buoyancy.setAcceleration(stepper_commands.stepper_speed);
+
     #else
         buoyancy.setSpeed(2000);
         buoyancy.setMaxSpeed(2000);
@@ -381,7 +296,7 @@ void IdleMode::run(StateAutomation *state)
     continuousFunctions(state);
     buoyancy.run();
     #if UI_ON
-    if(telemetry_data.system_state_command == 0)
+    if(TransportManager::getCommands().system_state == 0)
     {
         switch(callbackState)
         {
@@ -412,7 +327,7 @@ void IdleMode::run(StateAutomation *state)
 void IdleMode::exit(StateAutomation *state)
 {
     #if UI_ON
-    idle_called = false;
+        TransportManager::setIdle(false);
     #endif
 }
 
@@ -423,9 +338,10 @@ void Diving::enter(StateAutomation *state)
 
     // Initialize stepper settings
     #if UI_ON
-        buoyancy.setSpeed(telemetry_data.stepper_speed_command);
-        buoyancy.setMaxSpeed(telemetry_data.stepper_speed_command);
-        buoyancy.setAcceleration(telemetry_data.stepper_acceleration_command);
+        TransportManager::Commands stepper_commands = TransportManager::getCommands();
+        buoyancy.setSpeed(stepper_commands.stepper_speed);
+        buoyancy.setMaxSpeed(stepper_commands.stepper_speed);
+        buoyancy.setAcceleration(stepper_commands.stepper_acceleration);
     #else
         buoyancy.setSpeed(2000);
         buoyancy.setMaxSpeed(2000);
@@ -465,9 +381,10 @@ void Resurfacing::enter(StateAutomation *state)
 {
     currentState = CurrentState::RESURFACING;
     #if UI_ON
-        buoyancy.setSpeed(telemetry_data.stepper_speed_command);
-        buoyancy.setMaxSpeed(telemetry_data.stepper_speed_command);
-        buoyancy.setAcceleration(telemetry_data.stepper_acceleration_command);
+        TransportManager::Commands stepper_commands = TransportManager::getCommands();
+        buoyancy.setSpeed(stepper_commands.stepper_speed);
+        buoyancy.setMaxSpeed(stepper_commands.stepper_speed);
+        buoyancy.setAcceleration(stepper_commands.stepper_acceleration);
     #else  
         buoyancy.setSpeed(2000);
         buoyancy.setMaxSpeed(2000);
@@ -512,9 +429,10 @@ void Calibrate::enter(StateAutomation *state)
 {
     currentState = CurrentState::CALIBRATE;
     #if UI_ON
-        buoyancy.setSpeed(telemetry_data.stepper_speed_command);
-        buoyancy.setMaxSpeed(telemetry_data.stepper_speed_command);
-        buoyancy.setAcceleration(telemetry_data.stepper_acceleration_command);
+        TransportManager::Commands stepper_commands = TransportManager::getCommands();
+        buoyancy.setSpeed(stepper_commands.stepper_speed);
+        buoyancy.setMaxSpeed(stepper_commands.stepper_speed);
+        buoyancy.setAcceleration(stepper_commands.stepper_acceleration);
     #else
         buoyancy.setSpeed(2000);
         buoyancy.setMaxSpeed(2000);
