@@ -4,25 +4,41 @@
  * @brief configurations for the system
  * @version 0.1
  * @date 2022-12-25
- * 
+ *
  * @copyright Copyright (c) 2022 OceanAI (https://github.com/daniel360kim/OceanAI)
- * 
+ *
  */
 
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
+#include <cmath>
+
 #include "timer.h"
 #include "../Data/logged_data.h"
 
-#define DEBUG_ON true
-#define LIVE_DEBUG true
+#define DEBUG_ON false
+#define LIVE_DEBUG false
 
 #define UI_ON true
 
+#define PRINT_DATA false
+
 #if UI_ON && LIVE_DEBUG
-    #warning UI and Debug outputs will collide. Disable one of them.
+#warning UI and Debug outputs will collide. Disable one of them.
 #endif
+
+#define OPTICS_ON false
+
+namespace MissionDuration
+{
+    constexpr uint16_t days = 0;
+    constexpr uint16_t hours = 1;
+    constexpr uint32_t minutes = 0;
+    constexpr uint32_t seconds = 30;
+
+    constexpr uint64_t mission_time = ((uint64_t)(days * (uint64_t)8.64e+13) + (uint64_t)(hours * (uint64_t)3.6e+12) + (uint64_t)(minutes * (uint64_t)6e+10) + (uint64_t)(seconds * (uint64_t)1e+9));
+}
 
 namespace CPU
 {
@@ -48,10 +64,9 @@ namespace CPU
     constexpr int CPU_INFO_LOG_INTERVAL = HZ_TO_NS(5);
 };
 
-
 namespace Sensors
 {
-    constexpr Angles_3D<double> mag_bias = { 0.36, 0.39, 0.49 }; // in uT: set in mag calibration script
+    constexpr Angles_3D<double> mag_bias = {0.36, 0.39, 0.49}; // in uT: set in mag calibration script
 }
 
 namespace TransportManager
@@ -60,5 +75,12 @@ namespace TransportManager
     constexpr int SEND_INTERVAL = HZ_TO_NS(5);
 }
 
+namespace Logging
+{
+    constexpr int LOG_INTERVAL = HZ_TO_NS(30);
+    constexpr int BYTES_PER_LOG = 1536; // bytes per log
+    constexpr unsigned long long FLUSH_INTERVAL = SEC_TO_NS(30ULL); // flush every 30 seconds
+    constexpr unsigned long long CAPACITY_UPDATE_INTERVAL = SEC_TO_NS(360);// update capacity every 6 minutes
+}
 
 #endif

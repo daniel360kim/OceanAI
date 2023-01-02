@@ -23,11 +23,11 @@ No remote control functionality yet
 #include "../Sensors/transducer.h"
 #include "../Sensors/tds.h"
 #include "../Sensors/voltage.h"
-#include "../Sensors/Camera/camera.h"
+
+#include "../Data/SD/SD.h"
 
 #include "pins.h"
 
-#include "../Data/SD/SD.h"
 
 #include "indication/OutputFuncs.h"
 #include "indication/LED.h"

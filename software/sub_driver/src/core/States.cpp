@@ -20,8 +20,6 @@
  */
 namespace
 {
-    Time::Mission mission_duration;
-
     Fusion SFori;
     Sensors::Thermistor external_temp(RX_RF, 10000, 4100, 25, 30, HZ_TO_NS(50));
     Sensors::Transducer external_pres(TX_RF, 30, 10000000);
@@ -40,7 +38,7 @@ namespace
 
     LoggedData data;
 
-    SD_Logger logger(mission_duration.mission_time, HZ_TO_NS(50));
+    SD_Logger logger(MissionDuration::mission_time, HZ_TO_NS(50));
 
     bool warning = false;
 
@@ -57,10 +55,6 @@ namespace
     Buoyancy buoyancy(pins_b, Stepper::Resolution::HALF, StepperProperties(STEPPER_HALF_STEPS / STEPS_PER_HALF, STEPPER_HALF_STEPS));
 
     CurrentState currentState;
-
-    Resolution resolution = RESOLUTION_640x480;
-    Frame_Number frame_number = ONE_PHOTO;
-    OV2640_Mini camera(CS_VD, resolution, frame_number, true);
 
     StaticJsonDocument<STATIC_JSON_DOC_SIZE> data_json;
 
@@ -241,9 +235,9 @@ void Initialization::enter(StateAutomation *state)
     LEDb.blink(255, 0, 0, 1000);
     LEDa.blink(255, 0, 0, 1000);
 
-    TransportManager::init();
-    TransportManager::Commands stepper_commands = TransportManager::getCommands();
     #if UI_ON
+        TransportManager::init();
+        TransportManager::Commands stepper_commands = TransportManager::getCommands();
         buoyancy.setSpeed(stepper_commands.stepper_speed);
         buoyancy.setMaxSpeed(stepper_commands.stepper_speed);
         buoyancy.setAcceleration(stepper_commands.stepper_speed);

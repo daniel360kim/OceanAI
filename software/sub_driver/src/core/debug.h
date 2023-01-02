@@ -94,6 +94,10 @@ extern Debug success; // success messages
     #define INFO_LOG(message) debugMessage.createMessage(Severity::INFO, message); info.addMessage(debugMessage);
     #define SUCCESS_LOG(message) debugMessage.createMessage(Severity::SUCCESS, message); success.addMessage(debugMessage);
 #else
+    #define ERROR_LOGf(severity, message, ...)
+    #define INFO_LOGf(message, ...)
+    #define SUCCESS_LOGf(message, ...)
+    
     #define ERROR_LOG(severity, message, ...)
     #define INFO_LOG(message, ...)
     #define SUCCESS_LOG(message, ...)
