@@ -13,7 +13,12 @@ Dependencies can be modified by going to the .pio/libdeps directory within the p
     #define swap 
     ```
 
-    From Arducam dependencies to resolve conflicts with the standard library.
+From Arducam dependencies to resolve conflicts with the standard library.
 * Must delete utility folder from Buzzer library and remove the include from the source header file.
+* Remove:
+```cpp
+# include "utility/pitches.h"
+```
+From Buzzer.h
 
 
