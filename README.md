@@ -58,7 +58,6 @@ git clone https://github.com/daniel360kim/OceanAI.git
 6. Connect the AUV through USB and click the 'Upload' button.
 <br></br>
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Graphical User Interface
 
@@ -88,7 +87,6 @@ git clone https://github.com/daniel360kim/OceanAI.git
 arc start
 ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 # License
 Distributed under the MIT License. See `LICENSE` for more information.
@@ -96,5 +94,3 @@ Distributed under the MIT License. See `LICENSE` for more information.
 # Contact
 * Daniel Kim - nmrs.thrust@gmail.com - [YouTube](https://www.youtube.com/channel/UC0VazqJrUQiJGd_Tedn47zA) - Instagram: @us_rockets
 * Project Link: https://github.com/daniel360kim/OceanAI 
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
