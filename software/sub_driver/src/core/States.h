@@ -34,7 +34,7 @@ No remote control functionality yet
 
 #include <Arduino.h>
 #include <teensy_clock/teensy_clock.h>
-#include <stdint.h>
+#include <cstdint>
 #include <chrono>
 
 #include "Navigation/SensorFusion/Fusion.h"

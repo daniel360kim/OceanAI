@@ -13,7 +13,7 @@
 
 #include <Arduino.h>
 #include <SDFat.h>
-#include <stdint.h>
+#include <cstdint>
 
 #include "SD.h"
 #include "../../core/debug.h"

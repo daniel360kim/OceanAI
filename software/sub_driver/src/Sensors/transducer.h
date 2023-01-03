@@ -13,7 +13,7 @@
 #define Transducer_h
 
 #include <Arduino.h>
-#include <stdint.h>
+#include <cstdint>
 #include <cmath>
 
 #include "constants.h"

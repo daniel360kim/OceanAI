@@ -13,7 +13,7 @@
 #define dss_h
 
 #include <Arduino.h>
-#include <stdint.h>
+#include <cstdint>
 
 #include "constants.h"
 #include "read_functions.h"

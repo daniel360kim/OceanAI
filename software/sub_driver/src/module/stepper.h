@@ -3,7 +3,7 @@
 #define stepper_h
 
 #include <Arduino.h>
-#include <stdint.h>
+#include <cstdint>
 
 #include "AccelStepper.h"
 #include "limit.h"

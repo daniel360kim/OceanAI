@@ -13,7 +13,7 @@
 
 #include <Arduino.h>
 #include <vector>
-#include <stdint.h>
+#include <cstdint>
 
 #include "logged_data.h"
 

@@ -20,7 +20,7 @@
 #include <EEPROM.h>
 
 #include <string>
-#include <stdint.h>
+#include <cstdint>
 
 #include "../../core/debug.h"
 #include "../../Data/SD/SD.h"

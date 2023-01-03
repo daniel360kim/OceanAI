@@ -15,7 +15,7 @@
 #include <chrono>
 #include <functional>
 #include <teensy_clock/teensy_clock.h>
-#include <stdint.h>
+#include <cstdint>
 
 #include "Timer.h"
 

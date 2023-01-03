@@ -16,7 +16,7 @@
 #include <queue>
 #include <memory>
 #include <CrashReport.h>
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 #include <stddef.h>
 #include <numeric>

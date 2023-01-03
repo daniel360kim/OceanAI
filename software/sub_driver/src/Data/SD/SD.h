@@ -14,7 +14,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <SdFat.h>
-#include <stdint.h>
+#include <cstdint>
 #include <vector>
 #include <CrashReport.h>
 #include <queue>
