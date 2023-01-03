@@ -182,6 +182,19 @@ void Initialization::enter(StateAutomation *state)
         ; // Wait for serial montior to open
 #endif
     Serial.begin(2000000);
+    
+    #if UI_ON
+        TransportManager::init();
+        TransportManager::Commands stepper_commands = TransportManager::getCommands();
+        buoyancy.setSpeed(stepper_commands.stepper_speed);
+        buoyancy.setMaxSpeed(stepper_commands.stepper_speed);
+        buoyancy.setAcceleration(stepper_commands.stepper_speed);
+
+    #else
+        buoyancy.setSpeed(2000);
+        buoyancy.setMaxSpeed(2000);
+        buoyancy.setAcceleration(2000);
+    #endif
 
     LEDa.setColor(255, 0, 255);
     LEDb.setColor(255, 0, 255);
@@ -220,7 +233,7 @@ void Initialization::enter(StateAutomation *state)
     }
     else
     {
-        //SUCCESS_LOG("Camera Initialization Complete");
+        SUCCESS_LOG("Camera Initialization Complete");
     }
 #endif
 
@@ -230,23 +243,11 @@ void Initialization::enter(StateAutomation *state)
         state->setState(ErrorIndication::getInstance());
         return;
     }
-    //SUCCESS_LOG("SD Card Initialization Complete");
+    SUCCESS_LOG("SD Card Initialization Complete");
 
     LEDb.blink(255, 0, 0, 1000);
     LEDa.blink(255, 0, 0, 1000);
 
-    #if UI_ON
-        TransportManager::init();
-        TransportManager::Commands stepper_commands = TransportManager::getCommands();
-        buoyancy.setSpeed(stepper_commands.stepper_speed);
-        buoyancy.setMaxSpeed(stepper_commands.stepper_speed);
-        buoyancy.setAcceleration(stepper_commands.stepper_speed);
-
-    #else
-        buoyancy.setSpeed(2000);
-        buoyancy.setMaxSpeed(2000);
-        buoyancy.setAcceleration(2000);
-    #endif
     currentState = CurrentState::INITIALIZATION;
 }
 

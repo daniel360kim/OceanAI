@@ -22,10 +22,14 @@
 
 #define UI_ON true
 
-#define PRINT_DATA false
+#define PRINT_DATA false //prints out logged data as JSON
 
-#if UI_ON && LIVE_DEBUG
+#if UI_ON && LIVE_DEBUG 
 #warning UI and Debug outputs will collide. Disable one of them.
+#endif
+
+#if UI_ON && PRINT_DATA
+#warning UI and Data outputs will collide. Disable one of them.
 #endif
 
 #define OPTICS_ON false

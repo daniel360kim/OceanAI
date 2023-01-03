@@ -47,6 +47,7 @@ namespace TransportManager
 
         void convert(LoggedData &data)
         {
+            //Convert to set size since data is transmitted to different devices
             loop_time = static_cast<uint16_t>(data.loop_time);
             voltage = static_cast<float>(data.filt_voltage);
             system_state = static_cast<uint8_t>(data.system_state);

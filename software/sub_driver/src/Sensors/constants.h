@@ -17,5 +17,4 @@ constexpr double ANALOG_TO_VOLTAGE = VREF / 1023.0;
 constexpr double STANDARD_TEMP = 25.0;
 
 
-
 #endif

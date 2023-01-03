@@ -12,10 +12,9 @@
 #define Data_struct_h
 
 #include <Arduino.h>
-#include <stdint.h>
+#include <cstdint>
 #include <ArduinoJson.h>
 #include <electricui.h>
-#include <cmath>
 
 #define ARDUINO_JSON_USE_DOUBLE 0
 #define ARDUINO_JSON_USE_LONG_LONG 0
@@ -64,9 +63,8 @@ struct BMP388Data
 };
 
 // To do: organize into different structs for optimization and organization
-class LoggedData
+struct LoggedData
 {
-public:
     int64_t time_ns;
     int loop_time;
     int system_state;
