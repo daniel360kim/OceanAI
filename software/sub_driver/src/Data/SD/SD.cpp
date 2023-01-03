@@ -312,7 +312,7 @@ bool SD_Logger::init()
  * @return true 
  * @return false 
  */
-FASTRUN bool SD_Logger::logData(StaticJsonDocument<STATIC_JSON_DOC_SIZE> &doc)
+bool SD_Logger::logData(StaticJsonDocument<STATIC_JSON_DOC_SIZE> &doc)
 {
     //Logging at a certain interval set by the constructor
     int64_t current_time = scoped_timer.elapsed();

@@ -18,34 +18,6 @@ No remote control functionality yet
 
 #include "StateAutomation.h"
 
-#include "../Sensors/Sensors.h"
-#include "../Sensors/thermistor.h"
-#include "../Sensors/transducer.h"
-#include "../Sensors/tds.h"
-#include "../Sensors/voltage.h"
-
-#include "../Data/SD/SD.h"
-
-#include "pins.h"
-
-
-#include "indication/OutputFuncs.h"
-#include "indication/LED.h"
-
-#include <Arduino.h>
-#include <teensy_clock/teensy_clock.h>
-#include <cstdint>
-#include <chrono>
-
-#include "Navigation/SensorFusion/Fusion.h"
-#include "navigation/Orientation.h"
-#include "Navigation/Postioning.h"
-
-#include "debug.h"
-#include "Time.h"
-#include "core/Timer.h"
-#include "module/stepper.h"
-#include "module/limit.h"
 /*
 Each state of our submarine is its own class and has 3 functions:
     enter: runs when the state is entered

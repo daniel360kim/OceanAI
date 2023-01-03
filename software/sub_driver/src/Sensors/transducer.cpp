@@ -22,7 +22,7 @@ Sensors::Transducer::Transducer(const uint8_t pin, const double cutoff, const lo
  * 
  * @return double measured voltage
  */
-FASTRUN inline double Sensors::Transducer::readVoltage()
+inline double Sensors::Transducer::readVoltage()
 {
     return analogRead(m_pin) * ANALOG_TO_VOLTAGE;
 }
@@ -32,7 +32,7 @@ FASTRUN inline double Sensors::Transducer::readVoltage()
  * 
  * @return double raw pressure in atm 
  */
-FASTRUN double Sensors::Transducer::readRaw()
+double Sensors::Transducer::readRaw()
 {
     double voltage = readVoltage();
     double psi = (100.0 / 3.0) * voltage + (50.0 - ((100.0 / 3.0) * (3.3 / 2.0))); //pressure = 25psi * voltage - 12.5psi (linear)
@@ -47,7 +47,7 @@ FASTRUN double Sensors::Transducer::readRaw()
  * @param delta_time change in time (sec)
  * @return double filtered pressure in atm
  */
-FASTRUN double Sensors::Transducer::readFiltered(const double delta_time)
+double Sensors::Transducer::readFiltered(const double delta_time)
 {
     double filtered_pressure = 0.0;
 
@@ -71,7 +71,7 @@ FASTRUN double Sensors::Transducer::readFiltered(const double delta_time)
  * 
  * @param data reference to struct where the data is logged
  */
-FASTRUN void Sensors::Transducer::logToStruct(LoggedData &data)
+void Sensors::Transducer::logToStruct(LoggedData &data)
 {
     int64_t current_time = scoped_timer.elapsed();
     if(current_time >= m_prev_log_ns + m_interval)

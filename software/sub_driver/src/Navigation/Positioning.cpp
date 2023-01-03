@@ -11,12 +11,12 @@
 
 #include "Postioning.h"
 
-FASTRUN inline void Positioning::Integrate(double parameter, double dt)
+inline void Positioning::Integrate(double parameter, double dt)
 {
     product = product + (parameter * dt);
 }
 
-FASTRUN inline double Positioning::returnProduct()
+inline double Positioning::returnProduct()
 {
     return product;
 }
@@ -26,7 +26,7 @@ FASTRUN inline double Positioning::returnProduct()
  * 
  * @param data data struct holding acc. and to be updated with vel
  */
-FASTRUN void Velocity::updateVelocity(LoggedData &data)
+void Velocity::updateVelocity(LoggedData &data)
 {
     x.Integrate(data.wfacc.x, data.delta_time);
     y.Integrate(data.wfacc.y, data.delta_time);
@@ -42,7 +42,7 @@ FASTRUN void Velocity::updateVelocity(LoggedData &data)
  * 
  * @param data data struct holding velocty and to be updated with position
  */
-FASTRUN void Position::updatePosition(LoggedData &data)
+void Position::updatePosition(LoggedData &data)
 {
     x.Integrate(data.vel.x, data.delta_time);
     y.Integrate(data.vel.y, data.delta_time);

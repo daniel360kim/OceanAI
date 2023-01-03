@@ -22,7 +22,7 @@ Sensors::TotalDissolvedSolids::TotalDissolvedSolids(const uint8_t pin, const dou
  * @param temp temperature where the sensor is loated
  * @return double raw_tds value
  */
-FASTRUN double Sensors::TotalDissolvedSolids::readRaw(const double temp)
+double Sensors::TotalDissolvedSolids::readRaw(const double temp)
 {
     int tds = analogRead(m_pin);
     double averageVoltage = tds * ANALOG_TO_VOLTAGE;
@@ -43,7 +43,7 @@ FASTRUN double Sensors::TotalDissolvedSolids::readRaw(const double temp)
  * @param temp ambient temperature
  * @return double filtered tds value
  */
-FASTRUN double Sensors::TotalDissolvedSolids::readFiltered(const double delta_time, const double temp)
+double Sensors::TotalDissolvedSolids::readFiltered(const double delta_time, const double temp)
 {
     double filtered_reading = 0.0;
     //Make sure that filtered and raw values match up
@@ -65,7 +65,7 @@ FASTRUN double Sensors::TotalDissolvedSolids::readFiltered(const double delta_ti
  * 
  * @param data reference to struct where data is logged
  */
-FASTRUN void Sensors::TotalDissolvedSolids::logToStruct(LoggedData &data)
+void Sensors::TotalDissolvedSolids::logToStruct(LoggedData &data)
 {
     int64_t current_time = scoped_timer.elapsed();
     if(current_time >= m_prev_log_ns + m_interval_ns)

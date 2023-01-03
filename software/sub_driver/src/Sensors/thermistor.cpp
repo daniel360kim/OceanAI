@@ -39,7 +39,7 @@ Sensors::Thermistor::Thermistor(const uint8_t pin, const double RT0, const doubl
  * 
  * @return double temperature in Celsius
  */ 
-FASTRUN double Sensors::Thermistor::readRaw()
+double Sensors::Thermistor::readRaw()
 {
     constexpr double VREF = 3.3;
     double RT = 0.0;
@@ -65,7 +65,7 @@ FASTRUN double Sensors::Thermistor::readRaw()
  * @param delta_time change in time
  * @return double temperature in Celsius
  */
-FASTRUN double Sensors::Thermistor::readFiltered(const double delta_time)
+double Sensors::Thermistor::readFiltered(const double delta_time)
 {
     //Ensure that filtered temp and raw temp are updated at the same time
     if(m_temp_updated)
@@ -87,7 +87,7 @@ FASTRUN double Sensors::Thermistor::readFiltered(const double delta_time)
  * 
  * @param data reference to the struct to log to
  */
-FASTRUN void Sensors::Thermistor::logToStruct(LoggedData &data)
+void Sensors::Thermistor::logToStruct(LoggedData &data)
 {
     int64_t current_time = scoped_timer.elapsed();
     if(current_time >= m_prev_log_ns + m_interval)

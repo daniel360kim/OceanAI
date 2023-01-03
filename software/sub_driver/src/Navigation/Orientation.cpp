@@ -100,7 +100,7 @@ void Orientation::toEuler(double w, double x, double y, double z, double *X, dou
  * @param wfay converted ay
  * @param wfaz converted az
  */
-FASTRUN Angles_3D<double> Orientation::convertAccelFrame(Quaternion orientation, double ax, double ay, double az)
+Angles_3D<double> Orientation::convertAccelFrame(Quaternion orientation, double ax, double ay, double az)
 {
     Quaternion acc = { 0, ax, ay, az };
     Quaternion wF_acc = Quaternion::hamiltonProduct(orientation, acc);
@@ -114,7 +114,7 @@ FASTRUN Angles_3D<double> Orientation::convertAccelFrame(Quaternion orientation,
     return world_frame_acc;
 }
 
-FASTRUN double Orientation::constrainAngle_whole(double x) //to 0,360
+double Orientation::constrainAngle_whole(double x) //to 0,360
 {
     x = std::fmod(x, 360);
     if(x < 0)
@@ -124,7 +124,7 @@ FASTRUN double Orientation::constrainAngle_whole(double x) //to 0,360
     return x;
 }
 
-FASTRUN double Orientation::constrainAngle_half(double x)
+double Orientation::constrainAngle_half(double x)
 {
     x = std::fmod(x + 180, 360);
     if(x < 0)
@@ -136,7 +136,7 @@ FASTRUN double Orientation::constrainAngle_half(double x)
 
 }
 
-FASTRUN Quaternion Orientation::toQuaternion(double x, double y, double z)
+Quaternion Orientation::toQuaternion(double x, double y, double z)
 {
     // Abbreviations for the various angular functions
     double cy = std::cos(z * 0.5);

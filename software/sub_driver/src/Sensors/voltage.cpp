@@ -14,7 +14,7 @@ Sensors::Voltage::Voltage(const uint8_t pin, const double cutoff, const long int
  * 
  * @return double raw_voltage value
  */
-FASTRUN double Sensors::Voltage::readRaw()
+double Sensors::Voltage::readRaw()
 {
     double voltage = analogRead(m_pin) * ANALOG_TO_VOLTAGE;
     voltage *= (9.95 + 1.992) / 1.992; // voltage divider
@@ -35,7 +35,7 @@ FASTRUN double Sensors::Voltage::readRaw()
  * 
  * @param delta_time change in time (seconds)
  */
-FASTRUN double Sensors::Voltage::readFiltered(const double delta_time)
+double Sensors::Voltage::readFiltered(const double delta_time)
 {
     double filtered_voltage = 0.0;
 
@@ -53,7 +53,7 @@ FASTRUN double Sensors::Voltage::readFiltered(const double delta_time)
     return filtered_voltage;
 }
 
-FASTRUN void Sensors::Voltage::logToStruct(LoggedData &data)
+void Sensors::Voltage::logToStruct(LoggedData &data)
 {
     int64_t current_time = scoped_timer.elapsed();
     if(current_time >= m_interval + m_prev_log_ns)

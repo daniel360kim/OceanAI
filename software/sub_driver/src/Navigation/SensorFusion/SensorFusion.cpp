@@ -55,7 +55,7 @@ SF::SF()
 }
 
 // See: http://en.wikipedia.org/wiki/Fast_inverse_square_root
-FASTRUN double SF::invSqrt(double x)
+double SF::invSqrt(double x)
 {
 	double halfx = 0.5 * x;
 	double y = x;
@@ -262,7 +262,7 @@ void SF::MahonyUpdate(double gx, double gy, double gz, double ax, double ay, dou
 //============================================================================================
 // Madgwick AHRS algorithm update
 
-FASTRUN void SF::MadgwickUpdate(double gx, double gy, double gz, double ax, double ay, double az, double mx, double my, double mz, double deltat) {
+void SF::MadgwickUpdate(double gx, double gy, double gz, double ax, double ay, double az, double mx, double my, double mz, double deltat) {
 	double recipNorm;
 	double s0, s1, s2, s3;
 	double qDot1, qDot2, qDot3, qDot4;

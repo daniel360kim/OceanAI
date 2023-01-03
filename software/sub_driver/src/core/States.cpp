@@ -13,62 +13,84 @@
 #include "Timer.h"
 #include "cpu.h"
 #include "../Data/TransportManager.h"
+#include "../Sensors/Sensors.h"
+#include "../Sensors/thermistor.h"
+#include "../Sensors/transducer.h"
+#include "../Sensors/tds.h"
+#include "../Sensors/voltage.h"
 
-/**
- * @brief Anonymous namespace to avoid name collisions
- *
- */
-namespace
-{
-    Fusion SFori;
-    Sensors::Thermistor external_temp(RX_RF, 10000, 4100, 25, 30, HZ_TO_NS(50));
-    Sensors::Transducer external_pres(TX_RF, 30, 10000000);
-    Sensors::TotalDissolvedSolids total_dissolved_solids(TDS, 30, HZ_TO_NS(50));
-    Sensors::Voltage voltmeter(v_div, 30, HZ_TO_NS(50));
+#include "../Data/SD/SD.h"
 
-    Orientation ori;
+#include "pins.h"
 
-    LED signal(SIGNAL);
 
-    int64_t previous_time;
-    teensy_clock::time_point start_time;
+#include "indication/OutputFuncs.h"
+#include "indication/LED.h"
 
-    Velocity nav_v;
-    Position nav_p;
+#include <Arduino.h>
+#include <teensy_clock/teensy_clock.h>
+#include <cstdint>
+#include <chrono>
 
-    LoggedData data;
+#include "Navigation/SensorFusion/Fusion.h"
+#include "navigation/Orientation.h"
+#include "Navigation/Postioning.h"
 
-    SD_Logger logger(MissionDuration::mission_time, HZ_TO_NS(50));
+#include "debug.h"
+#include "Time.h"
+#include "core/Timer.h"
+#include "module/stepper.h"
+#include "module/limit.h"
 
-    bool warning = false;
 
-    StepperPins pins_b{
-        STP_b,
-        DIR_b,
-        MS1_b,
-        MS2_b,
-        ERR_b,
-        STOP_b};
+static Fusion SFori;
+static Sensors::Thermistor external_temp(RX_RF, 10000, 4100, 25, 30, HZ_TO_NS(50));
+static Sensors::Transducer external_pres(TX_RF, 30, 10000000);
+static Sensors::TotalDissolvedSolids total_dissolved_solids(TDS, 30, HZ_TO_NS(50));
+static Sensors::Voltage voltmeter(v_div, 30, HZ_TO_NS(50));
 
-    constexpr double STEPS_PER_HALF = 224.852;
-    constexpr int STEPPER_HALF_STEPS = 27000;
-    Buoyancy buoyancy(pins_b, Stepper::Resolution::HALF, StepperProperties(STEPPER_HALF_STEPS / STEPS_PER_HALF, STEPPER_HALF_STEPS));
+static Orientation ori;
+ 
+static LED signal(SIGNAL);
 
-    CurrentState currentState;
+static int64_t previous_time;
+static teensy_clock::time_point start_time;
 
-    StaticJsonDocument<STATIC_JSON_DOC_SIZE> data_json;
+static Velocity nav_v;
+static Position nav_p;
 
-    #if UI_ON
-        static CurrentState callbackState; //State to go back to after going into idle
-    #endif
+static LoggedData data;
 
-};
+static SD_Logger logger(MissionDuration::mission_time, HZ_TO_NS(50));
+ 
+static bool warning = false;
+
+static StepperPins pins_b{
+    STP_b,
+    DIR_b,
+    MS1_b,
+    MS2_b,
+    ERR_b,
+    STOP_b};
+
+constexpr double STEPS_PER_HALF = 224.852;
+constexpr int STEPPER_HALF_STEPS = 27000;
+static Buoyancy buoyancy(pins_b, Stepper::Resolution::HALF, StepperProperties(STEPPER_HALF_STEPS / STEPS_PER_HALF, STEPPER_HALF_STEPS));
+
+static CurrentState currentState;
+
+static StaticJsonDocument<STATIC_JSON_DOC_SIZE> data_json;
+
+#if UI_ON
+    static CurrentState callbackState; //State to go back to after going into idle
+#endif
+
+
 
 /**
  * @brief Functions that run in multiple states
- * FASTRUN is a macro where the function data is copied to ITCM in RAM and runs from there
  */
-FASTRUN void continuousFunctions(StateAutomation *state)
+void continuousFunctions(StateAutomation *state)
 {
     data.time_ns = scoped_timer.elapsed(); // scoped timer is a global object to measure time since program epoch
     data.delta_time = (scoped_timer.elapsed() - previous_time) / 1000000000.0;
@@ -182,7 +204,7 @@ void Initialization::enter(StateAutomation *state)
         ; // Wait for serial montior to open
 #endif
     Serial.begin(2000000);
-    
+
     #if UI_ON
         TransportManager::init();
         TransportManager::Commands stepper_commands = TransportManager::getCommands();

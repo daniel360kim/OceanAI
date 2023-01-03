@@ -59,7 +59,7 @@ void Quaternion::toAxis(double gx, double gy, double gz, double dt)
  * @param B factor B
  * @return Quaternion product 
  */
-FASTRUN Quaternion Quaternion::hamiltonProduct(Quaternion A, Quaternion B) 
+Quaternion Quaternion::hamiltonProduct(Quaternion A, Quaternion B) 
 { 
   Quaternion product;
  

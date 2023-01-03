@@ -68,7 +68,7 @@ namespace Filter
       }
     }
 
-    FASTRUN double filt(double xn, double dt)
+    double filt(double xn, double dt)
     {
       // Provide me with the current raw value: x
       // I will give you the current filtered value: y
