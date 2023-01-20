@@ -4,9 +4,9 @@
  * @brief debugging macros
  * @version 0.1
  * @date 2022-12-25 (christmas yay!)
- * 
+ *
  * @copyright Copyright (c) 2022 OceanAI (https://github.com/daniel360kim/OceanAI)
- * 
+ *
  */
 
 #ifndef DEBUG_H
@@ -21,19 +21,20 @@
 
 /**
  * @brief What type of message is it?
- * 
+ *
  */
 enum class Severity
 {
-    SUCCESS, //success messages
-    INFO, //info messages
-    WARNING, //warning messages
-    ERROR, //error messages
+    SUCCESS, // success messages
+    INFO,    // info messages
+    WARNING, // warning messages
+    ERROR,   // error messages
 };
 
+#if DEBUG_ON
 /**
  * @brief Holds information for debugging
- * 
+ *
  */
 class DebugMessage
 {
@@ -59,48 +60,103 @@ private:
     int64_t m_Timestamp;
     Severity m_Severity;
     std::string m_Message;
+
+    class Debug
+    {
+    public:
+        Debug() {}
+        Debug(int maxMessages = 100) : m_maxMessages(maxMessages) {}
+        ~Debug() {}
+
+        void addMessage(DebugMessage message);
+        void printMessages(bool deleteMessages = false);
+        void printMessages(int numMessages, bool deleteMessages = false);
+
+        void clearMessages();
+
+    private:
+        std::vector<DebugMessage> m_Messages;
+        unsigned int m_maxMessages;
+    };
+
+    extern Debug error;   // error messages
+    extern Debug info;    // info messages
+    extern Debug success; // success messages
 };
-
-
-class Debug
+#endif
+#if UI_ON
+class Error
 {
-public:
-    Debug() {}
-    Debug(int maxMessages = 100) : m_maxMessages(maxMessages) {}
-    ~Debug() {}
+public: 
+    Error() {}
+    Error(uint8_t error_code, Severity severity, int64_t timestamp) : m_timestamp(timestamp), m_error_code(error_code), m_severity(severity) {}
+    ~Error() {}
 
-    void addMessage(DebugMessage message);
-    void printMessages(bool deleteMessages = false);
-    void printMessages(int numMessages, bool deleteMessages = false);
-
-    void clearMessages();
+    void setErrorCode(uint8_t error_code);
+    void setSeverity(Severity severity);
+    uint8_t getErrorCode() const;
+    Severity getSeverity() const;
 
 private:
-    std::vector<DebugMessage> m_Messages;
-    unsigned int m_maxMessages;
+    int64_t m_timestamp;
+    uint8_t m_error_code;
+    Severity m_severity;
 };
 
-extern Debug error; // error messages
-extern Debug info; // info messages
-extern Debug success; // success messages
+class ErrorManager
+{
+public:
+    ErrorManager() {}
+    ErrorManager(Error error);
+    ~ErrorManager() {}
+
+    void addError(Error error);
+    std::vector<uint8_t> getErrorCodes();
+    void clearErrors();
+
+private:
+    std::vector<Error> m_errors;
+};
+
+extern ErrorManager guiErrorManager;
+#endif
 
 #if DEBUG_ON
-    extern DebugMessage debugMessage;
-    #define ERROR_LOGf(severity, message, ...) debugMessage.createMessagef(severity, message, __VA_ARGS__); error.addMessage(debugMessage);
-    #define INFO_LOGf(message, ...) debugMessage.createMessagef(Severity::INFO, message, __VA_ARGS__); info.addMessage(debugMessage);
-    #define SUCCESS_LOGf(message, ...) debugMessage.createMessagef(Severity::SUCCESS, message, __VA_ARGS__); success.addMessage(debugMessage);
+extern DebugMessage debugMessage;
+#define ERROR_LOGf(severity, message, ...)                       \
+    debugMessage.createMessagef(severity, message, __VA_ARGS__); \
+    error.addMessage(debugMessage);
+#define INFO_LOGf(message, ...)                                        \
+    debugMessage.createMessagef(Severity::INFO, message, __VA_ARGS__); \
+    info.addMessage(debugMessage);
+#define SUCCESS_LOGf(message, ...)                                        \
+    debugMessage.createMessagef(Severity::SUCCESS, message, __VA_ARGS__); \
+    success.addMessage(debugMessage);
 
-    #define ERROR_LOG(severity, message) debugMessage.createMessage(severity, message); error.addMessage(debugMessage);
-    #define INFO_LOG(message) debugMessage.createMessage(Severity::INFO, message); info.addMessage(debugMessage);
-    #define SUCCESS_LOG(message) debugMessage.createMessage(Severity::SUCCESS, message); success.addMessage(debugMessage);
+#define ERROR_LOG(severity, message)               \
+    debugMessage.createMessage(severity, message); \
+    error.addMessage(debugMessage);
+#define INFO_LOG(message)                                \
+    debugMessage.createMessage(Severity::INFO, message); \
+    info.addMessage(debugMessage);
+#define SUCCESS_LOG(message)                                \
+    debugMessage.createMessage(Severity::SUCCESS, message); \
+    success.addMessage(debugMessage);
 #else
-    #define ERROR_LOGf(severity, message, ...)
-    #define INFO_LOGf(message, ...)
-    #define SUCCESS_LOGf(message, ...)
-    
-    #define ERROR_LOG(severity, message, ...)
-    #define INFO_LOG(message, ...)
-    #define SUCCESS_LOG(message, ...)
+#define ERROR_LOGf(severity, message, ...)
+#define INFO_LOGf(message, ...)
+#define SUCCESS_LOGf(message, ...)
+
+#define ERROR_LOG(severity, message, ...)
+#define INFO_LOG(message, ...)
+#define SUCCESS_LOG(message, ...)
+#endif
+
+#if UI_ON
+    extern Error errorMessage;
+    #define GUI_ERROR_LOG(severity, code) errorMessage.setErrorCode(code); errorMessage.setSeverity(severity); guiErrorManager.addError(errorMessage);
+#else
+    #define GUI_ERROR_LOG(severity, code)
 #endif
 
 

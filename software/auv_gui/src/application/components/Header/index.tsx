@@ -103,6 +103,16 @@ export const Header = (
               }}
               active={page === 'navigation'}
               />
+            <Button
+              minimal
+              large
+              icon = "database"
+              text = "Data"
+              onClick={() => {
+                navigate(`/devices/${props.deviceID}/datamanager`)
+              }}
+              active={page === 'datamanager'}
+              />
           </Navbar.Group>{' '}
         </div>
       </Navbar>

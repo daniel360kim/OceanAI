@@ -26,12 +26,13 @@
 #include "SD.h"
 #include "DataFile.h"
 #include "../logged_data.h"
-#include "queue.hpp"
 
 #include "../../core/debug.h"
 #include "../StartInfo.h"
 #include "../../core/Timer.h"
 #include "../../core/StateAutomation.h"
+
+#include <string>
 
 SdFs sd;
 FsFile file;
@@ -56,7 +57,7 @@ SD_Logger::SD_Logger(const int64_t duration, int log_interval_ns)
     //Calculating sd card capacity is a very expensive function so we call it every once in a while
     capacity_updater.setInterval(360000000000);
     capacity_updater.setFunction(SD_Logger::getCapacity);
-}
+} 
 
 /**
  * @brief Logs a crash report to the SD card
@@ -106,8 +107,12 @@ bool SD_Logger::log_crash_report()
  * @return true creation sudataesful  
  * @return false creation unsudataesful
  */
-bool SD_Logger::init()
+bool SD_Logger::init(bool format)
 {
+    if(format)
+    {
+        removeAllDataFiles();
+    }
     //Creating binary file 
     DataFile bin("data", DataFile::JSON);
 
@@ -312,22 +317,28 @@ bool SD_Logger::init()
  * @return true 
  * @return false 
  */
-bool SD_Logger::logData(StaticJsonDocument<STATIC_JSON_DOC_SIZE> &doc)
+bool SD_Logger::logData(LoggedData &data)
 {
     //Logging at a certain interval set by the constructor
     int64_t current_time = scoped_timer.elapsed();
-    if(current_time - m_previous_log_time >= m_log_interval)
+    if(current_time - m_previous_log_time < m_log_interval)
+    {
+        return true;
+    }
+    else
     {
         //If our sd card is busy we add to our buffer
         if(file.isBusy())
         {
-            write_buf.push(doc); //adding buffer to queue data structure (FIFO)
+            write_buf.push(data); //adding buffer to queue data structure (FIFO)
         }
         else
         {
             //If nothing is in the buffer we directly write to the sd card
             if(write_buf.size() == 0)
             {
+                StaticJsonDocument<STATIC_JSON_DOC_SIZE> doc;
+                LoggedData::data_to_json(data, doc);
                 serializeJson(doc, file);
                 file.print("\n");
 
@@ -343,9 +354,12 @@ bool SD_Logger::logData(StaticJsonDocument<STATIC_JSON_DOC_SIZE> &doc)
             else
             {
                 //If there is data in the buffer we move it into the buffer and write the oldest data to the sd card
-                write_buf.push(doc);
-                doc = write_buf.front();
+                write_buf.push(data);
+                data = write_buf.front();
                 write_buf.pop();
+
+                StaticJsonDocument<STATIC_JSON_DOC_SIZE> doc;
+                LoggedData::data_to_json(data, doc);
                 serializeJson(doc, file);
                 file.print("\n");
                 #if PRINT_DATA
@@ -358,6 +372,7 @@ bool SD_Logger::logData(StaticJsonDocument<STATIC_JSON_DOC_SIZE> &doc)
         }
         m_previous_log_time = scoped_timer.elapsed(); //update the last time we logged
     }
+
     /*
     * We dont want to cause any buffer overflows so we limit the buffer size to 100
     * If the buffer reaches this threshold, we probably are logging data to fast anyways
@@ -367,7 +382,7 @@ bool SD_Logger::logData(StaticJsonDocument<STATIC_JSON_DOC_SIZE> &doc)
     {
         //INFO_LOG("Buffer is full, slowing down data logging rate");
         //Clear the old data if it gets too large by swapping with an empty queue
-        std::queue<StaticJsonDocument<STATIC_JSON_DOC_SIZE>> empty;
+        std::queue<LoggedData> empty;
         std::swap(write_buf, empty);
 
         m_log_interval+= 10000000; //If the buffer is too large we increase the log interval to prevent overflow
@@ -388,6 +403,43 @@ void SD_Logger::update_sd_capacity(LoggedData &data)
         m_inital_cap_updated = true;
     }
     capacity_updater.void_tick(data.sd_capacity);
+}
+
+bool SD_Logger::removeAllDataFiles()
+{
+    const char* base_name = "data";
+    const char* extension = ".json";
+
+    for(int i = 0; i < 100; i++)
+    {
+        //ile names are in the format dataXX.json
+        char* filename = new char[10];
+
+        if(i < 10)
+        {
+            sprintf(filename, "%s0%d%s", base_name, i, extension);
+        }
+        else
+        {
+            sprintf(filename, "%s%d%s", base_name, i, extension);
+        }
+
+        if(!sd.exists(filename))
+        {
+            delete[] filename;
+            return true;
+        }
+        else
+        {
+            if(!sd.remove(filename))
+            {
+                return false;
+            }
+        }
+        delete[] filename;
+
+    }
+    return true;
 }
 
 void SD_Logger::log_image(OV2640_Mini &camera)

@@ -41,11 +41,13 @@ public:
 
     static char* incrementFileName(char* file_name, std::size_t name_length);
 
-private:
     static bool initializeSD();
-    char* appendChars(const char* hostname, const char* def_host);
-    bool resizeBuff(int num_bytes, uint8_t** buff);
-    bool resizeBuff(int num_bytes, char** buff) { return resizeBuff(num_bytes,(uint8_t**)buff); } //overloaded function to support appendChars()
+
+    static char* appendChars(const char* hostname, const char* def_host);
+
+private:
+    static bool resizeBuff(int num_bytes, uint8_t** buff);
+    static bool resizeBuff(int num_bytes, char** buff) { return resizeBuff(num_bytes,(uint8_t**)buff); } //overloaded function to support appendChars()
 
     uint8_t m_filename_length;
     static bool file_initialized;

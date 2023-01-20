@@ -40,8 +40,8 @@ public:
     SD_Logger(const int64_t duration_ns, int log_interval_ns);
 
     bool log_crash_report();
-    bool init();
-    bool logData(StaticJsonDocument<STATIC_JSON_DOC_SIZE> &doc);
+    bool init(bool format = false);
+    bool logData(LoggedData &data);
 
     static bool closeFile() { return file.close(); }
 
@@ -52,6 +52,8 @@ public:
     const char* get_data_filename() const { return m_data_filename; }
 
     void update_sd_capacity(LoggedData &data);
+
+    bool removeAllDataFiles();
 
 private:
     const char* m_data_filename; //name of the binary data
@@ -65,7 +67,7 @@ private:
     static void flush(void*);
     static void getCapacity(uint32_t &capacity);
 
-    std::queue<StaticJsonDocument<1536>> write_buf;
+    std::queue<LoggedData> write_buf;
 
     Time::Async<void, void*> flusher;
     Time::Async<void, uint32_t&> capacity_updater;

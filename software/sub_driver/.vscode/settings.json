@@ -68,7 +68,12 @@
     "system_error": "cpp",
     "vector": "cpp",
     "cmath": "cpp",
-    "algorithm": "cpp"
+    "algorithm": "cpp",
+    "array": "cpp",
+    "string_view": "cpp",
+    "initializer_list": "cpp",
+    "utility": "cpp",
+    "cerrno": "cpp"
 },
 "C_Cpp.errorSquiggles": "Enabled"
 }

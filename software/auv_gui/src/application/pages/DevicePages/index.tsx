@@ -4,6 +4,7 @@ import { DisconnectionModal } from '@electricui/components-desktop-blueprint'
 import { Header } from '../../components/Header'
 import { Intent } from '@blueprintjs/core'
 import { OverviewPage } from './OverviewPage'
+import { DataManagerPage } from './DataManagerPage'
 import React from 'react'
 import { MechanicsPage } from './MechanicsPage'
 import { NavigationPage } from './NavigationPage'
@@ -40,6 +41,7 @@ export const DevicePages = (
             <OverviewPage path="/" />
             <MechanicsPage path="mechanics" />
             <NavigationPage path="navigation" />
+            <DataManagerPage path="datamanager" />
           </Router>
         </div>
       </div>

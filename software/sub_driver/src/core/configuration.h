@@ -36,8 +36,8 @@
 
 namespace MissionDuration
 {
-    constexpr uint16_t days = 0;
-    constexpr uint16_t hours = 1;
+    constexpr uint16_t days = 2;
+    constexpr uint16_t hours = 6;
     constexpr uint32_t minutes = 0;
     constexpr uint32_t seconds = 30;
 
@@ -65,7 +65,7 @@ namespace CPU
     /**
      * @brief interval for logging CPU info
      */
-    constexpr int CPU_INFO_LOG_INTERVAL = HZ_TO_NS(5);
+    constexpr int CPU_INFO_LOG_INTERVAL = HZ_TO_NS(3);
 };
 
 namespace Sensors
@@ -86,5 +86,7 @@ namespace Logging
     constexpr unsigned long long FLUSH_INTERVAL = SEC_TO_NS(30ULL); // flush every 30 seconds
     constexpr unsigned long long CAPACITY_UPDATE_INTERVAL = SEC_TO_NS(360);// update capacity every 6 minutes
 }
+
+static int MIN_PULSE_WIDTH = 20;
 
 #endif

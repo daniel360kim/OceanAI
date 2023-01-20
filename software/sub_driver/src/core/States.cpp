@@ -44,10 +44,10 @@
 
 
 static Fusion SFori;
-static Sensors::Thermistor external_temp(RX_RF, 10000, 4100, 25, 30, HZ_TO_NS(50));
-static Sensors::Transducer external_pres(TX_RF, 30, 10000000);
-static Sensors::TotalDissolvedSolids total_dissolved_solids(TDS, 30, HZ_TO_NS(50));
-static Sensors::Voltage voltmeter(v_div, 30, HZ_TO_NS(50));
+static Sensors::Thermistor external_temp(RX_RF, 10000, 4100, 25, 30, HZ_TO_NS(5));
+static Sensors::Transducer external_pres(TX_RF, 30, HZ_TO_NS(5));
+static Sensors::TotalDissolvedSolids total_dissolved_solids(TDS, 30, HZ_TO_NS(5));
+static Sensors::Voltage voltmeter(v_div, 30, HZ_TO_NS(5));
 
 static Orientation ori;
  
@@ -61,7 +61,7 @@ static Position nav_p;
 
 static LoggedData data;
 
-static SD_Logger logger(MissionDuration::mission_time, HZ_TO_NS(50));
+static SD_Logger logger(MissionDuration::mission_time, HZ_TO_NS(10));
  
 static bool warning = false;
 
@@ -85,8 +85,6 @@ static StaticJsonDocument<STATIC_JSON_DOC_SIZE> data_json;
     static CurrentState callbackState; //State to go back to after going into idle
 #endif
 
-
-
 /**
  * @brief Functions that run in multiple states
  */
@@ -102,9 +100,8 @@ void continuousFunctions(StateAutomation *state)
     StateAutomation::printState(Serial, currentState);
 #endif
 
-    data.loop_time = 1.0 / data.delta_time;
-
     CPU::log_cpu_info(data);
+
 
     Sensors::logData(data);
 
@@ -141,16 +138,16 @@ void continuousFunctions(StateAutomation *state)
     }
 
     buoyancy.logToStruct(data);
+    buoyancy.setMinPulseWidth(MIN_PULSE_WIDTH);
 
     logger.update_sd_capacity(data);
-
-    LoggedData::data_to_json(data, data_json);
-
-    if (!logger.logData(data_json))
+    
+    if (!logger.logData(data))
     {
         warning = true;
         return;
     }
+    //sd_timer.showElapsed();
 #if UI_ON
     //Send/receive data to/from the UI
     //If GUI wants to change the state, it will be handled here
@@ -220,6 +217,7 @@ void Initialization::enter(StateAutomation *state)
 
     LEDa.setColor(255, 0, 255);
     LEDb.setColor(255, 0, 255);
+
 
     // I2C Scanner
     Sensors::scanI2C();
@@ -365,7 +363,7 @@ void Diving::enter(StateAutomation *state)
         buoyancy.setAcceleration(2000);
     #endif
     buoyancy.setResolution(Stepper::Resolution::HALF);
-    buoyancy.setMinPulseWidth(1); // how long to wait between high and low pulses
+    buoyancy.setMinPulseWidth(MIN_PULSE_WIDTH); // how long to wait between high and low pulses
     buoyancy.sink();              // set the direction of the stepper motors
 }
 
@@ -409,7 +407,7 @@ void Resurfacing::enter(StateAutomation *state)
     #endif
     buoyancy.setResolution(Stepper::Resolution::HALF);
     buoyancy.rise();
-    buoyancy.setMinPulseWidth(1);
+    buoyancy.setMinPulseWidth(MIN_PULSE_WIDTH); // how long to wait between high and low pulses
 }
 
 void Resurfacing::run(StateAutomation *state)
@@ -457,7 +455,7 @@ void Calibrate::enter(StateAutomation *state)
     #endif
 
     buoyancy.setResolution(Stepper::Resolution::HALF);
-    buoyancy.setMinPulseWidth(1);
+    buoyancy.setMinPulseWidth(MIN_PULSE_WIDTH); // how long to wait between high and low pulses
 
     buoyancy.move(500000);
 }

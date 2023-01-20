@@ -68,6 +68,10 @@ namespace CPU
         {
             logged_data.clock_speed = F_CPU_ACTUAL;
             logged_data.internal_temp = InternalTemperature.readTemperatureC();
+
+            logged_data.loop_time = 1.0 / logged_data.delta_time;
+
+            previous_cpu_log = current_time;
         }
     }
 

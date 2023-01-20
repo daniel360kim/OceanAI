@@ -26,31 +26,31 @@ DataFile::DataFile(const char* file_name, ENDING ending)
 	switch(ending)
 	{
 		case CSV:
-			m_filename = appendChars(file_name, "00.csv");
+			m_filename = appendChars(file_name, "000.csv");
 			break;
 
 		case TXT:
-			m_filename = appendChars(file_name, "00.txt");
+			m_filename = appendChars(file_name, "000.txt");
 			break;
 		
 		case DAT:
-			m_filename = appendChars(file_name, "00.data");
+			m_filename = appendChars(file_name, "000.data");
 			break;
 		
 		case JPG:
-			m_filename = appendChars(file_name, "00.jpg");
+			m_filename = appendChars(file_name, "000.jpg");
 			break;
 		
 		case PNG:
-			m_filename = appendChars(file_name, "00.png");
+			m_filename = appendChars(file_name, "000.png");
 			break;
 		
 		case MSGPACK:
-			m_filename = appendChars(file_name, "00.msgpack");
+			m_filename = appendChars(file_name, "000.msgpack");
 			break;
 		
 		case JSON:
-			m_filename = appendChars(file_name, "00.json");
+			m_filename = appendChars(file_name, "000.json");
 			break;
 		
 		default:
@@ -103,26 +103,8 @@ bool DataFile::createFile()
 	{
 		return false;
 	}
-	
-	//Iterate through all files, adding a number to the file name if it already exists
-	//Range of possible files is from 00-99
-	while(sd.exists(m_filename))
-	{
-		if(m_filename[m_filename_length + 1] != '9')
-		{
-			m_filename[m_filename_length + 1]++;
-		}
-		else if(m_filename[m_filename_length] != '9')
-		{
-			m_filename[m_filename_length + 1] = '0';
-			m_filename[m_filename_length]++;
-		}
-		else
-		{
-			//ERROR_LOG(Debug::Critical_Error, "Could not number files");
-			return false;
-		}
-	}
+
+	incrementFileName(m_filename, m_filename_length);
 
 	return true;
 }
@@ -154,19 +136,33 @@ bool DataFile::initializeSD()
  */
 char* DataFile::incrementFileName(char* file_name, std::size_t file_name_length)
 {
-	if(file_name[file_name_length + 1] != '9')
+	//New: ALlow numbers up to 999
+	//Singles place: 000-009
+	//Tens place: 010-099
+	//Hundreds place: 100-999
+
+	while(sd.exists(file_name))
 	{
-		file_name[file_name_length + 1]++;
-	}
-	else if(file_name[file_name_length] != '9')
-	{
-		file_name[file_name_length + 1] = '0';
-		file_name[file_name_length]++;
-	}
-	else
-	{
-		//ERROR_LOG(Debug::Fatal, "Could not number files");
-		return nullptr;
+		if(file_name[file_name_length + 2] != '9')
+		{
+			file_name[file_name_length + 2]++;
+		}
+		else if(file_name[file_name_length + 1] != '9')
+		{
+			file_name[file_name_length + 2] = '0';
+			file_name[file_name_length + 1]++;
+		}
+		else if(file_name[file_name_length] != '9')
+		{
+			file_name[file_name_length + 2] = '0';
+			file_name[file_name_length + 1] = '0';
+			file_name[file_name_length]++;
+		}
+		else
+		{
+			ERROR_LOG(Debug::Critical_Error, "Could not number files");
+			return NULL;
+		}
 	}
 
 	return file_name;

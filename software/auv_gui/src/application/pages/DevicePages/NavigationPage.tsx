@@ -28,6 +28,8 @@ const rzDS = new MessageDataSource('zd')
 const accDS = new MessageDataSource('ad')
 const gyrDS = new MessageDataSource('gd')
 
+const extPresDS = new MessageDataSource('ep')
+
 const navigationLayoutDescription = `
     Chart TimeSlice
 `
@@ -108,6 +110,19 @@ export const NavigationPage = (props: RouteComponentProps) => {
                   <VerticalAxis label="Acceleration (m/s/s)" />
                   <ZoomBrush />
                 </ChartContainer>
+
+                <ChartContainer>
+                <LineChart
+                    dataSource={extPresDS}
+                    color={Colors.RED5}
+                  />
+
+                  <RealTimeDomain window={30000} />
+                  <TimeAxis label="Time (s)" />
+                  <VerticalAxis label="Acceleration (m/s/s)" />
+                  <ZoomBrush />
+                </ChartContainer>
+                
                 
               </Card>
             </Areas.Chart>
