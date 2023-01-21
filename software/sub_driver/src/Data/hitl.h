@@ -13,18 +13,38 @@
 #define HITL_H
 
 #include <array>
+#include <cstdint>
+#include <vector>
 
 #include "../core/configuration.h"
 
 namespace HITL
 {
-    /**
-     * @brief The hardware in the loop simulation data
-     * 7 columns: time, latitude, longitude, depth, pressure, salinity, temperature
-     * 4337 rows
-     * 
-     */
-    EXTMEM std::array<std::array<double, 7>, 4337> HITL_data;
+    class DataProvider
+    {
+    public:
+        virtual ~DataProvider() = default;
+        virtual void update(int64_t timestamp) = 0;
+        virtual void reset() = 0;
+    };
+
+    class DataProviderManager
+    {
+    public:
+        DataProviderManager() = default;
+        DataProviderManager(const DataProviderManager&) = delete;
+        DataProviderManager& operator=(const DataProviderManager&) = delete;
+
+        void add_provider(DataProvider* provider) { m_providers.push_back(provider); }
+        void update(int64_t timestamp);
+        void reset();
+    
+    private:
+        std::vector<DataProvider*> m_providers;
+    };
+    
+
+
 }
 
 

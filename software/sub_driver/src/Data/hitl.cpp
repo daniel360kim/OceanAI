@@ -8,3 +8,5 @@
  * @copyright Copyright (c) 2022 OceanAI (https://github.com/daniel360kim/OceanAI)
  * 
  */
+
+#include "hitl.h"
