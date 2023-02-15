@@ -20,6 +20,7 @@
 #include "../Sensors/voltage.h"
 
 #include "../Data/SD/SD.h"
+#include "../Data/hitl.h"
 
 #include "pins.h"
 
@@ -30,11 +31,11 @@
 #include <Arduino.h>
 #include <teensy_clock/teensy_clock.h>
 #include <cstdint>
-#include <chrono>
 
-#include "Navigation/SensorFusion/Fusion.h"
-#include "navigation/Orientation.h"
-#include "Navigation/Postioning.h"
+#include "../Navigation/SensorFusion/Fusion.h"
+#include "../navigation/Orientation.h"
+#include "../Navigation/Postioning.h"
+#include "../Navigation/hitl_navigation.h"
 
 #include "debug.h"
 #include "Time.h"
@@ -44,9 +45,12 @@
 
 
 static Fusion SFori;
+
 static Sensors::Thermistor external_temp(RX_RF, 10000, 4100, 25, 30, HZ_TO_NS(5));
 static Sensors::Transducer external_pres(TX_RF, 30, HZ_TO_NS(5));
 static Sensors::TotalDissolvedSolids total_dissolved_solids(TDS, 30, HZ_TO_NS(5));
+
+
 static Sensors::Voltage voltmeter(v_div, 30, HZ_TO_NS(5));
 
 static Orientation ori;
@@ -85,6 +89,19 @@ static StaticJsonDocument<STATIC_JSON_DOC_SIZE> data_json;
     static CurrentState callbackState; //State to go back to after going into idle
 #endif
 
+#if HITL_ON
+    HITL::DataProviderManager data_provider((int64_t)618LL*1000000000LL);
+
+    HITL::Data location;
+    HITL::Data depth;
+    HITL::Data pressure;
+    HITL::Data salinity;
+    HITL::Data temperature;
+
+    HITLNavigation hitl_nav;
+    
+#endif
+
 /**
  * @brief Functions that run in multiple states
  */
@@ -102,12 +119,29 @@ void continuousFunctions(StateAutomation *state)
 
     CPU::log_cpu_info(data);
 
-
     Sensors::logData(data);
 
+    
     external_temp.logToStruct(data);
     external_pres.logToStruct(data);
     total_dissolved_solids.logToStruct(data);
+    #if HITL_ON
+    data_provider.update(data.time_ns);
+
+    data.HITL.index = (uint16_t)data_provider.getIndex();
+    data.HITL.timestamp = data_provider.getTimestamp();
+    data.HITL.location.latitude = location[0];
+    data.HITL.location.longitude = location[1];
+    data.HITL.depth = depth[0];
+    data.HITL.pressure = pressure[0];
+    data.HITL.salinity = salinity[0];
+    data.HITL.temperature = temperature[0];
+
+    data.HITL.distance = hitl_nav.getTotalDistanceTraveled(data.HITL.location.latitude, data.HITL.location.longitude);
+    data.HITL.averageSpeed = hitl_nav.getAverageSpeed(data.HITL.location.latitude, data.HITL.location.longitude, data.time_ns);
+    data.HITL.currentSpeed = hitl_nav.getSpeedX(data.HITL.location.latitude, data.HITL.location.longitude, data_provider.getTimestamp());
+
+    #endif
     voltmeter.logToStruct(data);
 
     nav_v.updateVelocity(data);
@@ -134,19 +168,22 @@ void continuousFunctions(StateAutomation *state)
     }
     else
     {
-        LEDb.blink(255, 0, 0, 500);
+        LEDb.blink(255, 0, 0, data.sd_log_rate_hz);
     }
 
     buoyancy.logToStruct(data);
     buoyancy.setMinPulseWidth(MIN_PULSE_WIDTH);
 
     logger.update_sd_capacity(data);
-    
+    data.sd_log_rate_hz = logger.getLoggingIntervalHz();
+
+    #if !UI_ON    
     if (!logger.logData(data))
     {
         warning = true;
         return;
     }
+    #endif
     //sd_timer.showElapsed();
 #if UI_ON
     //Send/receive data to/from the UI
@@ -157,6 +194,25 @@ void continuousFunctions(StateAutomation *state)
         state->setState(IdleMode::getInstance());
         return;
     }
+    TransportManager::Commands commands = TransportManager::getCommands();
+    #if HITL_ON
+        data_provider.update_frequency_scale(commands.hitl_scale);
+
+        //NS to HZ
+        data.hitl_rate = ((double)data_provider.get_frequency() / 1000000.0);
+        data.hitl_progress = data_provider.get_progress() * 100.0; //percentage
+    #endif
+
+    if(commands.sd_log_enable > 0)
+    {
+        logger.setLoggingInterval(std::lround((1.0 / commands.sd_log_enable) * 1000000000.0)); //hz to ns
+        if(!logger.logData(data))
+        {
+            warning = true;   
+        }
+    }
+
+
 #endif
 
 }
@@ -174,7 +230,8 @@ void continuousFunctions(StateAutomation *state)
 void Initialization::enter(StateAutomation *state)
 {
     start_time = teensy_clock::now(); // begin the scoped timer
-
+    // Flashy lights!
+    output.startupSequence();
     // If there was a crash from the last run, report it to SD
     if (CrashReport)
     {
@@ -184,8 +241,24 @@ void Initialization::enter(StateAutomation *state)
         }
     }
 
-    // Flashy lights!
-    output.startupSequence();
+    #if HITL_ON
+        location.addColumn(0);
+        location.addColumn(1);
+        depth.addColumn(2);
+        pressure.addColumn(3);
+        salinity.addColumn(4);
+        temperature.addColumn(5);
+
+        pressure.addTransform([](double x) { return x / 10.132; }); //Convert the raw pressure to atm
+
+        data_provider.add_provider(&location);
+        data_provider.add_provider(&depth);
+        data_provider.add_provider(&pressure);
+        data_provider.add_provider(&salinity);
+        data_provider.add_provider(&temperature);
+
+        hitl_nav.setInitialCoordinate(HITL_DATA_ALPHA[0][0], HITL_DATA_ALPHA[0][1], scoped_timer.elapsed());
+    #endif
 
     if (voltmeter.readRaw() <= 11.1 && voltmeter.readRaw() >= 6)
     {
@@ -209,6 +282,10 @@ void Initialization::enter(StateAutomation *state)
         buoyancy.setMaxSpeed(stepper_commands.stepper_speed);
         buoyancy.setAcceleration(stepper_commands.stepper_speed);
 
+        #if HITL_ON
+            data_provider.update_frequency_scale(stepper_commands.hitl_scale);
+        #endif
+
     #else
         buoyancy.setSpeed(2000);
         buoyancy.setMaxSpeed(2000);
@@ -220,7 +297,7 @@ void Initialization::enter(StateAutomation *state)
 
 
     // I2C Scanner
-    Sensors::scanI2C();
+    //Sensors::scanI2C();
     //SUCCESS_LOG("I2C Scanner Complete");
 
     LEDa.setColor(0, 255, 255);
@@ -234,7 +311,7 @@ void Initialization::enter(StateAutomation *state)
     }
 
     Sensors::setInterrupts();
-    SUCCESS_LOG("Nav Sensor Initialization Complete");
+    SUCCESS_LOG("Nav Sensor Initialization Complete\n");
 
     #if DEBUG_ON
         Angles_3D<double> bias = Sensors::setGyroBias();

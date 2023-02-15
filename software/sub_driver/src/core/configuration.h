@@ -20,7 +20,14 @@
 #define DEBUG_ON false
 #define LIVE_DEBUG false
 
+#define HITL_ON true
+#define HITL_LOOP true
+
 #define UI_ON true
+
+#if UI_ON && !HITL_ON
+#warning UI requires HITL to be enabled.
+#endif
 
 #define PRINT_DATA false //prints out logged data as JSON
 
@@ -36,13 +43,15 @@
 
 namespace MissionDuration
 {
-    constexpr uint16_t days = 2;
-    constexpr uint16_t hours = 6;
+    constexpr uint16_t days = 0;
+    constexpr uint16_t hours = 0;
     constexpr uint32_t minutes = 0;
-    constexpr uint32_t seconds = 30;
+    constexpr uint32_t seconds = 5000;
 
     constexpr uint64_t mission_time = ((uint64_t)(days * (uint64_t)8.64e+13) + (uint64_t)(hours * (uint64_t)3.6e+12) + (uint64_t)(minutes * (uint64_t)6e+10) + (uint64_t)(seconds * (uint64_t)1e+9));
 }
+
+
 
 namespace CPU
 {
@@ -65,7 +74,7 @@ namespace CPU
     /**
      * @brief interval for logging CPU info
      */
-    constexpr int CPU_INFO_LOG_INTERVAL = HZ_TO_NS(3);
+    constexpr int CPU_INFO_LOG_INTERVAL = HZ_TO_NS(1);
 };
 
 namespace Sensors
@@ -76,7 +85,7 @@ namespace Sensors
 namespace TransportManager
 {
     constexpr int SERIAL_BAUDRATE = 115200;
-    constexpr int SEND_INTERVAL = HZ_TO_NS(5);
+    constexpr int SEND_INTERVAL = HZ_TO_NS(100);
 }
 
 namespace Logging
@@ -87,6 +96,6 @@ namespace Logging
     constexpr unsigned long long CAPACITY_UPDATE_INTERVAL = SEC_TO_NS(360);// update capacity every 6 minutes
 }
 
-static int MIN_PULSE_WIDTH = 20;
+constexpr int MIN_PULSE_WIDTH = 1;
 
 #endif

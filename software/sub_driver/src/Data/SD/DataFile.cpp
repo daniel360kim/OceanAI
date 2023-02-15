@@ -160,7 +160,7 @@ char* DataFile::incrementFileName(char* file_name, std::size_t file_name_length)
 		}
 		else
 		{
-			ERROR_LOG(Debug::Critical_Error, "Could not number files");
+			ERROR_LOG(Severity::ERROR, "Could not number files");
 			return NULL;
 		}
 	}

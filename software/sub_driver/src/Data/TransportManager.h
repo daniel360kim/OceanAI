@@ -24,8 +24,13 @@ namespace TransportManager
         uint8_t system_state = 0;
         int16_t stepper_speed = 0;
         int16_t stepper_acceleration = 0;
-    };
 
+        float hitl_scale = 0;
+
+        uint8_t sd_log_enable = 1;
+        uint16_t sd_log_interval_hz = 30;
+    };
+    
     class Packet
     {
     public:
@@ -34,9 +39,20 @@ namespace TransportManager
         uint8_t system_state = 0;
         float internal_temp = 0.f;
 
-        Angles_3D<float> rel_ori = {0.f};
-        float acc[3] = {0.f};
-        float gyr[3] = {0.f};
+        #if HITL_ON
+            HITLData hitl_data;
+        #endif
+
+        float hitl_sensor_data[4] = { 0.f };
+
+        float hitl_rate = 0;
+        float hitl_progress = 0.f;
+
+        uint16_t sd_log_interval_hz;
+
+        Angles_3D<float> rel_ori = { 0.f };
+        float acc[3] = { 0.f };
+        float gyr[3] = { 0.f };
 
         int16_t stepper_current_position = 0;
         int16_t stepper_target_position = 0;
@@ -52,6 +68,21 @@ namespace TransportManager
             voltage = static_cast<float>(data.filt_voltage);
             system_state = static_cast<uint8_t>(data.system_state);
             internal_temp = static_cast<float>(data.bmi_temp);
+
+            hitl_data = data.HITL;
+
+            //seconds to hours
+            hitl_data.timestamp /= 3600;
+
+            hitl_sensor_data[0] = static_cast<float>(hitl_data.depth);
+            hitl_sensor_data[1] = static_cast<float>(hitl_data.pressure);
+            hitl_sensor_data[2] = static_cast<float>(hitl_data.salinity);
+            hitl_sensor_data[3] = static_cast<float>(hitl_data.temperature);
+
+            hitl_rate = data.hitl_rate;
+            hitl_progress = static_cast<float>(data.hitl_progress);
+
+            sd_log_interval_hz = data.sd_log_rate_hz;
 
             rel_ori.x = static_cast<float>(data.rel_ori.x);
             rel_ori.y = static_cast<float>(data.rel_ori.y);
@@ -87,6 +118,7 @@ namespace TransportManager
     Commands getCommands();
 
     void setIdle(bool command);
+
 }
 
 #endif

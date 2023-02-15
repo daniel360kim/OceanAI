@@ -37,14 +37,15 @@ class SD_Logger
 {
 public:
     SD_Logger() {}
-    SD_Logger(const int64_t duration_ns, int log_interval_ns);
+    SD_Logger(const int64_t duration_ns, int64_t log_interval_ns);
 
     bool log_crash_report();
     bool init(bool format = false);
     bool logData(LoggedData &data);
+    void setLoggingInterval(int64_t interval_ns) { m_log_interval = interval_ns; }
+    uint16_t getLoggingIntervalHz();
 
     static bool closeFile() { return file.close(); }
-
     static bool reopenFile(const char* filename);
 
     void log_image(OV2640_Mini &camera);

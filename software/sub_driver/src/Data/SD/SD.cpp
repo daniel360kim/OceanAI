@@ -44,7 +44,7 @@ cid_t cid;
  * @param mission mission information
  * @param log_interval how many nanoseconds between each log 
  */
-SD_Logger::SD_Logger(const int64_t duration, int log_interval_ns) 
+SD_Logger::SD_Logger(const int64_t duration, int64_t log_interval_ns) 
 {
     //Calculate log file size based on interval so we can preallocate
     m_log_file_size = (1536 * (duration / 1e+9) * 1.0 / (log_interval_ns / 1e+9)) + 10000; // 1536 bytes per log, 10000 bytes extra for safety
@@ -392,6 +392,12 @@ bool SD_Logger::logData(LoggedData &data)
     flusher.void_tick(this);
     
     return true;
+}
+
+uint16_t SD_Logger::getLoggingIntervalHz()
+{
+    double rate = (1.0 / (m_log_interval / 1000000000.0));
+    return (uint16_t)std::lround(rate);
 }
 
 void SD_Logger::update_sd_capacity(LoggedData &data)

@@ -44,6 +44,13 @@ struct OpticalData
     uint32_t FIFO_length;
 };
 
+template <typename T>
+struct Location
+{
+    T latitude;
+    T longitude;
+};
+
 // Sometimes we use single precision for smaller packets in telemetry so we template this struct
 template <typename T>
 struct Angles_3D
@@ -62,6 +69,21 @@ struct BMP388Data
     double temperature;
 };
 
+struct HITLData
+{
+    uint16_t index;
+    double timestamp;
+    Location<double> location;
+    double depth;
+    double pressure;
+    double salinity;
+    double temperature;
+
+    double distance;
+    double averageSpeed;
+    double currentSpeed;
+};
+
 // To do: organize into different structs for optimization and organization
 struct LoggedData
 {
@@ -70,11 +92,17 @@ struct LoggedData
     int system_state;
     double delta_time;
     uint32_t sd_capacity;
+    uint16_t sd_log_rate_hz;
 
     double raw_voltage;
     double filt_voltage;
     int clock_speed;
     double internal_temp;
+
+    HITLData HITL;
+
+    uint32_t hitl_rate;
+    double hitl_progress;
 
     BMP388Data raw_bmp;
 
@@ -97,6 +125,8 @@ struct LoggedData
 
     double raw_ext_pres;
     double filt_ext_pres;
+
+    double depth;
 
     double raw_ext_temp;
     double filt_ext_temp;
@@ -125,6 +155,8 @@ struct LoggedData
         p.print(delim);
         p.print(data.sd_capacity);
         p.print(delim);
+        p.print(data.sd_log_rate_hz);
+        p.print(delim);
         p.print(data.raw_voltage);
         p.print(delim);
         p.print(data.filt_voltage);
@@ -132,6 +164,30 @@ struct LoggedData
         p.print(data.clock_speed);
         p.print(delim);
         p.print(data.internal_temp);
+
+        p.print(delim);
+        p.print(data.HITL.index);
+        p.print(delim);
+        p.print(data.HITL.timestamp);
+        p.print(delim);
+        p.print(data.HITL.location.latitude);
+        p.print(delim);
+        p.print(data.HITL.location.longitude);
+        p.print(delim);
+        p.print(data.HITL.depth);
+        p.print(delim);
+        p.print(data.HITL.pressure);
+        p.print(delim);
+        p.print(data.HITL.salinity);
+        p.print(delim);
+        p.print(data.HITL.temperature);
+        p.print(delim);
+        p.print(data.HITL.distance);
+        p.print(delim);
+        p.print(data.HITL.averageSpeed);
+        p.print(delim);
+        p.print(data.HITL.currentSpeed);
+
         p.print(delim);
         p.print(data.raw_bmp.pressure);
         p.print(delim);
@@ -203,6 +259,8 @@ struct LoggedData
         p.print(delim);
         p.print(data.filt_ext_pres);
         p.print(delim);
+        p.print(data.depth);
+        p.print(delim);
         p.print(data.dive_stepper.limit_state);
         p.print(delim);
         p.print(data.dive_stepper.homed);
@@ -265,10 +323,24 @@ struct LoggedData
         sys_data.add(data.system_state);
         sys_data.add(data.delta_time);
         sys_data.add(data.sd_capacity);
+        sys_data.add(data.sd_log_rate_hz);
         sys_data.add(data.raw_voltage);
         sys_data.add(data.filt_voltage);
         sys_data.add(data.clock_speed);
         sys_data.add(data.internal_temp);
+
+        JsonArray hitl_data = doc.createNestedArray("HITL");
+        hitl_data.add(data.HITL.index);
+        hitl_data.add(data.HITL.timestamp);
+        hitl_data.add(data.HITL.location.latitude);
+        hitl_data.add(data.HITL.location.longitude);
+        hitl_data.add(data.HITL.depth);
+        hitl_data.add(data.HITL.pressure);
+        hitl_data.add(data.HITL.salinity);
+        hitl_data.add(data.HITL.temperature);
+        hitl_data.add(data.HITL.distance);
+        hitl_data.add(data.HITL.averageSpeed);
+        hitl_data.add(data.HITL.currentSpeed);
 
         JsonArray baro_data = doc.createNestedArray("baro_data");
         baro_data.add(data.raw_bmp.pressure);
@@ -312,6 +384,7 @@ struct LoggedData
         external_data.add(data.filt_ext_pres);
         external_data.add(data.raw_ext_temp);
         external_data.add(data.filt_ext_temp);
+        external_data.add(data.depth);
 
         JsonArray step_data = doc.createNestedArray("step_data");
         step_data.add(data.dive_stepper.limit_state);

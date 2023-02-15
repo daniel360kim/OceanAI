@@ -19,6 +19,7 @@ std::vector<std::vector<std::string>> read_csv(std::string filename)
             //Check for NaN. Remove row
             if (cell == "NaN")
             {
+
             }
             else
             {
@@ -35,6 +36,8 @@ std::vector<std::vector<std::string>> read_csv(std::string filename)
     {
         data[i].erase(data[i].begin());
     }
+
+
 
     return data;
 }
@@ -103,14 +106,19 @@ void convert_to_header(std::vector<std::vector<std::string>>& data, std::string 
     file << "#ifndef " << filename << "_H" << std::endl;
     file << "#define " << filename << "_H" << std::endl;
     file << std::endl;
-    file << "#include <array>" << std::endl;
 
-    file << "EXTMEM const std::array<std::array<double, " << data[0].size() << ">, " << data.size() << "> " << filename << " = {" << std::endl;
+    file << "constexpr int HITL_DATA_ROWS = " << data.size() << ";" << std::endl;
+    file << "constexpr int HITL_DATA_COLS = " << data[0].size() << ";" << std::endl;
 
-    for (int i = 0; i < data.size(); i++)
+    file << "const double " << "HITL_Data[HITL_DATA_ROWS][HITL_DATA_COLS]" << " = {" << std::endl;
+    for(int i = 0; i < data.size(); i++)
     {
-        file << "    {";
-        for (int j = 0; j < data[i].size(); j++)
+        file << "{";
+        if(data[i].size() == 6)
+        {
+
+        
+        for(int j = 0; j < data[i].size(); j++)
         {
             file << data[i][j];
             if (j != data[i].size() - 1)
@@ -124,16 +132,20 @@ void convert_to_header(std::vector<std::vector<std::string>>& data, std::string 
             file << ",";
         }
         file << std::endl;
+        }
     }
 
     file << "};" << std::endl;
     file << std::endl;
+
     file << "#endif" << std::endl;
+
+
 }
 
 int main(int argc, char const *argv[])
 {
-    std::vector<std::vector<std::string>> data = read_csv("long.csv");
+    std::vector<std::vector<std::string>> data = read_csv("data3.csv");
 
     std::cout << "Read " << data.size() << " rows" << std::endl;
 
