@@ -4,6 +4,12 @@
 
   (paper "A4")
 
+  (title_block
+    (title "OceanAI")
+    (date "2022-07-25")
+    (rev "2")
+  )
+
   (lib_symbols
     (symbol "Connector_Generic:Conn_01x02" (pin_names (offset 1.016) hide) (in_bom yes) (on_board yes)
       (property "Reference" "J" (id 0) (at 0 2.54 0)
@@ -2612,7 +2618,7 @@
     (stroke (width 0.1524) (type solid) (color 0 0 0 0))
     (fill (color 0 0 0 0.0000))
     (uuid f9522b5d-e43d-416f-9ff1-eee5c69eb8fb)
-    (property "Sheet name" "TDS" (id 0) (at 191.77 135.1784 0)
+    (property "Sheet name" "Salinity Sensor" (id 0) (at 191.77 135.1784 0)
       (effects (font (size 1.27 1.27)) (justify left bottom))
     )
     (property "Sheet file" "TDS.kicad_sch" (id 1) (at 191.77 150.4446 0)

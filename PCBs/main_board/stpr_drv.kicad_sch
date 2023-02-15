@@ -4,6 +4,12 @@
 
   (paper "A4")
 
+  (title_block
+    (title "OceanAI")
+    (date "2022-07-25")
+    (rev "2")
+  )
+
   (lib_symbols
     (symbol "A4988SETTR-T:A4988SETTR-T" (pin_names (offset 1.016)) (in_bom yes) (on_board yes)
       (property "Reference" "IC" (id 0) (at -16.51 30.48 0)

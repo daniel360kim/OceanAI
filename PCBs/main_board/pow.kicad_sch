@@ -4,6 +4,12 @@
 
   (paper "A4")
 
+  (title_block
+    (title "OceanAI")
+    (date "2022-07-25")
+    (rev "2")
+  )
+
   (lib_symbols
     (symbol "ADP122:ADP122ACPZ-3.3-R7" (pin_names (offset 0.254)) (in_bom yes) (on_board yes)
       (property "Reference" "U?" (id 0) (at 22.86 11.43 0)
