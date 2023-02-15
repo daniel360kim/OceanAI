@@ -9,21 +9,13 @@ declare global {
   interface ElectricUIDeveloperState {
     [messageID: string]: any
 
-    // Example messageID typings
-    orixDS: number
-    oriyDS: number
-    orizDS: number
+
   }
   interface ElectricUIDeviceMetadataState {
     name: string
   }
 }
 
-export type Angles3D = {
-  x: number
-  y: number
-  z: number
-
-}
+export {}
 
 

@@ -17,7 +17,6 @@ import {
   RealTimeDomain,
   TimeAxis,
   VerticalAxis,
-  ZoomBrush,
 } from '@electricui/components-desktop-charts'
 
 const currentPositionDS = new MessageDataSource('sp')
@@ -26,7 +25,7 @@ const stepSpeedDS = new MessageDataSource('ss')
 const stepAccelDS = new MessageDataSource('sa')
 
 const navigationLayoutDescription = `
-    Controls Charts
+    Controls 
 `
 
 export const MechanicsPage = (props: RouteComponentProps) => {
@@ -128,18 +127,7 @@ export const MechanicsPage = (props: RouteComponentProps) => {
               </Card>
             </Areas.Controls>
             <Areas.Charts>
-              <Card>
-                <div style={{ textAlign: 'center', marginBottom: '1em' }}>
-                  <b>Stepper Position</b>
-                </div>
-                <ChartContainer>
-                  <LineChart dataSource={currentPositionDS} />
-                  <RealTimeDomain window={30000} />
-                  <TimeAxis label="Time (s)" />
-                  <VerticalAxis />
-                  <ZoomBrush />
-                </ChartContainer>
-              </Card>
+
       
             </Areas.Charts>
           </React.Fragment>

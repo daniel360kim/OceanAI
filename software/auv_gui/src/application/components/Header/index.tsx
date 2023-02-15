@@ -107,11 +107,21 @@ export const Header = (
               minimal
               large
               icon = "database"
-              text = "Data"
+              text = "HITL"
               onClick={() => {
-                navigate(`/devices/${props.deviceID}/datamanager`)
+                navigate(`/devices/${props.deviceID}/hitl`)
               }}
-              active={page === 'datamanager'}
+              active={page === 'hitl'}
+              />
+            <Button
+              minimal
+              large
+              icon = "log-in"
+              text = "Logging"
+              onClick={() => {
+                navigate(`/devices/${props.deviceID}/logging`)
+              }}
+              active={page === 'logging'}
               />
           </Navbar.Group>{' '}
         </div>

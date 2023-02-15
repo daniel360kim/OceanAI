@@ -4,7 +4,6 @@ import {
   RealTimeDomain,
   TimeAxis,
   VerticalAxis,
-  ZoomBrush
 } from '@electricui/components-desktop-charts'
 
 import { Card, Colors } from '@blueprintjs/core'
@@ -20,8 +19,10 @@ import { MessageDataSource } from '@electricui/core-timeseries'
 
 
 const layoutDescription = `
-  Title Info
-  LoopChart TempChart
+  Info
+  Title
+
+
 `
 
 //Data Inputs
@@ -53,11 +54,10 @@ export const OverviewPage = (props: RouteComponentProps) => {
                   <Callout title="Functional Voltage" intent="primary">
                     Voltage must be above 4V to ensure proper stepper functionality
                 </Callout>
+                <h3>System Information</h3>
                 <HTMLTable striped interactive condensed>
                   <thead>
-                    <tr>
-                      <h3>System Information</h3>
-                    </tr>
+                  
                   </thead>
                   <tbody>
                     <tr>
@@ -123,32 +123,6 @@ export const OverviewPage = (props: RouteComponentProps) => {
                 <br />
               </Card>
             </Areas.Info>
-            <Areas.LoopChart>
-              <Card>
-                <h2>Loop Time</h2>
-                <ChartContainer>
-                  <LineChart dataSource={loop_timeDS} />
-                  <TimeAxis label="Time (s)"/>
-                  <VerticalAxis/>
-                  <RealTimeDomain window={10000} />
-                  <ZoomBrush />
-                </ChartContainer>
-              </Card>
-            </Areas.LoopChart>
-
-            <Areas.TempChart>
-              <Card>
-                <h2>CPU Temperature</h2>
-                <ChartContainer>
-                  <LineChart dataSource={internal_tempDS} />
-                  <TimeAxis label="Time (s)"/>
-                  <VerticalAxis/>
-                  <RealTimeDomain 
-                    window={10000}/>
-                  <ZoomBrush />
-                </ChartContainer>
-              </Card>
-            </Areas.TempChart>
           </React.Fragment>
         )}
       </Composition>
