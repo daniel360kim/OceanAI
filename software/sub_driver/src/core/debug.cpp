@@ -210,57 +210,8 @@ void Debug::clearMessages()
     m_Messages.clear();
 }
 #endif
-#if UI_ON
-    void Error::setErrorCode(uint8_t error_code)
-    {
-        m_error_code = error_code;
-    }
-
-    void Error::setSeverity(Severity severity)
-    {
-        m_severity = severity;
-    }
 
 
-    uint8_t Error::getErrorCode() const
-    {
-        return m_error_code;
-    }
-
-    Severity Error::getSeverity() const
-    {
-        return m_severity;
-    }
-
-    ErrorManager::ErrorManager(Error error)
-    {
-        m_errors.push_back(error);
-    }
-
-    void ErrorManager::addError(Error error)
-    {
-        
-        m_errors.push_back(error);
-    }
-
-    std::vector<uint8_t> ErrorManager::getErrorCodes()
-    {
-        std::vector<uint8_t> error_codes;
-        for(unsigned int i = 0; i < m_errors.size(); i++)
-        {
-            error_codes[i] = m_errors[i].getErrorCode();
-        }
-
-        return error_codes;
-    }
-
-    void ErrorManager::clearErrors()
-    {
-        m_errors.clear();
-    }
-
-
-#endif
 
 
 
