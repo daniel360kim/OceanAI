@@ -1,22 +1,3 @@
-{
-  "compilerOptions": {
-    "target": "es2019",
-    "module": "esnext",
-    "moduleResolution": "node",
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictPropertyInitialization": true,
-    "inlineSources": true,
-    "sourceMap": true,
-    "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
-    "newLine": "lf",
-    "jsx": "react",
-    "noEmitOnError": true,
-    "baseUrl": ".",
-    "paths": {
-      "*": ["*", "packages/*"]
-    }
-  },
-  "include": ["src/**/*.tsx", "typings/*.d.ts"]
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:a1f0440183e9c91b2b1cb3b15de87a37927a56bbf4521703835e07c3ca3b2257
+size 527
