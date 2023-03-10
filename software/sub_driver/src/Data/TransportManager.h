@@ -53,6 +53,7 @@ namespace TransportManager
         Angles_3D<float> rel_ori = { 0.f };
         float acc[3] = { 0.f };
         float gyr[3] = { 0.f };
+        float mag[3] = { 0.f };
 
         int16_t stepper_current_position = 0;
         int16_t stepper_target_position = 0;
@@ -95,6 +96,10 @@ namespace TransportManager
             acc[0] = static_cast<float>(data.racc.x);
             acc[1] = static_cast<float>(data.racc.y);
             acc[2] = static_cast<float>(data.racc.z);
+
+            mag[0] = static_cast<float>(data.rmag.x);
+            mag[1] = static_cast<float>(data.rmag.y);
+            mag[2] = static_cast<float>(data.rmag.z);
 
             stepper_acceleration = static_cast<int16_t>(data.dive_stepper.acceleration);
             stepper_current_position = static_cast<int16_t>(data.dive_stepper.current_position);

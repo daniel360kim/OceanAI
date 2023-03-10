@@ -58,6 +58,7 @@ namespace TransportManager
 
         EUI_FLOAT_ARRAY_RO("gd", telemetry_data.gyr),
         EUI_FLOAT_ARRAY_RO("ad", telemetry_data.acc),
+        EUI_FLOAT_ARRAY_RO("md", telemetry_data.mag),
 
         EUI_INT16("sp", telemetry_data.stepper_current_position),
         EUI_INT16("st", telemetry_data.stepper_target_position),
@@ -168,6 +169,7 @@ namespace TransportManager
             {
                 eui_send_tracked("gd");
                 eui_send_tracked("ad");
+                eui_send_tracked("md");
 
                 eui_send_tracked("sp");
                 eui_send_tracked("st");

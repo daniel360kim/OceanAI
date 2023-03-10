@@ -113,16 +113,7 @@ export const Header = (
               }}
               active={page === 'hitl'}
               />
-            <Button
-              minimal
-              large
-              icon = "log-in"
-              text = "Logging"
-              onClick={() => {
-                navigate(`/devices/${props.deviceID}/logging`)
-              }}
-              active={page === 'logging'}
-              />
+
           </Navbar.Group>{' '}
         </div>
       </Navbar>

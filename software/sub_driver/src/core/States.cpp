@@ -121,7 +121,6 @@ void continuousFunctions(StateAutomation *state)
 
     Sensors::logData(data);
 
-    
     external_temp.logToStruct(data);
     external_pres.logToStruct(data);
     total_dissolved_solids.logToStruct(data);
@@ -177,14 +176,14 @@ void continuousFunctions(StateAutomation *state)
     logger.update_sd_capacity(data);
     data.sd_log_rate_hz = logger.getLoggingIntervalHz();
 
-    #if !UI_ON    
+    #if SD_ON
     if (!logger.logData(data))
     {
         warning = true;
         return;
     }
     #endif
-    //sd_timer.showElapsed();
+
 #if UI_ON
     //Send/receive data to/from the UI
     //If GUI wants to change the state, it will be handled here
@@ -203,6 +202,7 @@ void continuousFunctions(StateAutomation *state)
         data.hitl_progress = data_provider.get_progress() * 100.0; //percentage
     #endif
 
+    #if SD_ON
     if(commands.sd_log_enable > 0)
     {
         logger.setLoggingInterval(std::lround((1.0 / commands.sd_log_enable) * 1000000000.0)); //hz to ns
@@ -211,6 +211,7 @@ void continuousFunctions(StateAutomation *state)
             warning = true;   
         }
     }
+    #endif
 
 
 #endif
@@ -233,6 +234,7 @@ void Initialization::enter(StateAutomation *state)
     // Flashy lights!
     output.startupSequence();
     // If there was a crash from the last run, report it to SD
+    #if SD_ON
     if (CrashReport)
     {
         if (!logger.log_crash_report())
@@ -240,6 +242,7 @@ void Initialization::enter(StateAutomation *state)
             warning = true;
         }
     }
+    #endif
 
     #if HITL_ON
         location.addColumn(0);
@@ -287,9 +290,9 @@ void Initialization::enter(StateAutomation *state)
         #endif
 
     #else
-        buoyancy.setSpeed(2000);
-        buoyancy.setMaxSpeed(2000);
-        buoyancy.setAcceleration(2000);
+        buoyancy.setSpeed(1500);
+        buoyancy.setMaxSpeed(1500);
+        buoyancy.setAcceleration(500);
     #endif
 
     LEDa.setColor(255, 0, 255);
@@ -334,12 +337,14 @@ void Initialization::enter(StateAutomation *state)
     }
 #endif
 
+    #if SD_ON
     // Initialize the SD card
     if (!logger.init())
     {
         state->setState(ErrorIndication::getInstance());
         return;
     }
+    #endif
     SUCCESS_LOG("SD Card Initialization Complete");
 
     LEDb.blink(255, 0, 0, 1000);
@@ -435,9 +440,9 @@ void Diving::enter(StateAutomation *state)
         buoyancy.setMaxSpeed(stepper_commands.stepper_speed);
         buoyancy.setAcceleration(stepper_commands.stepper_acceleration);
     #else
-        buoyancy.setSpeed(2000);
-        buoyancy.setMaxSpeed(2000);
-        buoyancy.setAcceleration(2000);
+        buoyancy.setSpeed(1500);
+        buoyancy.setMaxSpeed(1500);
+        buoyancy.setAcceleration(500);
     #endif
     buoyancy.setResolution(Stepper::Resolution::HALF);
     buoyancy.setMinPulseWidth(MIN_PULSE_WIDTH); // how long to wait between high and low pulses
@@ -478,9 +483,9 @@ void Resurfacing::enter(StateAutomation *state)
         buoyancy.setMaxSpeed(stepper_commands.stepper_speed);
         buoyancy.setAcceleration(stepper_commands.stepper_acceleration);
     #else  
-        buoyancy.setSpeed(2000);
-        buoyancy.setMaxSpeed(2000);
-        buoyancy.setAcceleration(2000);
+        buoyancy.setSpeed(1500);
+        buoyancy.setMaxSpeed(1500);
+        buoyancy.setAcceleration(500);
     #endif
     buoyancy.setResolution(Stepper::Resolution::HALF);
     buoyancy.rise();
@@ -526,9 +531,9 @@ void Calibrate::enter(StateAutomation *state)
         buoyancy.setMaxSpeed(stepper_commands.stepper_speed);
         buoyancy.setAcceleration(stepper_commands.stepper_acceleration);
     #else
-        buoyancy.setSpeed(2000);
-        buoyancy.setMaxSpeed(2000);
-        buoyancy.setAcceleration(2000);
+        buoyancy.setSpeed(1500);
+        buoyancy.setMaxSpeed(1500);
+        buoyancy.setAcceleration(1500);
     #endif
 
     buoyancy.setResolution(Stepper::Resolution::HALF);

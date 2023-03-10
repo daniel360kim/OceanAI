@@ -8,7 +8,7 @@ import { HITLPage } from './HITL'
 import React from 'react'
 import { MechanicsPage } from './MechanicsPage'
 import { NavigationPage } from './NavigationPage'
-import { LoggingPage } from './LoggingPage'
+
 import { navigate } from '@electricui/utility-electron'
 
 interface InjectDeviceIDFromLocation {
@@ -43,7 +43,6 @@ export const DevicePages = (
             <MechanicsPage path="mechanics" />
             <NavigationPage path="navigation" />
             <HITLPage path="hitl" />
-            <LoggingPage path="logging" />
           </Router>
         </div>
       </div>

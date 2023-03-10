@@ -18,7 +18,9 @@ import { Composition } from 'atomic-layout'
 import { MessageDataSource } from '@electricui/core-timeseries'
 import React from 'react'
 import { RouteComponentProps } from '@reach/router'
-import { DataTransformer, filter } from '@electricui/dataflow'
+import { Printer } from '@electricui/components-desktop'
+import { Tag } from '@blueprintjs/core'
+import { Intent } from '@blueprintjs/core'
 
 const rxDS = new MessageDataSource<number>('xd')
 const ryDS = new MessageDataSource<number>('yd')
@@ -26,8 +28,10 @@ const rzDS = new MessageDataSource<number>('zd')
 
 const accDS = new MessageDataSource('ad')
 const gyrDS = new MessageDataSource('gd')
+const magDS = new MessageDataSource('md')
 
 const navigationLayoutDescription = `
+    Chart Numeric 
     Chart TimeSlice
 `
 
@@ -104,6 +108,196 @@ export const NavigationPage = (props: RouteComponentProps) => {
                 </ChartContainer>
               </Card>
             </Areas.Chart>
+            <Areas.Numeric>
+              <Card>
+                <h2>IMU</h2>
+
+                <b>aX: </b>
+                <Printer
+                  accessor={state => state.ad[0]}
+                  precision={3}
+                  style={{
+                    width: '3.5em',
+                    height: '1.05em',
+                    contain: 'strict',
+                    textAlign: 'left',
+                    display: 'inline-block',
+                    overflow: 'hidden',
+                    fontSize: '1.1em',
+                  }}
+                />
+
+                <b>aY: </b>
+                <Printer
+                  accessor={state => state.ad[1]}
+                  precision={3}
+                  style={{
+                    width: '3.5em',
+                    height: '1.05em',
+                    contain: 'strict',
+                    textAlign: 'left',
+                    display: 'inline-block',
+                    overflow: 'hidden',
+                    fontSize: '1.1em',
+                  }}
+                />
+
+                <b>aZ: </b>
+                <Printer
+                  accessor={state => state.ad[2]}
+                  precision={3}
+                  style={{
+                    width: '3.5em',
+                    height: '1.05em',
+                    contain: 'strict',
+                    textAlign: 'left',
+                    display: 'inline-block',
+                    overflow: 'hidden',
+                    fontSize: '1.1em',
+                  }}
+                />
+                <br></br>
+
+                <b>gX: </b>
+                <Printer
+                  accessor={state => state.gd[0]}
+                  precision={3}
+                  style={{
+                    width: '3.5em',
+                    height: '1.05em',
+                    contain: 'strict',
+                    textAlign: 'left',
+                    display: 'inline-block',
+                    overflow: 'hidden',
+                    fontSize: '1.1em',
+                  }}
+                />
+
+                <b>gY: </b>
+                <Printer
+                  accessor={state => state.gd[1]}
+                  precision={3}
+                  style={{
+                    width: '3.5em',
+                    height: '1.05em',
+                    contain: 'strict',
+                    textAlign: 'left',
+                    display: 'inline-block',
+                    overflow: 'hidden',
+                    fontSize: '1.1em',
+                  }}
+                />
+
+                <b>gZ: </b>
+                <Printer
+                  accessor={state => state.gd[2]}
+                  precision={3}
+                  style={{
+                    width: '3.5em',
+                    height: '1.05em',
+                    contain: 'strict',
+                    textAlign: 'left',
+                    display: 'inline-block',
+                    overflow: 'hidden',
+                    fontSize: '1.1em',
+                  }}
+                />
+
+                <br></br>
+
+                <b>mX: </b>
+                <Printer
+                  accessor={state => state.md[0]}
+                  precision={3}
+                  style={{
+                    width: '3.5em',
+                    height: '1.05em',
+                    contain: 'strict',
+                    textAlign: 'left',
+                    display: 'inline-block',
+                    overflow: 'hidden',
+                    fontSize: '1.1em',
+                  }}
+                />
+
+                <b>mY: </b>
+                <Printer
+                  accessor={state => state.md[1]}
+                  precision={3}
+                  style={{
+                    width: '3.5em',
+                    height: '1.05em',
+                    contain: 'strict',
+                    textAlign: 'left',
+                    display: 'inline-block',
+                    overflow: 'hidden',
+                    fontSize: '1.1em',
+                  }}
+                />
+
+                <b>mZ: </b>
+                <Printer
+                  accessor={state => state.md[2]}
+                  precision={3}
+                  style={{
+                    width: '3.5em',
+                    height: '1.05em',
+                    contain: 'strict',
+                    textAlign: 'left',
+                    display: 'inline-block',
+                    overflow: 'hidden',
+                    fontSize: '1.1em',
+                  }}
+                />
+
+                <h2>Localization</h2>
+
+                <b>X: </b>
+                <Printer
+                  accessor="xd"
+                  precision={3}
+                  style={{
+                    width: '4em',
+                    height: '1.05em',
+                    contain: 'strict',
+                    textAlign: 'left',
+                    display: 'inline-block',
+                    overflow: 'hidden',
+                    fontSize: '1.1em',
+                  }}
+                />
+
+                <b>Y: </b>
+                <Printer
+                  accessor="yd"
+                  precision={3}
+                  style={{
+                    width: '4em',
+                    height: '1.05em',
+                    contain: 'strict',
+                    textAlign: 'left',
+                    display: 'inline-block',
+                    overflow: 'hidden',
+                    fontSize: '1.1em',
+                  }}
+                />
+
+                <b>Z: </b>
+                <Printer
+                  accessor="zd"
+                  precision={3}
+                  style={{
+                    width: '4em',
+                    height: '1.05em',
+                    contain: 'strict',
+                    textAlign: 'left',
+                    display: 'inline-block',
+                    overflow: 'hidden',
+                    fontSize: '1.1em',
+                  }}
+                />
+              </Card>
+            </Areas.Numeric>
 
             <Areas.TimeSlice>
               <Card>
@@ -130,8 +324,6 @@ export const NavigationPage = (props: RouteComponentProps) => {
                   <HorizontalAxis label="X m/s²" />
                   <VerticalAxis label="Y m/s²" />
                 </ChartContainer>
-
-               
               </Card>
             </Areas.TimeSlice>
           </React.Fragment>

@@ -39,6 +39,8 @@
 #warning UI and Data outputs will collide. Disable one of them.
 #endif
 
+#define SD_ON false
+
 #define OPTICS_ON false
 
 namespace MissionDuration
