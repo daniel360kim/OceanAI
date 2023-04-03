@@ -1,10 +1,13 @@
 #include "voltage.h"
 
-Sensors::Voltage::Voltage(const uint8_t pin, const double cutoff, const long interval_ns)
+Sensors::Voltage::Voltage(const uint8_t pin, const double cutoff, const long interval_ns, double r1, double r2)
 {
     pinMode(pin, INPUT);
     m_pin = pin;
     m_interval = interval_ns;
+
+    m_r1 = r1;
+    m_r2 = r2;
 
     m_filter.setCutoff(cutoff);
 }
@@ -17,12 +20,16 @@ Sensors::Voltage::Voltage(const uint8_t pin, const double cutoff, const long int
 double Sensors::Voltage::readRaw()
 {
     double voltage = analogRead(m_pin) * ANALOG_TO_VOLTAGE;
-    voltage *= (9.95 + 1.992) / 1.992; // voltage divider
+
+    const double resistor_sum  = m_r1 + m_r2;
+
+    voltage *= resistor_sum / m_r2; // voltage divider
 
     if(voltage <= 0.1)
     {
         voltage = 0.0;
     }
+
 
     m_raw_voltage = voltage;
     m_voltage_updated = true;
@@ -53,15 +60,4 @@ double Sensors::Voltage::readFiltered(const double delta_time)
     return filtered_voltage;
 }
 
-void Sensors::Voltage::logToStruct(LoggedData &data)
-{
-    int64_t current_time = scoped_timer.elapsed();
-    if(current_time >= m_interval + m_prev_log_ns)
-    {
-        double delta_time = data.delta_time;
-        data.raw_voltage = readRaw();
-        data.filt_voltage = readFiltered(delta_time);
-        m_prev_log_ns = current_time;
-    }
-}
 

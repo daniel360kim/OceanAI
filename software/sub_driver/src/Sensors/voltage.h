@@ -26,15 +26,16 @@ namespace Sensors
     class Voltage : public ReadFunctions
     {
     public:
-        Voltage(const uint8_t pin, const double cutoff, const long interval_ns);
+        Voltage(const uint8_t pin, const double cutoff, const long interval_ns, double r1, double r2);
 
         double readRaw();
         double readFiltered(const double delta_time);
 
-        void logToStruct(LoggedData &data);
     private:
         uint8_t m_pin;
         long m_interval;
+        double m_r1;
+        double m_r2;
 
         double m_raw_voltage;
 
