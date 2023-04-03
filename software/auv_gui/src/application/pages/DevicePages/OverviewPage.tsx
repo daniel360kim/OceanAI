@@ -31,6 +31,7 @@ const loop_timeDS = new MessageDataSource('lt')
 const sys_stateDS = new MessageDataSource<number>('sst')
 const internal_tempDS = new MessageDataSource('it')
 const voltageDS = new MessageDataSource('v')
+const regulatorDS = new MessageDataSource('r')
 
 const baseSpeed = 100
 
@@ -112,7 +113,12 @@ export const OverviewPage = (props: RouteComponentProps) => {
                     color={Colors.GREEN5}
                     precision={2}
                   />
-
+                  <Statistic
+                    label="Regulator (V)"
+                    accessor="r"
+                    color={Colors.ORANGE5}
+                    precision={2}
+                  />
                 </Statistics>
                 <br />
                 <br />

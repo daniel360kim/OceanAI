@@ -30,10 +30,6 @@ export const StateIndicator = (props: StateIndicatorProps) => {
     </Callout>
   } else if (state == 4) {
     return <Callout title="Resurfacing" intent="primary">
-        Next Up: Surfaced
-    </Callout>
-  } else if (state == 5) {
-    return <Callout title="Calibrating" intent="primary">
         Next Up: Diving
     </Callout>
   } else {
