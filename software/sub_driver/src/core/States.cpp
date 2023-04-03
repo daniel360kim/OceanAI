@@ -51,7 +51,9 @@ static Sensors::Transducer external_pres(TX_RF, 30, HZ_TO_NS(5));
 static Sensors::TotalDissolvedSolids total_dissolved_solids(TDS, 30, HZ_TO_NS(5));
 
 
-static Sensors::Voltage voltmeter(v_div, 30, HZ_TO_NS(5));
+static Sensors::Voltage regulator(v_div, 30, HZ_TO_NS(5), 9.95, 1.992);
+static Sensors::Voltage battery(TX_GPS, 30, HZ_TO_NS(5), 9.62, 4.47);
+
 
 static Orientation ori;
  
@@ -75,11 +77,24 @@ static StepperPins pins_b{
     MS1_b,
     MS2_b,
     ERR_b,
-    STOP_b};
+    STOP_b
+};
+
+static StepperPins pins_p{
+    STP_p,
+    DIR_p,
+    MS1_p,
+    MS2_p,
+    ERR_p,
+    STOP_p
+};
 
 constexpr double STEPS_PER_HALF = 224.852;
-constexpr int STEPPER_HALF_STEPS = 27000;
-static Buoyancy buoyancy(pins_b, Stepper::Resolution::HALF, StepperProperties(STEPPER_HALF_STEPS / STEPS_PER_HALF, STEPPER_HALF_STEPS));
+constexpr int STEPPER_HALF_STEPS_BUOYANCY = 27000; // constant representing how many half steps the stepper motor takes to move the buoyancy to the bottom
+constexpr int STEPPER_HALF_STEPS_PITCH = 10850; // constant representing how many half steps the stepper motor takes to reach the end of the carriage
+
+static Buoyancy buoyancy(pins_b, Stepper::Resolution::HALF, StepperProperties(STEPPER_HALF_STEPS_BUOYANCY / STEPS_PER_HALF, STEPPER_HALF_STEPS_BUOYANCY));
+static Pitch pitch(pins_p, Stepper::Resolution::HALF, StepperProperties(STEPPER_HALF_STEPS_PITCH / STEPS_PER_HALF, STEPPER_HALF_STEPS_PITCH));
 
 static CurrentState currentState;
 
@@ -141,7 +156,12 @@ void continuousFunctions(StateAutomation *state)
     data.HITL.currentSpeed = hitl_nav.getSpeedX(data.HITL.location.latitude, data.HITL.location.longitude, data_provider.getTimestamp());
 
     #endif
-    voltmeter.logToStruct(data);
+
+    data.raw_voltage = battery.readRaw();
+    data.filt_voltage = battery.readFiltered(data.delta_time);
+
+    data.raw_regulator = regulator.readRaw();
+    data.filt_regulator = regulator.readFiltered(data.delta_time);
 
     nav_v.updateVelocity(data);
     nav_p.updatePosition(data);
@@ -172,6 +192,11 @@ void continuousFunctions(StateAutomation *state)
 
     buoyancy.logToStruct(data);
     buoyancy.setMinPulseWidth(MIN_PULSE_WIDTH);
+    buoyancy.update();
+
+    pitch.logToStruct(data);
+    pitch.setMinPulseWidth(MIN_PULSE_WIDTH);
+    pitch.update();
 
     logger.update_sd_capacity(data);
     data.sd_log_rate_hz = logger.getLoggingIntervalHz();
@@ -194,12 +219,50 @@ void continuousFunctions(StateAutomation *state)
         return;
     }
     TransportManager::Commands commands = TransportManager::getCommands();
+
+    if(commands.auto_pitch != 0)
+    {
+        if(!pitch.isCalibrated())
+        {
+            pitch.calibrate();
+        }
+        else
+        {
+            if(commands.pitch.direction == 0)
+            {
+                commands.pitch.speed *= -1;
+            }
+
+            if(pitch.currentPosition() * -1 == STEPPER_HALF_STEPS_PITCH && commands.pitch.direction == 0)
+            {
+                commands.pitch.speed = 0;
+            }
+
+            if(pitch.currentPosition() == 0 && commands.pitch.direction == 1)
+            {
+                commands.pitch.speed = 0;
+            }
+            pitch.setSpeed(commands.pitch.speed);
+            pitch.setAcceleration(commands.pitch.acceleration);
+        }
+
+        if(commands.recalibrate_pitch != 0)
+        {
+            pitch.setCalibrated(false);
+        }
+    }
+    else
+    {
+
+    }
+
     #if HITL_ON
         data_provider.update_frequency_scale(commands.hitl_scale);
 
         //NS to HZ
         data.hitl_rate = ((double)data_provider.get_frequency() / 1000000.0);
         data.hitl_progress = data_provider.get_progress() * 100.0; //percentage
+
     #endif
 
     #if SD_ON
@@ -263,11 +326,12 @@ void Initialization::enter(StateAutomation *state)
         hitl_nav.setInitialCoordinate(HITL_DATA_ALPHA[0][0], HITL_DATA_ALPHA[0][1], scoped_timer.elapsed());
     #endif
 
-    if (voltmeter.readRaw() <= 11.1 && voltmeter.readRaw() >= 6)
+    if (battery.readRaw() <= 6.8 && battery.readRaw() >= 6)
     {
-        //ERROR_LOG(Debug::Critical_Error, "Low battery voltage");
+        ERROR_LOG(Debug::Critical_Error, "Low battery voltage");
         state->setState(ErrorIndication::getInstance());
     }
+    
 
     CPU::init();
 
@@ -280,10 +344,21 @@ void Initialization::enter(StateAutomation *state)
 
     #if UI_ON
         TransportManager::init();
-        TransportManager::Commands stepper_commands = TransportManager::getCommands();
-        buoyancy.setSpeed(stepper_commands.stepper_speed);
-        buoyancy.setMaxSpeed(stepper_commands.stepper_speed);
-        buoyancy.setAcceleration(stepper_commands.stepper_speed);
+
+        /**
+         * If the UI is on, we need to wait for the UI to send the initialization commands
+         */
+        TransportManager::Commands stepper_commands = TransportManager::getCommands(); //Wait for the UI to send the initialization commands
+
+        //Set the stepper settings from the UI commands
+        buoyancy.setSpeed(stepper_commands.buoyancy.speed);
+        buoyancy.setMaxSpeed(stepper_commands.buoyancy.speed);
+        buoyancy.setAcceleration(stepper_commands.buoyancy.speed);
+
+        //Set the stepper settings from the UI commands
+        pitch.setSpeed(stepper_commands.pitch.speed);
+        pitch.setMaxSpeed(stepper_commands.pitch.speed);
+        pitch.setAcceleration(stepper_commands.pitch.speed);
 
         #if HITL_ON
             data_provider.update_frequency_scale(stepper_commands.hitl_scale);
@@ -293,6 +368,10 @@ void Initialization::enter(StateAutomation *state)
         buoyancy.setSpeed(1500);
         buoyancy.setMaxSpeed(1500);
         buoyancy.setAcceleration(500);
+
+        pitch.setSpeed(1500);
+        pitch.setMaxSpeed(1500);
+        
     #endif
 
     LEDa.setColor(255, 0, 255);
@@ -356,7 +435,7 @@ void Initialization::enter(StateAutomation *state)
 void Initialization::run(StateAutomation *state)
 {
     // initialization happens once and we move on...
-    state->setState(Calibrate::getInstance());
+    state->setState(Diving::getInstance());
 }
 
 void Initialization::exit(StateAutomation *state)
@@ -386,20 +465,21 @@ void IdleMode::enter(StateAutomation *state)
 {
     currentState = CurrentState::IDLE_MODE;
     buoyancy.setSpeed(0);
+    pitch.setSpeed(0);
 }
 
 void IdleMode::run(StateAutomation *state)
 {
     continuousFunctions(state);
+
     buoyancy.run();
+    pitch.run();
+
     #if UI_ON
     if(TransportManager::getCommands().system_state == 0)
     {
         switch(callbackState)
         {
-            case CurrentState::CALIBRATE:
-                state->setState(Calibrate::getInstance());
-                return;
             case CurrentState::DIVING_MODE:
                 state->setState(Diving::getInstance());
                 return;
@@ -413,7 +493,7 @@ void IdleMode::run(StateAutomation *state)
                 state->setState(Resurfacing::getInstance());
                 return;
             default:
-                state->setState(Calibrate::getInstance());
+                state->setState(Diving::getInstance());
                 return;
         }
     }
@@ -428,68 +508,35 @@ void IdleMode::exit(StateAutomation *state)
     #endif
 }
 
-void Diving::enter(StateAutomation *state)
-{
-    // Set current state for reading
-    currentState = CurrentState::DIVING_MODE;
-
-    // Initialize stepper settings
-    #if UI_ON
-        TransportManager::Commands stepper_commands = TransportManager::getCommands();
-        buoyancy.setSpeed(stepper_commands.stepper_speed);
-        buoyancy.setMaxSpeed(stepper_commands.stepper_speed);
-        buoyancy.setAcceleration(stepper_commands.stepper_acceleration);
-    #else
-        buoyancy.setSpeed(1500);
-        buoyancy.setMaxSpeed(1500);
-        buoyancy.setAcceleration(500);
-    #endif
-    buoyancy.setResolution(Stepper::Resolution::HALF);
-    buoyancy.setMinPulseWidth(MIN_PULSE_WIDTH); // how long to wait between high and low pulses
-    buoyancy.sink();              // set the direction of the stepper motors
-}
-
-void Diving::run(StateAutomation *state)
-{
-    // If we have filled the ballast start resurfacing
-    // Probably want to add some type of pressure parameter so the sub goes to a certain depth
-    if (buoyancy.sinking && buoyancy.currentPosition() == buoyancy.targetPosition())
-    {
-        #if UI_ON
-        state->setState(Resurfacing::getInstance());
-        return;
-        #else
-        state->setState(Resurfacing::getInstance());
-        return;
-        #endif
-    }
-
-    buoyancy.update(); // update the stepper motors
-
-    // call the continuous loop functions
-    continuousFunctions(state);
-}
-
-void Diving::exit(StateAutomation *state)
-{
-}
 
 void Resurfacing::enter(StateAutomation *state)
 {
     currentState = CurrentState::RESURFACING;
     #if UI_ON
         TransportManager::Commands stepper_commands = TransportManager::getCommands();
-        buoyancy.setSpeed(stepper_commands.stepper_speed);
-        buoyancy.setMaxSpeed(stepper_commands.stepper_speed);
-        buoyancy.setAcceleration(stepper_commands.stepper_acceleration);
+
+        buoyancy.setSpeed(stepper_commands.buoyancy.speed);
+        buoyancy.setMaxSpeed(stepper_commands.buoyancy.speed);
+        buoyancy.setAcceleration(stepper_commands.buoyancy.acceleration);
+
+        pitch.setSpeed(stepper_commands.pitch.speed);
+        pitch.setMaxSpeed(stepper_commands.pitch.speed);
+        pitch.setAcceleration(stepper_commands.pitch.acceleration);
     #else  
         buoyancy.setSpeed(1500);
         buoyancy.setMaxSpeed(1500);
         buoyancy.setAcceleration(500);
+
+        pitch.setSpeed(1500);
+        pitch.setMaxSpeed(1500);
+        pitch.setAcceleration(500);
     #endif
     buoyancy.setResolution(Stepper::Resolution::HALF);
     buoyancy.rise();
     buoyancy.setMinPulseWidth(MIN_PULSE_WIDTH); // how long to wait between high and low pulses
+
+    pitch.setResolution(Stepper::Resolution::HALF);
+    pitch.setMinPulseWidth(MIN_PULSE_WIDTH); // how long to wait between high and low pulses
 }
 
 void Resurfacing::run(StateAutomation *state)
@@ -497,39 +544,26 @@ void Resurfacing::run(StateAutomation *state)
     // If we emptied the ballast, we move to the surface
     if (buoyancy.currentPosition() == buoyancy.targetPosition())
     {
-        if (m_iterations >= 3) // every three times we dive and resurface, recalibrate to correct any integrated small errors
-        {
-            state->setState(Calibrate::getInstance());
-            m_iterations = 0;
-            return;
-        }
-        else
-        {
-            state->setState(Diving::getInstance());
-            return;
-        }
+        state->setState(Diving::getInstance());
     }
-    
-    buoyancy.update(); // update the stepper motors
-    // Just filling and refilling syringe at this point. need to check accelerometers and pressure
-    // sensors to check minimums and maximums of our dive
 
     continuousFunctions(state);
 }
 
 void Resurfacing::exit(StateAutomation *state)
 {
-    m_iterations++;
+    
 }
 
-void Calibrate::enter(StateAutomation *state)
+void Diving::enter(StateAutomation *state)
 {
-    currentState = CurrentState::CALIBRATE;
+    currentState = CurrentState::DIVING_MODE;
     #if UI_ON
         TransportManager::Commands stepper_commands = TransportManager::getCommands();
-        buoyancy.setSpeed(stepper_commands.stepper_speed);
-        buoyancy.setMaxSpeed(stepper_commands.stepper_speed);
-        buoyancy.setAcceleration(stepper_commands.stepper_acceleration);
+
+        buoyancy.setSpeed(stepper_commands.buoyancy.speed);
+        buoyancy.setMaxSpeed(stepper_commands.buoyancy.speed);
+        buoyancy.setAcceleration(stepper_commands.buoyancy.acceleration);
     #else
         buoyancy.setSpeed(1500);
         buoyancy.setMaxSpeed(1500);
@@ -542,10 +576,9 @@ void Calibrate::enter(StateAutomation *state)
     buoyancy.move(500000);
 }
 
-void Calibrate::run(StateAutomation *state)
+void Diving::run(StateAutomation *state)
 {
     continuousFunctions(state);
-    buoyancy.update();
 
     if (buoyancy.limit.state() == true)
     {
@@ -553,7 +586,7 @@ void Calibrate::run(StateAutomation *state)
     }
 }
 
-void Calibrate::exit(StateAutomation *state)
+void Diving::exit(StateAutomation *state)
 {
     buoyancy.setCurrentPosition(0);
 }
@@ -566,9 +599,8 @@ void Calibrate::exit(StateAutomation *state)
 Initialization Initialization::instance;
 ErrorIndication ErrorIndication::instance;
 IdleMode IdleMode::instance;
-Diving Diving::instance;
 Resurfacing Resurfacing::instance;
-Calibrate Calibrate::instance;
+Diving Diving::instance;
 
 Initialization &Initialization::getInstance()
 {
@@ -585,17 +617,13 @@ IdleMode &IdleMode::getInstance()
     return instance;
 }
 
-Diving &Diving::getInstance()
-{
-    return instance;
-}
-
 Resurfacing &Resurfacing::getInstance()
 {
     return instance;
 }
 
-Calibrate &Calibrate::getInstance()
+Diving &Diving::getInstance()
 {
     return instance;
 }
+

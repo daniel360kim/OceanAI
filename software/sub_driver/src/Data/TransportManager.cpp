@@ -35,6 +35,7 @@ namespace TransportManager
     {
         EUI_UINT16("lt", telemetry_data.loop_time),
         EUI_FLOAT("v", telemetry_data.voltage),
+        EUI_FLOAT("r", telemetry_data.regulator),
         EUI_UINT8("sst", telemetry_data.system_state),
         EUI_FLOAT("it", telemetry_data.internal_temp),
 
@@ -60,14 +61,24 @@ namespace TransportManager
         EUI_FLOAT_ARRAY_RO("ad", telemetry_data.acc),
         EUI_FLOAT_ARRAY_RO("md", telemetry_data.mag),
 
-        EUI_INT16("sp", telemetry_data.stepper_current_position),
-        EUI_INT16("st", telemetry_data.stepper_target_position),
-        EUI_INT16("ss", telemetry_data.stepper_speed),
-        EUI_INT16("sa", telemetry_data.stepper_acceleration),
+        EUI_INT16("bsp", telemetry_data.buoyancy.current_position),
+        EUI_INT16("bst", telemetry_data.buoyancy.target_position),
+        EUI_INT16("bss", telemetry_data.buoyancy.speed),
+        EUI_INT16("bsa", telemetry_data.buoyancy.acceleration),
+
+        EUI_INT16("psp", telemetry_data.pitch.current_position),
+        EUI_INT16("pst", telemetry_data.pitch.target_position),
+        EUI_INT16("pss", telemetry_data.pitch.speed),
+        EUI_INT16("psa", telemetry_data.pitch.acceleration),
 
         EUI_UINT8("ssc", telemetry_data.commands.system_state),
-        EUI_INT16("sc", telemetry_data.commands.stepper_speed),
-        EUI_INT16("ac", telemetry_data.commands.stepper_acceleration),
+        EUI_INT16("bsc", telemetry_data.commands.buoyancy.speed),
+        EUI_INT16("bac", telemetry_data.commands.buoyancy.acceleration),
+        EUI_INT16("psc", telemetry_data.commands.pitch.speed),
+        EUI_INT16("pac", telemetry_data.commands.pitch.acceleration),
+        EUI_UINT8("pd", telemetry_data.commands.pitch.direction),
+        EUI_UINT8("pr", telemetry_data.commands.recalibrate_pitch),
+        EUI_UINT8("ap", telemetry_data.commands.auto_pitch),
         EUI_FLOAT("hds", telemetry_data.commands.hitl_scale),
         EUI_UINT8("sde", telemetry_data.commands.sd_log_enable),
         EUI_UINT16("sdr", telemetry_data.commands.sd_log_interval_hz),
@@ -141,6 +152,7 @@ namespace TransportManager
             {
                 eui_send_tracked("lt");
                 eui_send_tracked("v");
+                eui_send_tracked("r");
                 eui_send_tracked("sst");
                 eui_send_tracked("it");
 
@@ -171,10 +183,17 @@ namespace TransportManager
                 eui_send_tracked("ad");
                 eui_send_tracked("md");
 
-                eui_send_tracked("sp");
-                eui_send_tracked("st");
-                eui_send_tracked("ss");
-                eui_send_tracked("sa");
+                eui_send_tracked("bsp");
+                eui_send_tracked("bst");
+                eui_send_tracked("bss");
+                eui_send_tracked("bsa");
+
+                eui_send_tracked("psp");
+                eui_send_tracked("pst");
+                eui_send_tracked("pss");
+                eui_send_tracked("psa");
+
+                eui_send_tracked("ap");
 
                 packet_one = true;
             }

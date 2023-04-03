@@ -94,26 +94,6 @@ private:
 };
 
 /**
- * @brief Diving state. Used when the submarine is diving
- * 
- */
-class Diving : public State
-{
-public:
-    void enter(StateAutomation *state);
-    void run(StateAutomation *state);
-    void exit(StateAutomation *state);
-    static Diving &getInstance();
-
-private:
-    Diving() {}
-    Diving(const Diving &);
-    Diving &operator=(const Diving &);
-
-    static Diving instance;
-};
-
-/**
  * @brief Resurfacing state. Used when the submarine is resurfacing
  * 
  */
@@ -132,22 +112,21 @@ private:
 
     static Resurfacing instance;
 
-    int m_iterations = 0; //every certain iterations we recalibrate
 };
 
-class Calibrate : public State
+class Diving : public State
 {
 public:
     void enter(StateAutomation *state);
     void run(StateAutomation *state);
     void exit(StateAutomation *state);
-    static Calibrate &getInstance();
+    static Diving &getInstance();
 private:
-    Calibrate() {}
-    Calibrate(const Calibrate &);
-    Calibrate &operator=(const Calibrate &);
+    Diving() {}
+    Diving(const Diving &);
+    Diving &operator=(const Diving &);
 
-    static Calibrate instance;
+    static Diving instance;
 };
 
 

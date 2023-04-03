@@ -26,7 +26,6 @@ namespace Sensors
         virtual ~ReadFunctions() {}
         virtual double readRaw() = 0; //reads raw sensor value
         virtual double readFiltered(const double delta_time) = 0; //runs filter through raw sensor value
-        virtual void logToStruct(LoggedData &data) = 0; //logs raw and filtered sensor values to our data struct
 
     protected:
         double raw_reading = 0.0;

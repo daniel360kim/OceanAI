@@ -96,6 +96,9 @@ struct LoggedData
 
     double raw_voltage;
     double filt_voltage;
+    double raw_regulator;
+    double filt_regulator;
+
     int clock_speed;
     double internal_temp;
 
@@ -160,6 +163,10 @@ struct LoggedData
         p.print(data.raw_voltage);
         p.print(delim);
         p.print(data.filt_voltage);
+        p.print(delim);
+        p.print(data.raw_regulator);
+        p.print(delim);
+        p.print(data.filt_regulator);
         p.print(delim);
         p.print(data.clock_speed);
         p.print(delim);
@@ -326,6 +333,8 @@ struct LoggedData
         sys_data.add(data.sd_log_rate_hz);
         sys_data.add(data.raw_voltage);
         sys_data.add(data.filt_voltage);
+        sys_data.add(data.raw_regulator);
+        sys_data.add(data.filt_regulator);
         sys_data.add(data.clock_speed);
         sys_data.add(data.internal_temp);
 

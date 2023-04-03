@@ -41,7 +41,6 @@ enum class CurrentState
     IDLE_MODE,
     DIVING_MODE,
     RESURFACING,
-    CALIBRATE,
 };
 
 /**

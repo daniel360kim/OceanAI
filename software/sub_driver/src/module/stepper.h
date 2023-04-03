@@ -44,14 +44,16 @@ public:
     Stepper(StepperPins pins, Resolution resolution, StepperProperties properties);
 
     void setResolution(Resolution resolution);
-    void calibrate();
-    void calibrate_noCheck(); //calibrate without checking if the limit switch is pressed a second time
+    bool calibrate();
 
     double currentPosition_mm();
     double targetPosition_mm();
 
     void goTo(long absolute);
     void move_mm(int mm);
+
+    bool setCalibrated(bool calibrated) { this->calibrated = calibrated; }
+    bool isCalibrated() const { return calibrated; }
 
     bool update();
 
@@ -63,7 +65,7 @@ protected:
     StepperPins pins;
 
     double steps_per_mm;
-    bool calibrated = true; //change to false when calibration impl.
+    bool calibrated = false;
 
     void recheckLimit();
 };
@@ -78,20 +80,18 @@ public:
     void sink();
     void rise();
 
-    void forward();
-
     void logToStruct(LoggedData &data);
 
     bool sinking = false;
     bool rising = false;
+};
 
-    void calibrate();
-    void calibrate_noCheck(); //calibrate without checking if the limit switch is pressed a second time
-
-
-private:
-    void recheckLimit();
+class Pitch : public Stepper
+{
+public:
+    explicit Pitch(StepperPins pins, Resolution resolution, StepperProperties properties) : Stepper(pins, resolution, properties) {}
     
+    void logToStruct(LoggedData &data);
 };
 
 

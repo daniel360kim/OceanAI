@@ -72,43 +72,32 @@ void Stepper::setResolution(Resolution resolution)
 
 /**
  * @brief Calibrates the stepper motor
- * Really need to figure out how to make this nonblocking :(
+ * Must call update outside of this function
  * 
  */
-void Stepper::calibrate()
+bool Stepper::calibrate()
 {
-    setMaxSpeed(6000);
-    setAcceleration(6000);
-    setSpeed(6000);
+    setMaxSpeed(1000);
+    setAcceleration(500);
+    setSpeed(1000);
     setResolution(Resolution::HALF);
 
-    calibrate_noCheck();
+    moveTo(100000000); //move to end of rail
 
-    recheckLimit();
-
-    calibrated = true;
-}
-
-/**
- * @brief Calibrates the stepper motor without checking if the limit switch is pressed a second time
- * 
- */
-void Stepper::calibrate_noCheck()
-{
     if(limit.state() == true)
     {
-        recheckLimit();
-        return;
+        moveTo(0);
+        setCurrentPosition(0);
+        update();
+        calibrated = true;
+        return true;
     }
-
-    move(-100000000); //just move a lot lol
-    while(limit.state() == false)
+    else
     {
-        run();
+        return false;
     }
-    
-    setCurrentPosition(0);
 }
+
 
 /**
  * @brief After limit switch is pressed once, it goes back and slowly eases back in
@@ -118,7 +107,7 @@ void Stepper::calibrate_noCheck()
 void Stepper::recheckLimit()
 {
     setCurrentPosition(0);
-    move(1000);
+    move(-1000);
     while(currentPosition() != 1000)
     {
         run();
@@ -126,8 +115,7 @@ void Stepper::recheckLimit()
     
     setResolution(Resolution::EIGHTH);
 
-
-    move(-100000000);
+    move(100000000);
     uint64_t start = millis();
     while(limit.state() == false)
     {
@@ -236,11 +224,6 @@ bool Stepper::update()
  */
 void Buoyancy::sink()
 {
-    if(!calibrated)
-    {
-        calibrate();
-    }
-
     moveTo(-1 * properties.halves_length); //go to the other side of the carriage
 
     sinking = true;
@@ -259,24 +242,6 @@ void Buoyancy::rise()
     rising = true;
 }
 
-/**
- * @brief moves syringe back and forth to go up and down, thus going forward
- * Must be called in main loop and updated consistently
- * 
- */
-void Buoyancy::forward()
-{
-    if(sinking && currentPosition() == targetPosition())
-    {
-        rise();
-    }
-    else if(rising && currentPosition() == targetPosition())
-    {
-        sink();
-    }
-
-    update();
-}
 
 void Buoyancy::logToStruct(LoggedData &data)
 {
@@ -294,58 +259,22 @@ void Buoyancy::logToStruct(LoggedData &data)
 }
 
 
-void Buoyancy::calibrate()
+void Pitch::logToStruct(LoggedData &data)
 {
-    setMaxSpeed(4000);
-    setAcceleration(2000);
-    setSpeed(4000);
-    setResolution(Resolution::HALF);
+    data.pitch_stepper.current_position = currentPosition();
+    data.pitch_stepper.target_position = targetPosition();
 
-    calibrate_noCheck();
+    data.pitch_stepper.current_position_mm = currentPosition_mm();
+    data.pitch_stepper.target_position_mm = targetPosition_mm();
 
-    recheckLimit();
+    data.pitch_stepper.limit_state = limit.state();
 
-    calibrated = true;
+    data.pitch_stepper.speed = speed();
+    data.pitch_stepper.max_speed = maxSpeed();
+    data.pitch_stepper.acceleration = acceleration();
 }
 
-void Buoyancy::calibrate_noCheck()
-{
-    if(limit.state() == true)
-    {
-        recheckLimit();
-        return;
-    }
 
-    move(-100000000); //just move a lot lol
-    while(limit.state() == false)
-    {
-        run();
-    }
-    
-    setCurrentPosition(0);
-}
 
-void Buoyancy::recheckLimit()
-{
-    setCurrentPosition(0);
-    move(500);
-    while(currentPosition() != 500)
-    {
-        run();
-    }
-    
-    setResolution(Resolution::EIGHTH);
-    move(-100000000);
-    uint64_t start = millis();
-    while(limit.state() == false)
-    {
-        if(millis() - start > 10000)
-        {
-            return;
-        }
-        run();
-    }
 
-    setCurrentPosition(0);
-}
 

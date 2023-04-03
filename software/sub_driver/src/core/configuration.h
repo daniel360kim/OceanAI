@@ -53,8 +53,6 @@ namespace MissionDuration
     constexpr uint64_t mission_time = ((uint64_t)(days * (uint64_t)8.64e+13) + (uint64_t)(hours * (uint64_t)3.6e+12) + (uint64_t)(minutes * (uint64_t)6e+10) + (uint64_t)(seconds * (uint64_t)1e+9));
 }
 
-
-
 namespace CPU
 {
     /**

@@ -19,16 +19,35 @@
 
 namespace TransportManager
 {
+    struct StepperCommands
+    {
+        int16_t speed = 0;
+        int16_t acceleration = 0;
+        uint8_t direction = 0;
+    };
+
     struct Commands
     {
         uint8_t system_state = 0;
-        int16_t stepper_speed = 0;
-        int16_t stepper_acceleration = 0;
+        
+        StepperCommands buoyancy;
+        StepperCommands pitch;
+
+        uint8_t recalibrate_pitch = false;
+        uint8_t auto_pitch = false;
 
         float hitl_scale = 0;
 
         uint8_t sd_log_enable = 1;
         uint16_t sd_log_interval_hz = 30;
+    };
+
+    struct StepperInfo
+    {
+        int16_t current_position = 0;
+        int16_t target_position = 0;
+        int16_t speed = 0;
+        int16_t acceleration = 0;
     };
     
     class Packet
@@ -36,6 +55,7 @@ namespace TransportManager
     public:
         uint16_t loop_time = 0;
         float voltage = 0.f;
+        float regulator = 0.f;
         uint8_t system_state = 0;
         float internal_temp = 0.f;
 
@@ -55,10 +75,8 @@ namespace TransportManager
         float gyr[3] = { 0.f };
         float mag[3] = { 0.f };
 
-        int16_t stepper_current_position = 0;
-        int16_t stepper_target_position = 0;
-        int16_t stepper_speed = 0;
-        int16_t stepper_acceleration = 0;
+        StepperInfo buoyancy;
+        StepperInfo pitch;
 
         Commands commands = {};
 
@@ -66,7 +84,8 @@ namespace TransportManager
         {
             //Convert to set size since data is transmitted to different devices
             loop_time = static_cast<uint16_t>(data.loop_time);
-            voltage = static_cast<float>(data.filt_voltage);
+            voltage = static_cast<float>(data.raw_voltage);
+            regulator = static_cast<float>(data.filt_regulator);
             system_state = static_cast<uint8_t>(data.system_state);
             internal_temp = static_cast<float>(data.bmi_temp);
 
@@ -101,15 +120,21 @@ namespace TransportManager
             mag[1] = static_cast<float>(data.rmag.y);
             mag[2] = static_cast<float>(data.rmag.z);
 
-            stepper_acceleration = static_cast<int16_t>(data.dive_stepper.acceleration);
-            stepper_current_position = static_cast<int16_t>(data.dive_stepper.current_position);
-            stepper_target_position = static_cast<int16_t>(data.dive_stepper.target_position);
-            stepper_speed = static_cast<int16_t>(data.dive_stepper.speed);
+            buoyancy.acceleration = static_cast<int16_t>(data.dive_stepper.acceleration);
+            buoyancy.current_position = static_cast<int16_t>(data.dive_stepper.current_position);
+            buoyancy.target_position = static_cast<int16_t>(data.dive_stepper.target_position);
+            buoyancy.speed = static_cast<int16_t>(data.dive_stepper.speed);
 
-            stepper_acceleration = std::abs<int16_t>(stepper_acceleration);
-            stepper_current_position = std::abs<int16_t>(stepper_current_position);
-            stepper_target_position = std::abs<int16_t>(stepper_target_position);
-            stepper_speed = std::abs<int16_t>(stepper_speed);
+            pitch.acceleration = static_cast<int16_t>(data.pitch_stepper.acceleration);
+            pitch.current_position = static_cast<int16_t>(data.pitch_stepper.current_position) * -1;
+            pitch.target_position = static_cast<int16_t>(data.pitch_stepper.target_position);
+            pitch.speed = static_cast<int16_t>(data.pitch_stepper.speed);
+
+            buoyancy.acceleration = std::abs<int16_t>(buoyancy.acceleration);
+            buoyancy.current_position = std::abs<int16_t>(buoyancy.current_position);
+            buoyancy.target_position = std::abs<int16_t>(buoyancy.target_position);
+            buoyancy.speed = std::abs<int16_t>(buoyancy.speed);
+
         }
     };
 
