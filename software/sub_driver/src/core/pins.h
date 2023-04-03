@@ -80,8 +80,8 @@ constexpr uint8_t TX_RF = 4;
 constexpr uint8_t SET = 6;
 
 //Serial comms
-constexpr uint8_t RX_5 = 21;
-constexpr uint8_t TX_5 = 20;
+constexpr uint8_t RX_GPS = 21;
+constexpr uint8_t TX_GPS = 20;
 
 /////expr SPI /////
 constexpr uint8_t CS_VD = 10;
