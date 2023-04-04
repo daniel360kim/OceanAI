@@ -17,12 +17,25 @@
 #include "timer.h"
 #include "../Data/logged_data.h"
 
+/**
+ * Debug funciontality for the system
+ * DEBUG saves internal debug messages internally
+ * LIVE_DEBUG sends internal debug messages to the Serial monitor
+ */
 #define DEBUG_ON false
 #define LIVE_DEBUG false
 
+/**
+ * HITL functionality for the system
+ * Set HITL_LOOP to true to reloop through the HITL data
+ */
 #define HITL_ON true
 #define HITL_LOOP true
 
+/**
+ * UI functionality for the system
+ * Make sure there are no serial outputs while UI is on
+ */
 #define UI_ON true
 
 #if UI_ON && !HITL_ON
@@ -43,6 +56,10 @@
 
 #define OPTICS_ON false
 
+/**
+ * @brief Mission duration setting to preallocate space in microSD
+ * 
+ */
 namespace MissionDuration
 {
     constexpr uint16_t days = 0;
@@ -85,7 +102,7 @@ namespace Sensors
 namespace TransportManager
 {
     constexpr int SERIAL_BAUDRATE = 115200;
-    constexpr int SEND_INTERVAL = HZ_TO_NS(100);
+    constexpr int SEND_INTERVAL = HZ_TO_NS(100); //how often data is sent to the GUI
 }
 
 namespace Logging
@@ -96,6 +113,6 @@ namespace Logging
     constexpr unsigned long long CAPACITY_UPDATE_INTERVAL = SEC_TO_NS(360);// update capacity every 6 minutes
 }
 
-constexpr int MIN_PULSE_WIDTH = 1;
+constexpr int MIN_PULSE_WIDTH = 1; // minimum pulse width in microseconds for stepper motor
 
 #endif

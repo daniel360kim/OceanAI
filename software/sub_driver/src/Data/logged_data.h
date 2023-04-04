@@ -84,7 +84,10 @@ struct HITLData
     double currentSpeed;
 };
 
-// To do: organize into different structs for optimization and organization
+/**
+ * @brief All the data logged to the SD card
+ * 
+ */
 struct LoggedData
 {
     int64_t time_ns;

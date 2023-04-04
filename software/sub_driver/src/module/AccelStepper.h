@@ -52,65 +52,46 @@ public:
     } MotorInterfaceType;
 
     explicit AccelStepper(uint8_t interface = AccelStepper::FULL4WIRE, uint8_t pin1 = 2, uint8_t pin2 = 3, uint8_t pin3 = 0, uint8_t pin4 = 0, bool enable = true);
-
     AccelStepper(void (*forward)(), void (*backward)());
 
     void moveTo(long absolute);
-
     void move(long relative);
 
     bool run();
-
     bool runSpeed();
 
     void setMaxSpeed(double speed);
-
     double maxSpeed();
-
     void setAcceleration(double acceleration);
-
     void setSpeed(double speed);
-
     double speed();
 
     double distanceToGo();
-
     double targetPosition();
-
     double currentPosition();
-
     double acceleration() const { return _acceleration; }
     double maxSpeed() const { return _maxSpeed; }
     double speed() const { return _speed; }
 
     void setCurrentPosition(long position);
-
     void runToPosition();
-
     bool runSpeedToPosition();
-
     void runToNewPosition(long position);
 
     void stop();
 
     virtual void disableOutputs();
-
     virtual void enableOutputs();
 
     void setMinPulseWidth(unsigned int minWidth);
-
     void setEnablePin(uint8_t enablePin = 0xff);
-
     void setPinsInverted(bool directionInvert = false, bool stepInvert = false, bool enableInvert = false);
-
     void setPinsInverted(bool pin1Invert, bool pin2Invert, bool pin3Invert, bool pin4Invert, bool enableInvert);
-
     bool isRunning();
 
     uint64_t step_iterations;
 
     void invertDirection();
-
 
 protected:
 
@@ -123,19 +104,12 @@ protected:
     virtual void setOutputPins(uint8_t mask);
 
     virtual void step(long step);
-
     virtual void step0(long step);
-
     virtual void step1(long step);
-
     virtual void step2(long step);
-
     virtual void step3(long step);
-
     virtual void step4(long step);
-
     virtual void step6(long step);
-
     virtual void step8(long step);
 
     bool _direction;
@@ -146,15 +120,11 @@ protected:
     double _maxSpeed;
 private:
     uint8_t _interface;
-
     uint8_t _pin[4];
-
     uint8_t _pinInverted[4];
 
     double _currentPos;
-
     double _targetPos;
-
     double _speed;
 
 
@@ -162,25 +132,19 @@ private:
     double _sqrt_twoa;
 
     uint64_t _stepInterval;
-
     uint64_t _lastStepTime;
 
     unsigned int _minPulseWidth;
 
     bool _enableInverted;
-
     uint8_t _enablePin;
 
     void (*_forward)();
-
     void (*_backward)();
 
     double _n;
-
     double _c0;
-
     double _cn;
-
     double _cmin;
 };
 

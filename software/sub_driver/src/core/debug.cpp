@@ -16,6 +16,12 @@
 #include "debug.h"
 
 #if DEBUG_ON
+/*
+* Three types of debug message
+* Error: errors within the system
+* Success: successful events within the system
+* Info: information about the system
+*/
 Debug error(100);
 Debug success(100);
 Debug info(100);
@@ -25,7 +31,7 @@ DebugMessage debugMessage;
 /**
  * @brief Construct a new Debug Message:: Debug Message object
  * Creates a debug message with a variable number of arguments
- * 
+ * Follows the same format as printf
  * @param severity severity of message
  * @param message the message to be printed
  * @param ... arguments to be printed
@@ -86,14 +92,13 @@ void DebugMessage::createMessagef(Severity severity, std::string message, ...)
 
     va_end(args);
 
-    Serial.print("Message: "); Serial.println(m_Message.c_str());
 }
 
 void DebugMessage::createMessage(Severity severity, std::string message)
 {
-    m_Timestamp = scoped_timer.elapsed();
-    m_Severity = severity;
-    m_Message = message;
+    m_Timestamp = scoped_timer.elapsed(); //log the timestamp
+    m_Severity = severity; 
+    m_Message = message; 
 }
 
 void DebugMessage::SetTimestamp(int64_t timestamp)
@@ -151,11 +156,14 @@ void Debug::addMessage(DebugMessage addMessage)
 { 
     m_Messages.push_back(addMessage);
 
-    #if LIVE_DEBUG
+    #if LIVE_DEBUG //print the message to the serial monitor if live debug is enabled
         Serial.print(addMessage.GetTimestampMillis()); Serial.print("ms\t");
         Serial.print(addMessage.GetMessage().c_str()); Serial.print("\n");
     #endif
 
+    /**
+     * If the number of messages exceeds the maximum number of messages, delete the oldest message
+     */
     if(m_Messages.size() > m_maxMessages)
     {
         m_Messages.erase(m_Messages.begin());

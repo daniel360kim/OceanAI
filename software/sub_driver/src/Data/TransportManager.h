@@ -75,11 +75,21 @@ namespace TransportManager
         float gyr[3] = { 0.f };
         float mag[3] = { 0.f };
 
+        float x;
+        float y;
+        float z;
+
         StepperInfo buoyancy;
         StepperInfo pitch;
 
         Commands commands = {};
 
+        /**
+         * @brief Converts the data within LoggedData to the format needed for transmission by the GUI
+         * 32 bit float used instead of 64 bit double to save bandwidth
+         * Size of types is set (uint8_t, uint16_t, uint32_t, float) to ensure cross platform compatibility
+         * @param data LoggedData instance with the data to convert
+         */
         void convert(LoggedData &data)
         {
             //Convert to set size since data is transmitted to different devices
@@ -119,6 +129,11 @@ namespace TransportManager
             mag[0] = static_cast<float>(data.rmag.x);
             mag[1] = static_cast<float>(data.rmag.y);
             mag[2] = static_cast<float>(data.rmag.z);
+
+            //Translated orientation values for 3D model 
+            x = static_cast<float>(data.rel_ori.x * DEG_TO_RAD);
+            y = static_cast<float>(data.rel_ori.y * DEG_TO_RAD);
+            z = static_cast<float>(data.rel_ori.z * DEG_TO_RAD);
 
             buoyancy.acceleration = static_cast<int16_t>(data.dive_stepper.acceleration);
             buoyancy.current_position = static_cast<int16_t>(data.dive_stepper.current_position);

@@ -4,11 +4,13 @@
 
 void setup() 
 {
-	StateAutomation submarine;
-	while(1)
+	StateAutomation submarine; // create a submarine object
+
+	//We ignore the loop() of the Arduino framework to avoid globals
+	while(1) 
 	{
 		submarine.run();
 	}
 }
-
+ 
 void loop() {}

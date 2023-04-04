@@ -52,7 +52,7 @@ public:
     void goTo(long absolute);
     void move_mm(int mm);
 
-    bool setCalibrated(bool calibrated) { this->calibrated = calibrated; }
+    void setCalibrated(bool calibrated) { this->calibrated = calibrated; }
     bool isCalibrated() const { return calibrated; }
 
     bool update();
@@ -79,6 +79,7 @@ public:
     
     void sink();
     void rise();
+    void rise(long half_steps);
 
     void logToStruct(LoggedData &data);
 

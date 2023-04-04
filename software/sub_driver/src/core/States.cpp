@@ -24,9 +24,9 @@
 
 #include "pins.h"
 
-
 #include "indication/OutputFuncs.h"
 #include "indication/LED.h"
+#include "indication/LEDStrip.h"
 
 #include <Arduino.h>
 #include <teensy_clock/teensy_clock.h>
@@ -54,10 +54,10 @@ static Sensors::TotalDissolvedSolids total_dissolved_solids(TDS, 30, HZ_TO_NS(5)
 static Sensors::Voltage regulator(v_div, 30, HZ_TO_NS(5), 9.95, 1.992);
 static Sensors::Voltage battery(TX_GPS, 30, HZ_TO_NS(5), 9.62, 4.47);
 
-
 static Orientation ori;
  
 static LED signal(SIGNAL);
+static LEDStrip<RX_GPS, 15> led_strip;
 
 static int64_t previous_time;
 static teensy_clock::time_point start_time;
@@ -118,31 +118,28 @@ static StaticJsonDocument<STATIC_JSON_DOC_SIZE> data_json;
 #endif
 
 /**
- * @brief Functions that run in multiple states
+ * @brief Functions that run in multiple states looped
  */
 void continuousFunctions(StateAutomation *state)
 {
     data.time_ns = scoped_timer.elapsed(); // scoped timer is a global object to measure time since program epoch
-    data.delta_time = (scoped_timer.elapsed() - previous_time) / 1000000000.0;
+    data.delta_time = (scoped_timer.elapsed() - previous_time) / 1000000000.0; //calculate the delta time
     previous_time = scoped_timer.elapsed();
 
-    data.system_state = static_cast<uint8_t>(currentState);
+    data.system_state = static_cast<uint8_t>(currentState); //update the current state within the logged data
 
 #if PRINT_STATE
     StateAutomation::printState(Serial, currentState);
 #endif
 
-    CPU::log_cpu_info(data);
-
-    Sensors::logData(data);
-
-    external_temp.logToStruct(data);
-    external_pres.logToStruct(data);
-    total_dissolved_solids.logToStruct(data);
     #if HITL_ON
-    data_provider.update(data.time_ns);
+    data_provider.update(data.time_ns); //update the data provider with the current time
 
-    data.HITL.index = (uint16_t)data_provider.getIndex();
+    /**
+     * Update logged data with the HITL data collected
+     * 
+     */
+    data.HITL.index = (uint16_t)data_provider.getIndex(); 
     data.HITL.timestamp = data_provider.getTimestamp();
     data.HITL.location.latitude = location[0];
     data.HITL.location.longitude = location[1];
@@ -151,26 +148,41 @@ void continuousFunctions(StateAutomation *state)
     data.HITL.salinity = salinity[0];
     data.HITL.temperature = temperature[0];
 
+    //update the navigation data based on HITL data
     data.HITL.distance = hitl_nav.getTotalDistanceTraveled(data.HITL.location.latitude, data.HITL.location.longitude);
     data.HITL.averageSpeed = hitl_nav.getAverageSpeed(data.HITL.location.latitude, data.HITL.location.longitude, data.time_ns);
     data.HITL.currentSpeed = hitl_nav.getSpeedX(data.HITL.location.latitude, data.HITL.location.longitude, data_provider.getTimestamp());
 
     #endif
 
+    /**
+     * Logging sensor data
+     * 
+     */
+    CPU::log_cpu_info(data); //add cpu info to the logged data
+
+    Sensors::logData(data); //add IMU data to the logged data
+
+    external_temp.logToStruct(data);
+    external_pres.logToStruct(data);
+    total_dissolved_solids.logToStruct(data);
+
+    //Voltage from battery
     data.raw_voltage = battery.readRaw();
     data.filt_voltage = battery.readFiltered(data.delta_time);
 
+    //Voltage from regulator
     data.raw_regulator = regulator.readRaw();
     data.filt_regulator = regulator.readFiltered(data.delta_time);
 
-    nav_v.updateVelocity(data);
-    nav_p.updatePosition(data);
-    SFori.update(data);
+    nav_v.updateVelocity(data); //calculate velocity from IMU data
+    nav_p.updatePosition(data); //calculate position from IMU data
+    SFori.update(data); //update the orientation of the sub from IMU data
 
-    Quaternion relative = Orientation::toQuaternion(data.rel_ori.x, data.rel_ori.y, data.rel_ori.z);
-    data.wfacc = ori.convertAccelFrame(relative, data.racc.x, data.racc.y, data.racc.z);
+    Quaternion relative = Orientation::toQuaternion(data.rel_ori.x, data.rel_ori.y, data.rel_ori.z); //convert the relative orientation to a quaternion
+    data.wfacc = ori.convertAccelFrame(relative, data.racc.x, data.racc.y, data.racc.z); //convert the acceleration from the relative frame to the world frame
 
-    data.relative = static_cast<Angles_4D>(relative);
+    data.relative = static_cast<Angles_4D>(relative); //add to logged data
 
 #if OPTICS_ON == true
     camera.capture();
@@ -178,24 +190,26 @@ void continuousFunctions(StateAutomation *state)
     logger.log_image(camera);
 #endif
 
-    signal.blink(80);
+    signal.blink(80); //blink to look cool :)
 
     if (!warning)
     {
+        //Show the spectrum on the LEDs if there is no warning
         LEDa.displaySpectrum();
         LEDb.displaySpectrum();
     }
     else
     {
-        LEDb.blink(255, 0, 0, data.sd_log_rate_hz);
+        LEDb.blink(255, 0, 0, data.sd_log_rate_hz); //blink red if there is a warning
     }
 
+    led_strip.setColor(255, 255, 255); //turn on LED strip at the bottom of the vehicle
+
+    //Log and update buoyancy and pitch stepper motor data
     buoyancy.logToStruct(data);
-    buoyancy.setMinPulseWidth(MIN_PULSE_WIDTH);
     buoyancy.update();
 
     pitch.logToStruct(data);
-    pitch.setMinPulseWidth(MIN_PULSE_WIDTH);
     pitch.update();
 
     logger.update_sd_capacity(data);
@@ -218,8 +232,11 @@ void continuousFunctions(StateAutomation *state)
         state->setState(IdleMode::getInstance());
         return;
     }
+
+    //Get commands from the GUI
     TransportManager::Commands commands = TransportManager::getCommands();
 
+    //Update pitch stepper from the 
     if(commands.auto_pitch != 0)
     {
         if(!pitch.isCalibrated())
@@ -251,7 +268,7 @@ void continuousFunctions(StateAutomation *state)
             pitch.setCalibrated(false);
         }
     }
-    else
+    else //auto pitch proc here
     {
 
     }
@@ -531,9 +548,11 @@ void Resurfacing::enter(StateAutomation *state)
         pitch.setMaxSpeed(1500);
         pitch.setAcceleration(500);
     #endif
+
     buoyancy.setResolution(Stepper::Resolution::HALF);
-    buoyancy.rise();
     buoyancy.setMinPulseWidth(MIN_PULSE_WIDTH); // how long to wait between high and low pulses
+
+    buoyancy.rise();
 
     pitch.setResolution(Stepper::Resolution::HALF);
     pitch.setMinPulseWidth(MIN_PULSE_WIDTH); // how long to wait between high and low pulses
@@ -545,6 +564,7 @@ void Resurfacing::run(StateAutomation *state)
     if (buoyancy.currentPosition() == buoyancy.targetPosition())
     {
         state->setState(Diving::getInstance());
+        return;
     }
 
     continuousFunctions(state);

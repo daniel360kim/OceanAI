@@ -17,6 +17,11 @@
 #include <chrono>
 #include <map>
 
+/**
+ * Macros to convert time units
+ * This project uses nanoseconds as the base unit
+ */
+
 #define SEC_TO_NS(sec) (sec * 1000000000ULL)
 #define MS_TO_NS(ms) (ms * 1000000)
 #define US_TO_NS(us) (us * 1000)
@@ -143,7 +148,7 @@ namespace Time
         TimerManager() {}
         static TimerManager instance;
 
-        std::map<const char*, TimerData> timers;
+        std::map<const char*, TimerData> timers; //all the running timers
 
     };
 

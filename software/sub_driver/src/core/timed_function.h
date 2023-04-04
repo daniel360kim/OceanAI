@@ -80,6 +80,11 @@ namespace Time
             this->interval = interval;
         }
 
+        /**
+         * @brief Set which function to call at the interval
+         * 
+         * @param func pointer to the function to be called
+         */
         void setFunction(T(*func)(P...))
         {
             this->func = func;

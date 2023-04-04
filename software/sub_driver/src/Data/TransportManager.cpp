@@ -31,11 +31,13 @@ namespace TransportManager
     static bool packet_one = true; //Flag to switch between packets
 
     //Pairing telemetry data with names to transport to GUI
+    //Identifiers must be unique and short to optimize data transfer
     static eui_message_t tracked_variables[] =
     {
+        //Data being sent to GUI
         EUI_UINT16("lt", telemetry_data.loop_time),
         EUI_FLOAT("v", telemetry_data.voltage),
-        EUI_FLOAT("r", telemetry_data.regulator),
+        EUI_FLOAT("reg", telemetry_data.regulator),
         EUI_UINT8("sst", telemetry_data.system_state),
         EUI_FLOAT("it", telemetry_data.internal_temp),
 
@@ -60,6 +62,9 @@ namespace TransportManager
         EUI_FLOAT_ARRAY_RO("gd", telemetry_data.gyr),
         EUI_FLOAT_ARRAY_RO("ad", telemetry_data.acc),
         EUI_FLOAT_ARRAY_RO("md", telemetry_data.mag),
+        EUI_FLOAT("x", telemetry_data.x),
+        EUI_FLOAT("y", telemetry_data.y),
+        EUI_FLOAT("z", telemetry_data.z),
 
         EUI_INT16("bsp", telemetry_data.buoyancy.current_position),
         EUI_INT16("bst", telemetry_data.buoyancy.target_position),
@@ -71,6 +76,7 @@ namespace TransportManager
         EUI_INT16("pss", telemetry_data.pitch.speed),
         EUI_INT16("psa", telemetry_data.pitch.acceleration),
 
+        //Data received from the GUI
         EUI_UINT8("ssc", telemetry_data.commands.system_state),
         EUI_INT16("bsc", telemetry_data.commands.buoyancy.speed),
         EUI_INT16("bac", telemetry_data.commands.buoyancy.acceleration),
@@ -79,6 +85,7 @@ namespace TransportManager
         EUI_UINT8("pd", telemetry_data.commands.pitch.direction),
         EUI_UINT8("pr", telemetry_data.commands.recalibrate_pitch),
         EUI_UINT8("ap", telemetry_data.commands.auto_pitch),
+
         EUI_FLOAT("hds", telemetry_data.commands.hitl_scale),
         EUI_UINT8("sde", telemetry_data.commands.sd_log_enable),
         EUI_UINT16("sdr", telemetry_data.commands.sd_log_interval_hz),
@@ -136,6 +143,10 @@ namespace TransportManager
     {
         serial_rx_handler();
 
+        /**
+         * @brief Sends data to GUI within the interval
+         * Sends data in two packets to stay within UART buffer size
+         */
         int64_t current_time = scoped_timer.elapsed();
         if(current_time - previous_telem_send_time <= SEND_INTERVAL)
         {
@@ -194,6 +205,10 @@ namespace TransportManager
                 eui_send_tracked("psa");
 
                 eui_send_tracked("ap");
+
+                eui_send_tracked("x");
+                eui_send_tracked("y");
+                eui_send_tracked("z");
 
                 packet_one = true;
             }

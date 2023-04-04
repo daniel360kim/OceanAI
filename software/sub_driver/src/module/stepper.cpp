@@ -224,7 +224,7 @@ bool Stepper::update()
  */
 void Buoyancy::sink()
 {
-    moveTo(-1 * properties.halves_length); //go to the other side of the carriage
+    moveTo(properties.halves_length); //go to the other side of the carriage
 
     sinking = true;
     rising = false;
@@ -237,6 +237,14 @@ void Buoyancy::sink()
 void Buoyancy::rise()
 {
     moveTo(-1 * properties.halves_length); //moves to the very end of the carriage
+
+    sinking = false;
+    rising = true;
+}
+
+void Buoyancy::rise(long half_steps)
+{
+    move(-1 * half_steps);
 
     sinking = false;
     rising = true;

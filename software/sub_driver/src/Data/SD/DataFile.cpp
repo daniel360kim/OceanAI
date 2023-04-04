@@ -18,11 +18,18 @@
 
 bool DataFile::file_initialized = false;
 
-
+/**
+ * @brief Creates a file within the SD card. Increments the file name if the file already exists
+ * 
+ * @param file_name file name
+ * @param ending file name extension (.txt, .csv, .jpg, etc.)
+ */
 DataFile::DataFile(const char* file_name, ENDING ending)
 {
 	m_filename_length = strlen(file_name);
 
+	//Add more extensions to the switch statement if needed. must also add to the ENDING enum
+	//Extensions with three numbers (that will be changed) is appended to the file name
 	switch(ending)
 	{
 		case CSV:
@@ -54,7 +61,7 @@ DataFile::DataFile(const char* file_name, ENDING ending)
 			break;
 		
 		default:
-			m_filename = appendChars(file_name, "00.txt"); //default to .txt
+			m_filename = appendChars(file_name, "000.txt"); //default to .txt
 	}	
 }
 
@@ -104,7 +111,7 @@ bool DataFile::createFile()
 		return false;
 	}
 
-	incrementFileName(m_filename, m_filename_length);
+	incrementFileName(m_filename, m_filename_length); //increment the file name if it already exists
 
 	return true;
 }

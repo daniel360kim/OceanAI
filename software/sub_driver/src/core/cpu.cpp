@@ -24,7 +24,7 @@ namespace CPU
      */
     void init()
     {
-        InternalTemperature.attachHighTempInterruptCelsius(OVERTEMP_THRESHOLD, &HighAlarmISR);
+        InternalTemperature.attachHighTempInterruptCelsius(OVERTEMP_THRESHOLD, &HighAlarmISR); //set overtemp threshold and attach HighAlarmISR (ISR for when temperature is above OVERTEMP_THRESHOLD)
 
         INFO_LOGf("Overtemp threshold: %d", OVERTEMP_THRESHOLD);
         INFO_LOGf("Undertemp threshold: %d", UNDERTEMP_THRESHOLD);
@@ -59,6 +59,7 @@ namespace CPU
     int64_t previous_cpu_log = 0;
     void log_cpu_info(LoggedData &logged_data)
     {
+        // log CPU info at a set interval
         int64_t current_time = scoped_timer.elapsed();
         if(current_time - previous_cpu_log < CPU_INFO_LOG_INTERVAL)
         {

@@ -29,6 +29,8 @@ namespace Sensors
 
     static BMP388_DEV baro;
 
+    static int64_t previous_mag_time = 0;
+
     /*
     BMI088 comes with built in low pass filter
     LIS3MDL does not come with built in low pass filter so we use our own
@@ -393,7 +395,7 @@ namespace Sensors
     {
         // Flags are triggered by the interrupt ISRs set in setInterrupts()
         // Mag, gyro, accel, and baro all have different interrupt pins
-        if (mag_flag) // If the magnetometer has new data
+        if(data.time_ns - previous_mag_time > HZ_TO_NS(1000))
         {
             data.rmag = returnRawMag();
 
@@ -402,6 +404,7 @@ namespace Sensors
             data.fmag.z = mag_z.filt(data.rmag.z, data.delta_time);
             mag_flag = false;
         }
+        
 
         if (accel_flag) // If the accelerometer has new data
         {
