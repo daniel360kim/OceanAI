@@ -43,6 +43,7 @@ export const DevicePages = (
             <MechanicsPage path="mechanics" />
             <NavigationPage path="navigation" />
             <HITLPage path="hitl" />
+  
           </Router>
         </div>
       </div>

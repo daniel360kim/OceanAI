@@ -8,7 +8,6 @@ import {
 
 import { Card, Colors } from '@blueprintjs/core'
 import { Composition } from 'atomic-layout'
-import { IntervalRequester } from '@electricui/components-core'
 import React from 'react'
 import { RouteComponentProps } from '@reach/router'
 import { HTMLTable } from '@blueprintjs/core'
@@ -16,11 +15,12 @@ import { Callout } from '@blueprintjs/core'
 import { Statistic, Statistics } from '@electricui/components-desktop-blueprint'
 import { StateIndicator } from 'src/application/components/StateIndication'
 import { MessageDataSource } from '@electricui/core-timeseries'
+import { HueSlider } from '@electricui/components-desktop'
 
 
 const layoutDescription = `
-  Info
   Title
+  Info
 
 
 `
@@ -115,13 +115,14 @@ export const OverviewPage = (props: RouteComponentProps) => {
                   />
                   <Statistic
                     label="Regulator (V)"
-                    accessor="r"
+                    accessor="reg"
                     color={Colors.ORANGE5}
                     precision={2}
                   />
                 </Statistics>
                 <br />
                 <br />
+
                 <Card interactive elevation={1}>
                   <h2>System State</h2>
                   <StateIndicator />

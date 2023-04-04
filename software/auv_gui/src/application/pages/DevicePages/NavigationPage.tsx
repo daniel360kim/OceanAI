@@ -10,7 +10,16 @@ import {
   Fog,
 } from '@electricui/components-desktop-charts'
 
-import { Event } from '@electricui/timeseries'
+import {
+  Environment,
+  ControlledGroup,
+  GLTF,
+  OrbitControls,
+} from '@electricui/components-desktop-three'
+
+import IMUModel from '../../components/xsens-mti300/xsens-mti300.glb'
+
+GLTF.preload(IMUModel)
 
 import { Card, Colors } from '@blueprintjs/core'
 import { Composition } from 'atomic-layout'
@@ -19,8 +28,6 @@ import { MessageDataSource } from '@electricui/core-timeseries'
 import React from 'react'
 import { RouteComponentProps } from '@reach/router'
 import { Printer } from '@electricui/components-desktop'
-import { Tag } from '@blueprintjs/core'
-import { Intent } from '@blueprintjs/core'
 
 const rxDS = new MessageDataSource<number>('xd')
 const ryDS = new MessageDataSource<number>('yd')
@@ -33,6 +40,7 @@ const magDS = new MessageDataSource('md')
 const navigationLayoutDescription = `
     Chart Numeric 
     Chart TimeSlice
+    Chart Model
 `
 
 export const NavigationPage = (props: RouteComponentProps) => {
@@ -105,6 +113,31 @@ export const NavigationPage = (props: RouteComponentProps) => {
                   <RealTimeDomain window={10000} />
                   <TimeAxis label="Time (s)" />
                   <VerticalAxis label="Acceleration (m/s/s)" />
+                </ChartContainer>
+
+                <div style={{ textAlign: 'center', marginBottom: '1em' }}>
+                  <b>Magnetometer</b>
+                </div>
+
+                <ChartContainer>
+                  <LineChart
+                    dataSource={magDS}
+                    accessor={(data, time) => data[0]}
+                    color={Colors.RED5}
+                  />
+                  <LineChart
+                    dataSource={magDS}
+                    accessor={(data, time) => data[1]}
+                    color={Colors.GREEN5}
+                  />
+                  <LineChart
+                    dataSource={magDS}
+                    accessor={(data, time) => data[2]}
+                    color={Colors.BLUE5}
+                  />
+                  <RealTimeDomain window={10000} />
+                  <TimeAxis label="Time (s)" />
+                  <VerticalAxis label="Magnetometer (uTesla)" />
                 </ChartContainer>
               </Card>
             </Areas.Chart>
@@ -326,6 +359,37 @@ export const NavigationPage = (props: RouteComponentProps) => {
                 </ChartContainer>
               </Card>
             </Areas.TimeSlice>
+            <Areas.Model>
+              <Card>
+                <Environment
+                  camera={{
+                    fov: 50,
+                    position: [0, 0, -85],
+                  }}
+                  style={{ width: '100%', height: '25vh' }}
+                >
+                  {/* <OrbitControls /> */}
+                  <ControlledGroup
+                    position={[0, 0, 0]}
+                    // positionAccessor={state => {
+                    //   return [state.acc[1] / 10, state.acc[2] / 10, state.acc[0] / 10]
+                    // }}
+                    rotationAccessor={state => {
+                      return [
+                        state.y,
+                        state.z,
+                        state.x,
+                      ]
+                    }}
+                  >
+                    <GLTF asset={IMUModel} />
+                  </ControlledGroup>
+                  <ambientLight intensity={0.1} />
+                  <hemisphereLight intensity={0.3} />
+                  <directionalLight intensity={1.0} />
+                </Environment>
+              </Card>
+            </Areas.Model>
           </React.Fragment>
         )}
       </Composition>

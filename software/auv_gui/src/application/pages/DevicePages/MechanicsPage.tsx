@@ -11,19 +11,10 @@ import { Popover } from '@blueprintjs/core'
 import { Button as BlueprintButton } from '@blueprintjs/core'
 import { Button } from '@electricui/components-desktop-blueprint'
 import { Checkbox } from '@electricui/components-desktop-blueprint'
+import { HueSlider } from '@electricui/components-desktop'
+import { Slider } from '@electricui/components-desktop-blueprint'
 
-import {
-  ChartContainer,
-  LineChart,
-  RealTimeDomain,
-  TimeAxis,
-  VerticalAxis,
-} from '@electricui/components-desktop-charts'
 
-const currentPositionDS = new MessageDataSource('bsp')
-const targetPositionDS = new MessageDataSource('bst')
-const stepSpeedDS = new MessageDataSource('bss')
-const stepAccelDS = new MessageDataSource('bsa')
 
 const navigationLayoutDescription = `
     BControls 
@@ -76,7 +67,9 @@ export const MechanicsPage = (props: RouteComponentProps) => {
                 </Statistics>
               </Card>
               <StateIndicator />
+
               <Card>
+
                 <Popover>
                   <BlueprintButton large intent="warning" icon="dashboard">
                     Stepper Settings
@@ -275,6 +268,7 @@ export const MechanicsPage = (props: RouteComponentProps) => {
                 <br></br>
               </Card>
             </Areas.PControls>
+
           </React.Fragment>
         )}
       </Composition>
