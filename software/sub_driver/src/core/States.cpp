@@ -242,6 +242,9 @@ void continuousFunctions(StateAutomation *state)
     {
         if(!pitch.isCalibrated())
         {
+            pitch.setSpeed(1000);
+            pitch.setMaxSpeed(1000);
+            pitch.setAcceleration(500);
             pitch.calibrate();
         }
         else
@@ -278,12 +281,19 @@ void continuousFunctions(StateAutomation *state)
         else
         {
             int speed = 1000;
+            pitch.setMaxSpeed(speed);
             pitch.setAcceleration(500);
 
             CurrentState cur_state = currentState;
+            long current_position = static_cast<long>(buoyancy.currentPosition());
+            current_position = std::abs<long>(current_position);
             if(cur_state == CurrentState::RESURFACING)
             {
-                if(buoyancy.currentPosition() < 5000)
+                if(current_position < 5000)
+                {
+                    pitch.setSpeed(0);
+                }
+                else if(pitch.currentPosition() * -1 == STEPPER_HALF_STEPS_PITCH)
                 {
                     pitch.setSpeed(0);
                 }
@@ -295,10 +305,18 @@ void continuousFunctions(StateAutomation *state)
             }
             else if(cur_state == CurrentState::DIVING_MODE)
             {
-                if(buoyancy.currentPosition() > 9000)
+                if(pitch.currentPosition() == 0)
+                {
+                    pitch.setSpeed(0);
+                }
+                else if(current_position > 9000)
                 {
                     pitch.moveTo(10000);
                     pitch.setSpeed(speed);
+                }
+                else
+                {
+                    pitch.setSpeed(0);
                 }
             }
             else
@@ -361,6 +379,8 @@ void Initialization::enter(StateAutomation *state)
     }
     #endif
 
+    currentState = CurrentState::INITIALIZATION;
+
     #if HITL_ON
         location.addColumn(0);
         location.addColumn(1);
@@ -398,34 +418,6 @@ void Initialization::enter(StateAutomation *state)
 
     #if UI_ON
         TransportManager::init();
-
-        /**
-         * If the UI is on, we need to wait for the UI to send the initialization commands
-         */
-        TransportManager::Commands stepper_commands = TransportManager::getCommands(); //Wait for the UI to send the initialization commands
-
-        //Set the stepper settings from the UI commands
-        buoyancy.setSpeed(stepper_commands.buoyancy.speed);
-        buoyancy.setMaxSpeed(stepper_commands.buoyancy.speed);
-        buoyancy.setAcceleration(stepper_commands.buoyancy.speed);
-
-        //Set the stepper settings from the UI commands
-        pitch.setSpeed(stepper_commands.pitch.speed);
-        pitch.setMaxSpeed(stepper_commands.pitch.speed);
-        pitch.setAcceleration(stepper_commands.pitch.speed);
-
-        #if HITL_ON
-            data_provider.update_frequency_scale(stepper_commands.hitl_scale);
-        #endif
-
-    #else
-        buoyancy.setSpeed(1500);
-        buoyancy.setMaxSpeed(1500);
-        buoyancy.setAcceleration(500);
-
-        pitch.setSpeed(1500);
-        pitch.setMaxSpeed(1500);
-        
     #endif
 
     LEDa.setColor(255, 0, 255);
@@ -480,10 +472,77 @@ void Initialization::enter(StateAutomation *state)
     #endif
     SUCCESS_LOG("SD Card Initialization Complete");
 
-    LEDb.blink(255, 0, 0, 1000);
-    LEDa.blink(255, 0, 0, 1000);
+    bool buoyancy_calibrated = false;
+    bool pitch_calibrated = false;
 
-    currentState = CurrentState::INITIALIZATION;
+    buoyancy.setMaxSpeed(800);
+    buoyancy.setAcceleration(500);
+    buoyancy.setSpeed(800);
+    buoyancy.setResolution(Stepper::Resolution::HALF);
+    buoyancy.setMinPulseWidth(10);
+
+    pitch.setMaxSpeed(800);
+    pitch.setAcceleration(500);
+    pitch.setSpeed(800);
+    pitch.setResolution(Stepper::Resolution::HALF);
+    pitch.setMinPulseWidth(10);
+
+    while(!buoyancy_calibrated || !pitch_calibrated)
+    {
+        if(!pitch.isCalibrated())
+        {
+            pitch.calibrate();
+        }
+        else
+        {
+            pitch_calibrated = true;
+        }
+        if(!buoyancy.isCalibrated())
+        {
+            buoyancy.calibrate();
+        }
+        else
+        {
+            buoyancy_calibrated = true;
+        }
+
+
+        buoyancy.update();
+        pitch.update();
+
+        continuousFunctions(state);
+    }
+
+    #if UI_ON
+
+        /**
+         * If the UI is on, we need to wait for the UI to send the initialization commands
+         */
+        TransportManager::Commands stepper_commands = TransportManager::getCommands(); //Wait for the UI to send the initialization commands
+
+        //Set the stepper settings from the UI commands
+        buoyancy.setSpeed(stepper_commands.buoyancy.speed);
+        buoyancy.setMaxSpeed(stepper_commands.buoyancy.speed);
+        buoyancy.setAcceleration(stepper_commands.buoyancy.speed);
+
+        //Set the stepper settings from the UI commands
+        pitch.setSpeed(stepper_commands.pitch.speed);
+        pitch.setMaxSpeed(stepper_commands.pitch.speed);
+        pitch.setAcceleration(stepper_commands.pitch.speed);
+
+        #if HITL_ON
+            data_provider.update_frequency_scale(stepper_commands.hitl_scale);
+        #endif
+
+    #else
+        buoyancy.setSpeed(800);
+        buoyancy.setMaxSpeed(800);
+        buoyancy.setAcceleration(500);
+
+        pitch.setSpeed(800);
+        pitch.setMaxSpeed(800);
+        
+    #endif
 }
 
 void Initialization::run(StateAutomation *state)

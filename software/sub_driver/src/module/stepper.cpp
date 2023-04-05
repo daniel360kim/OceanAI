@@ -72,16 +72,11 @@ void Stepper::setResolution(Resolution resolution)
 
 /**
  * @brief Calibrates the stepper motor
- * Must call update outside of this function
+ * Must set stepper speeds and accelerations before calling this
  * 
  */
 bool Stepper::calibrate()
 {
-    setMaxSpeed(1000);
-    setAcceleration(500);
-    setSpeed(1000);
-    setResolution(Resolution::HALF);
-
     moveTo(100000000); //move to end of rail
 
     if(limit.state() == true)

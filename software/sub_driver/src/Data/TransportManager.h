@@ -146,7 +146,7 @@ namespace TransportManager
             pitch.speed = static_cast<int16_t>(data.pitch_stepper.speed);
 
             buoyancy.acceleration = std::abs<int16_t>(buoyancy.acceleration);
-            buoyancy.current_position = std::abs<int16_t>(buoyancy.current_position);
+            //buoyancy.current_position = std::abs<int16_t>(buoyancy.current_position);
             buoyancy.target_position = std::abs<int16_t>(buoyancy.target_position);
             buoyancy.speed = std::abs<int16_t>(buoyancy.speed);
 
