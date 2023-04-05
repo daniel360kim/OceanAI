@@ -41,7 +41,7 @@ Main components of the project include:
 * [AUV Control Board](https://github.com/daniel360kim/OceanAI/tree/master/PCBs)
 * [AUV Software](https://github.com/daniel360kim/OceanAI/tree/master/software/sub_driver)
 * [AUV CAD Model](https://github.com/daniel360kim/OceanAI/tree/master/CAD)
-* Deep Learning Model (coming soon)
+* [Deep Learning Model](https://github.com/daniel360kim/OceanAI/tree/master/software/detection_model)
 
 # Getting Started
 ## AUV Software
