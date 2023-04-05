@@ -95,8 +95,11 @@ constexpr double STEPS_PER_HALF = 224.852;
 constexpr int STEPPER_HALF_STEPS_BUOYANCY = 27000; // constant representing how many half steps the stepper motor takes to move the buoyancy to the bottom
 constexpr int STEPPER_HALF_STEPS_PITCH = 10850; // constant representing how many half steps the stepper motor takes to reach the end of the carriage
 
-static Buoyancy buoyancy(pins_b, Stepper::Resolution::HALF, StepperProperties(STEPPER_HALF_STEPS_BUOYANCY / STEPS_PER_HALF, STEPPER_HALF_STEPS_BUOYANCY));
-static Pitch pitch(pins_p, Stepper::Resolution::HALF, StepperProperties(STEPPER_HALF_STEPS_PITCH / STEPS_PER_HALF, STEPPER_HALF_STEPS_PITCH));
+static Mechanics::StepperProperties buoyancy_properties(STEPPER_HALF_STEPS_BUOYANCY / STEPS_PER_HALF, STEPPER_HALF_STEPS_BUOYANCY);
+static Mechanics::StepperProperties pitch_properties(STEPPER_HALF_STEPS_PITCH / STEPS_PER_HALF, STEPPER_HALF_STEPS_PITCH);
+
+static Mechanics::Buoyancy buoyancy(pins_b, Mechanics::Stepper::Resolution::HALF, buoyancy_properties);
+static Mechanics::Pitch pitch(pins_p, Mechanics::Stepper::Resolution::HALF, pitch_properties);
 
 static CurrentState currentState;
 
@@ -223,9 +226,7 @@ void continuousFunctions(StateAutomation *state)
     {
         if(!pitch.isCalibrated())
         {
-            pitch.setSpeed(1000);
-            pitch.setMaxSpeed(1000);
-            pitch.setAcceleration(500);
+            Mechanics::setPitchSpeeds(pitch, 1000, 500);
             pitch.calibrate();
         }
         else
@@ -244,8 +245,7 @@ void continuousFunctions(StateAutomation *state)
             {
                 commands.pitch.speed = 0;
             }
-            pitch.setSpeed(commands.pitch.speed);
-            pitch.setAcceleration(commands.pitch.acceleration);
+            Mechanics::setPitchSpeeds(pitch, commands.pitch.speed, commands.pitch.acceleration);
         }
 
         if(commands.recalibrate_pitch != 0)
@@ -261,9 +261,8 @@ void continuousFunctions(StateAutomation *state)
         }
         else
         {
-            int speed = 1000;
-            pitch.setMaxSpeed(speed);
-            pitch.setAcceleration(500);
+            pitch.setMaxSpeed(Mechanics::PITCH_DEFAULT_STEPPER_SPEED);
+            pitch.setAcceleration(Mechanics::PITCH_DEFAULT_STEPPER_ACCELERATION);
 
             CurrentState cur_state = currentState;
             long current_position = static_cast<long>(buoyancy.currentPosition());
@@ -281,7 +280,7 @@ void continuousFunctions(StateAutomation *state)
                 else
                 {
                     pitch.moveTo(-10000);
-                    pitch.setSpeed(speed * -1);
+                    pitch.setSpeed(Mechanics::PITCH_DEFAULT_STEPPER_SPEED * -1);
                 }
             }
             else if(cur_state == CurrentState::DIVING_MODE)
@@ -293,7 +292,7 @@ void continuousFunctions(StateAutomation *state)
                 else if(current_position > 9000)
                 {
                     pitch.moveTo(10000);
-                    pitch.setSpeed(speed);
+                    pitch.setSpeed(Mechanics::PITCH_DEFAULT_STEPPER_SPEED);
                 }
                 else
                 {
@@ -363,33 +362,17 @@ void Initialization::enter(StateAutomation *state)
     currentState = CurrentState::INITIALIZATION;
 
     #if HITL_ON
-        location.addColumn(0);
-        location.addColumn(1);
-        depth.addColumn(2);
-        pressure.addColumn(3);
-        salinity.addColumn(4);
-        temperature.addColumn(5);
-
-        pressure.addTransform([](double x) { return x / 10.132; }); //Convert the raw pressure to atm
-
-        data_provider.add_provider(&location);
-        data_provider.add_provider(&depth);
-        data_provider.add_provider(&pressure);
-        data_provider.add_provider(&salinity);
-        data_provider.add_provider(&temperature);
-
+        HITL::initializeProviders(data_provider, location, depth, pressure, salinity, temperature);
         hitl_nav.setInitialCoordinate(HITL_DATA_ALPHA[0][0], HITL_DATA_ALPHA[0][1], scoped_timer.elapsed());
     #endif
 
-    if (battery.readRaw() <= 6.8 && battery.readRaw() >= 6)
+    if (battery.readRaw() <= 6 && battery.readRaw() >= 5.5)
     {
         ERROR_LOG(Debug::Critical_Error, "Low battery voltage");
         state->setState(ErrorIndication::getInstance());
     }
     
-
     CPU::init();
-
 
 #if LIVE_DEBUG == true
     while (!Serial)
@@ -453,44 +436,10 @@ void Initialization::enter(StateAutomation *state)
     #endif
     SUCCESS_LOG("SD Card Initialization Complete");
 
-    bool buoyancy_calibrated = false;
-    bool pitch_calibrated = false;
+    Mechanics::setDefaultSettings(buoyancy, pitch);
 
-    buoyancy.setMaxSpeed(800);
-    buoyancy.setAcceleration(500);
-    buoyancy.setSpeed(800);
-    buoyancy.setResolution(Stepper::Resolution::HALF);
-    buoyancy.setMinPulseWidth(10);
-
-    pitch.setMaxSpeed(800);
-    pitch.setAcceleration(500);
-    pitch.setSpeed(800);
-    pitch.setResolution(Stepper::Resolution::HALF);
-    pitch.setMinPulseWidth(10);
-
-    while(!buoyancy_calibrated || !pitch_calibrated)
+    while(!Mechanics::calibrateBoth(buoyancy, pitch))
     {
-        if(!pitch.isCalibrated())
-        {
-            pitch.calibrate();
-        }
-        else
-        {
-            pitch_calibrated = true;
-        }
-        if(!buoyancy.isCalibrated())
-        {
-            buoyancy.calibrate();
-        }
-        else
-        {
-            buoyancy_calibrated = true;
-        }
-
-
-        buoyancy.update();
-        pitch.update();
-
         continuousFunctions(state);
     }
 
@@ -499,30 +448,18 @@ void Initialization::enter(StateAutomation *state)
         /**
          * If the UI is on, we need to wait for the UI to send the initialization commands
          */
-        TransportManager::Commands stepper_commands = TransportManager::getCommands(); //Wait for the UI to send the initialization commands
+        TransportManager::Commands commands = TransportManager::getCommands(); //Wait for the UI to send the initialization commands
 
         //Set the stepper settings from the UI commands
-        buoyancy.setSpeed(stepper_commands.buoyancy.speed);
-        buoyancy.setMaxSpeed(stepper_commands.buoyancy.speed);
-        buoyancy.setAcceleration(stepper_commands.buoyancy.speed);
-
-        //Set the stepper settings from the UI commands
-        pitch.setSpeed(stepper_commands.pitch.speed);
-        pitch.setMaxSpeed(stepper_commands.pitch.speed);
-        pitch.setAcceleration(stepper_commands.pitch.speed);
+        Mechanics::setBuoyancySpeeds(buoyancy, commands.buoyancy.speed, commands.buoyancy.acceleration);
+        Mechanics::setPitchSpeeds(pitch, commands.pitch.speed, commands.pitch.acceleration);
 
         #if HITL_ON
-            data_provider.update_frequency_scale(stepper_commands.hitl_scale);
+            data_provider.update_frequency_scale(commands.hitl_scale);
         #endif
 
     #else
-        buoyancy.setSpeed(800);
-        buoyancy.setMaxSpeed(800);
-        buoyancy.setAcceleration(500);
-
-        pitch.setSpeed(800);
-        pitch.setMaxSpeed(800);
-        
+        Mechanics::setDefaultSpeeds(buoyancy, pitch);
     #endif
 }
 
@@ -558,16 +495,17 @@ void ErrorIndication::exit(StateAutomation *state)
 void IdleMode::enter(StateAutomation *state)
 {
     currentState = CurrentState::IDLE_MODE;
-    buoyancy.setSpeed(0);
-    pitch.setSpeed(0);
+    
+    Mechanics::setBuoyancySpeeds(buoyancy, 0, 0);
+    Mechanics::setPitchSpeeds(pitch, 0, 0);
 }
 
 void IdleMode::run(StateAutomation *state)
 {
     continuousFunctions(state);
 
-    buoyancy.run();
-    pitch.run();
+    buoyancy.update();
+    pitch.update();
 
     #if UI_ON
     if(TransportManager::getCommands().system_state == 0)
@@ -609,30 +547,13 @@ void Resurfacing::enter(StateAutomation *state)
     #if UI_ON
         TransportManager::Commands stepper_commands = TransportManager::getCommands();
 
-        buoyancy.setSpeed(stepper_commands.buoyancy.speed);
-        buoyancy.setMaxSpeed(stepper_commands.buoyancy.speed);
-        buoyancy.setAcceleration(stepper_commands.buoyancy.acceleration);
-
-        pitch.setSpeed(stepper_commands.pitch.speed);
-        pitch.setMaxSpeed(stepper_commands.pitch.speed);
-        pitch.setAcceleration(stepper_commands.pitch.acceleration);
+        Mechanics::setBuoyancySpeeds(buoyancy, stepper_commands.buoyancy.speed, stepper_commands.buoyancy.acceleration);
+        Mechanics::setPitchSpeeds(pitch, stepper_commands.pitch.speed, stepper_commands.pitch.acceleration);
     #else  
-        buoyancy.setSpeed(1500);
-        buoyancy.setMaxSpeed(1500);
-        buoyancy.setAcceleration(500);
-
-        pitch.setSpeed(1500);
-        pitch.setMaxSpeed(1500);
-        pitch.setAcceleration(500);
+        Mechanics::setDefaultSettings(buoyancy, pitch);
     #endif
 
-    buoyancy.setResolution(Stepper::Resolution::HALF);
-    buoyancy.setMinPulseWidth(MIN_PULSE_WIDTH); // how long to wait between high and low pulses
-
     buoyancy.rise();
-
-    pitch.setResolution(Stepper::Resolution::HALF);
-    pitch.setMinPulseWidth(MIN_PULSE_WIDTH); // how long to wait between high and low pulses
 }
 
 void Resurfacing::run(StateAutomation *state)
@@ -658,17 +579,11 @@ void Diving::enter(StateAutomation *state)
     #if UI_ON
         TransportManager::Commands stepper_commands = TransportManager::getCommands();
 
-        buoyancy.setSpeed(stepper_commands.buoyancy.speed);
-        buoyancy.setMaxSpeed(stepper_commands.buoyancy.speed);
-        buoyancy.setAcceleration(stepper_commands.buoyancy.acceleration);
+        Mechanics::setBuoyancySpeeds(buoyancy, stepper_commands.buoyancy.speed, stepper_commands.buoyancy.acceleration);
+        Mechanics::setPitchSpeeds(pitch, stepper_commands.pitch.speed, stepper_commands.pitch.acceleration);
     #else
-        buoyancy.setSpeed(1500);
-        buoyancy.setMaxSpeed(1500);
-        buoyancy.setAcceleration(1500);
+        Mechanics::setDefaultSettings(buoyancy, pitch);
     #endif
-
-    buoyancy.setResolution(Stepper::Resolution::HALF);
-    buoyancy.setMinPulseWidth(MIN_PULSE_WIDTH); // how long to wait between high and low pulses
 
     buoyancy.move(500000);
 }

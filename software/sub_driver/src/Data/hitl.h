@@ -89,6 +89,7 @@ namespace HITL
         int64_t m_last_timestamp = 0;
     };
 
+    void initializeProviders(DataProviderManager &provider_manager, Data &location, Data &depth, Data &pressure, Data &salinity, Data &temperature);
     void logData(LoggedData &data, DataProviderManager &provider_manager, Data &location, Data &depth, Data &pressure, Data &salinity, Data &temperature);
 }
 

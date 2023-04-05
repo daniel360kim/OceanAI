@@ -156,6 +156,24 @@ namespace HITL
         m_columns.clear();
         m_data.clear();
     }
+
+    void initializeProviders(DataProviderManager &provider_manager, Data &location, Data &depth, Data &pressure, Data &salinity, Data &temperature)
+    {
+        location.addColumn(0);
+        location.addColumn(1);
+        depth.addColumn(2);
+        pressure.addColumn(3);
+        salinity.addColumn(4);
+        temperature.addColumn(5);
+
+        pressure.addTransform([](double x) { return x / 10.132; }); //Convert the raw pressure to atm (from dbar)
+
+        provider_manager.add_provider(&location);
+        provider_manager.add_provider(&depth);
+        provider_manager.add_provider(&pressure);
+        provider_manager.add_provider(&salinity);
+        provider_manager.add_provider(&temperature);
+    }
     
     /**
      * @brief log the data from the HITL data providers to the logged data struct

@@ -16,6 +16,7 @@
 
 #include "timer.h"
 #include "../Data/logged_data.h"
+#include "../module/stepper.h"
 
 /**
  * Debug funciontality for the system
@@ -113,6 +114,17 @@ namespace Logging
     constexpr unsigned long long CAPACITY_UPDATE_INTERVAL = SEC_TO_NS(360);// update capacity every 6 minutes
 }
 
-constexpr int MIN_PULSE_WIDTH = 1; // minimum pulse width in microseconds for stepper motor
+namespace Mechanics
+{
+    constexpr int BUOYANCY_DEFAULT_STEPPER_SPEED = 800; // default speed for stepper motor
+    constexpr int BUOYANCY_DEFAULT_STEPPER_ACCELERATION = 500; // default acceleration for stepper motor
+
+    constexpr int PITCH_DEFAULT_STEPPER_SPEED = 1000; // default speed for stepper motor
+    constexpr int PITCH_DEFAULT_STEPPER_ACCELERATION = 500; // default acceleration for stepper motor
+
+    constexpr Stepper::Resolution DEFAULT_STEPPER_RESOLUTION = Stepper::Resolution::HALF; // default resolution for stepper motor
+
+    constexpr int MIN_PULSE_WIDTH = 1; // minimum pulse width in microseconds for stepper motor
+}
 
 #endif

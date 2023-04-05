@@ -10,91 +10,103 @@
 #include "data/logged_data.h"
 #include "../core/pins.h"
 
-/**
- * @brief Properties of our stepper motor configuration
- * Carriage length describes the range the stepper mover can move an object in mm
- * Halves length is how many half-resolution steps are in a full carriage length
- * Halves length can be measureed with a different test program
- * This struct is passed into the constructor of the stepper class
- */
-struct StepperProperties
-{
-    StepperProperties() {}
-    StepperProperties(double carriage_length, long halves_length) : carriage_length(carriage_length), halves_length(halves_length) {}
-    double carriage_length; //how long is the carriage in mm
-    long halves_length; //how many half steps are in the carriage
-};
 
-/**
- * @brief Child class of AccelStepper
- * Includes code to change the resolution of the stepper 
- * and to calibrate the motor w/ limit switches
- */
-class Stepper : public AccelStepper
+namespace Mechanics
 {
-public:
-    enum class Resolution
+    /**
+     * @brief Properties of our stepper motor configuration
+     * Carriage length describes the range the stepper mover can move an object in mm
+     * Halves length is how many half-resolution steps are in a full carriage length
+     * Halves length can be measureed with a different test program
+     * This struct is passed into the constructor of the stepper class
+     */
+    struct StepperProperties
     {
-        HALF,
-        QUARTER,
-        EIGHTH,
-        SIXTEENTH
+        StepperProperties() {}
+        StepperProperties(double carriage_length, long halves_length) : carriage_length(carriage_length), halves_length(halves_length) {}
+        double carriage_length; //how long is the carriage in mm
+        long halves_length; //how many half steps are in the carriage
     };
 
-    Stepper(StepperPins pins, Resolution resolution, StepperProperties properties);
+    /**
+     * @brief Child class of AccelStepper
+     * Includes code to change the resolution of the stepper 
+     * and to calibrate the motor w/ limit switches
+     */
+    class Stepper : public AccelStepper
+    {
+    public:
+        enum class Resolution
+        {
+            HALF,
+            QUARTER,
+            EIGHTH,
+            SIXTEENTH
+        };
 
-    void setResolution(Resolution resolution);
-    bool calibrate();
+        Stepper(StepperPins pins, Resolution resolution, StepperProperties properties);
 
-    double currentPosition_mm();
-    double targetPosition_mm();
+        void setResolution(Resolution resolution);
+        bool calibrate();
 
-    void goTo(long absolute);
-    void move_mm(int mm);
+        double currentPosition_mm();
+        double targetPosition_mm();
 
-    void setCalibrated(bool calibrated) { this->calibrated = calibrated; }
-    bool isCalibrated() const { return calibrated; }
+        void goTo(long absolute);
+        void move_mm(int mm);
 
-    bool update();
+        void setCalibrated(bool calibrated) { this->calibrated = calibrated; }
+        bool isCalibrated() const { return calibrated; }
 
-    StepperProperties properties;
+        bool update();
 
-    Limit limit;
-protected:
-    Resolution resolution;
-    StepperPins pins;
+        StepperProperties properties;
 
-    double steps_per_mm;
-    bool calibrated = false;
+        Limit limit;
+    protected:
+        Resolution resolution;
+        StepperPins pins;
 
-    void recheckLimit();
-};
+        double steps_per_mm;
+        bool calibrated = false;
 
-//Singleton class for buoyancy driver
-//TODO: make this less horrible
-class Buoyancy : public Stepper
-{
-public:
-    explicit Buoyancy(StepperPins pins, Resolution resolution, StepperProperties properties) : Stepper(pins, resolution, properties) {}
-    
-    void sink();
-    void rise();
-    void rise(long half_steps);
+        void recheckLimit();
+    };
 
-    void logToStruct(LoggedData &data);
+    //Singleton class for buoyancy driver
+    //TODO: make this less horrible
+    class Buoyancy : public Stepper
+    {
+    public:
+        explicit Buoyancy(StepperPins pins, Resolution resolution, StepperProperties properties) : Stepper(pins, resolution, properties) {}
+        
+        void sink();
+        void rise();
+        void rise(long half_steps);
 
-    bool sinking = false;
-    bool rising = false;
-};
+        void logToStruct(LoggedData &data);
 
-class Pitch : public Stepper
-{
-public:
-    explicit Pitch(StepperPins pins, Resolution resolution, StepperProperties properties) : Stepper(pins, resolution, properties) {}
-    
-    void logToStruct(LoggedData &data);
-};
+        bool sinking = false;
+        bool rising = false;
+    };
 
+    class Pitch : public Stepper
+    {
+    public:
+        explicit Pitch(StepperPins pins, Resolution resolution, StepperProperties properties) : Stepper(pins, resolution, properties) {}
+        
+        void logToStruct(LoggedData &data);
+    };
+
+    void setBuoyancySpeeds(Buoyancy &buoyancy, double speed, double acceleration);
+    void setPitchSpeeds(Pitch &pitch, double speed, double acceleration);
+
+    void setDefaultSettings(Buoyancy &buoyancy, Pitch &pitch);
+    void setDefaultSpeeds(Buoyancy &buoyancy, Pitch &pitch);
+
+    bool calibrateBoth(Buoyancy &buoyancy, Pitch &pitch);
+
+}
 
 
 
