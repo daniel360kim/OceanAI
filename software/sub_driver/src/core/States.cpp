@@ -90,6 +90,7 @@ static StepperPins pins_p{
 };
 
 constexpr double STEPS_PER_HALF = 224.852;
+//end at 27000
 constexpr int STEPPER_HALF_STEPS_BUOYANCY = 27000; // constant representing how many half steps the stepper motor takes to move the buoyancy to the bottom
 constexpr int STEPPER_HALF_STEPS_PITCH = 10850; // constant representing how many half steps the stepper motor takes to reach the end of the carriage
 
@@ -270,6 +271,42 @@ void continuousFunctions(StateAutomation *state)
     }
     else //auto pitch proc here
     {
+        if(!pitch.isCalibrated())
+        {
+            pitch.calibrate();
+        }
+        else
+        {
+            int speed = 1000;
+            pitch.setAcceleration(500);
+
+            CurrentState cur_state = currentState;
+            if(cur_state == CurrentState::RESURFACING)
+            {
+                if(buoyancy.currentPosition() < 5000)
+                {
+                    pitch.setSpeed(0);
+                }
+                else
+                {
+                    pitch.moveTo(-10000);
+                    pitch.setSpeed(speed * -1);
+                }
+            }
+            else if(cur_state == CurrentState::DIVING_MODE)
+            {
+                if(buoyancy.currentPosition() > 9000)
+                {
+                    pitch.moveTo(10000);
+                    pitch.setSpeed(speed);
+                }
+            }
+            else
+            {
+                pitch.setSpeed(0);
+            }
+
+        }
 
     }
 
