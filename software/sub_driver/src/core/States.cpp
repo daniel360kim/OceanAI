@@ -31,6 +31,7 @@
 #include <Arduino.h>
 #include <teensy_clock/teensy_clock.h>
 #include <cstdint>
+#include <array>
 
 #include "../Navigation/SensorFusion/Fusion.h"
 #include "../navigation/Orientation.h"
@@ -114,7 +115,7 @@ static StaticJsonDocument<STATIC_JSON_DOC_SIZE> data_json;
     HITL::Data salinity;
     HITL::Data temperature;
 
-    HITLNavigation hitl_nav;
+    HITL::HITLNavigation hitl_nav;
     
 #endif
 
@@ -134,32 +135,12 @@ void continuousFunctions(StateAutomation *state)
 #endif
 
     #if HITL_ON
-    data_provider.update(data.time_ns); //update the data provider with the current time
-
-    /**
-     * Update logged data with the HITL data collected
-     * 
-     */
-    data.HITL.index = (uint16_t)data_provider.getIndex(); 
-    data.HITL.timestamp = data_provider.getTimestamp();
-    data.HITL.location.latitude = location[0];
-    data.HITL.location.longitude = location[1];
-    data.HITL.depth = depth[0];
-    data.HITL.pressure = pressure[0];
-    data.HITL.salinity = salinity[0];
-    data.HITL.temperature = temperature[0];
-
-    //update the navigation data based on HITL data
-    data.HITL.distance = hitl_nav.getTotalDistanceTraveled(data.HITL.location.latitude, data.HITL.location.longitude);
-    data.HITL.averageSpeed = hitl_nav.getAverageSpeed(data.HITL.location.latitude, data.HITL.location.longitude, data.time_ns);
-    data.HITL.currentSpeed = hitl_nav.getSpeedX(data.HITL.location.latitude, data.HITL.location.longitude, data_provider.getTimestamp());
-
+        data_provider.update(data.time_ns); //update the data provider with the current time
+        HITL::logData(data, data_provider, location, depth, pressure, salinity, temperature); //log the HITL data to the logged data struct
+        hitl_nav.logData(data); //log the HITL navigation data to the logged data struct
     #endif
 
-    /**
-     * Logging sensor data
-     * 
-     */
+    //Logging sensor data
     CPU::log_cpu_info(data); //add cpu info to the logged data
 
     Sensors::logData(data); //add IMU data to the logged data

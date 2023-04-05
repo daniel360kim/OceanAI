@@ -11,36 +11,41 @@
 
 
 #include "../core/configuration.h"
+#include "../Data/logged_data.h"
 
 #if HITL_ON
 
 #include <cstdint>
 
-class HITLNavigation
+namespace HITL
 {
-public:
-    HITLNavigation() {}
-    
-    void setInitialCoordinate(double latitude, double longitude, int64_t timestamp);
+    class HITLNavigation
+    {
+    public:
+        HITLNavigation() {}
+        
+        void setInitialCoordinate(double latitude, double longitude, int64_t timestamp);
 
-    double getTotalDistanceTraveled(double latitude, double longitude);
-    double getTotalDistanceTraveled(double latitude, double longitude, double prevLatitude, double prevLongitude);
-    double getAverageSpeed(double latitude, double longitude, int64_t timestamp);
+        double getTotalDistanceTraveled(Location<double> location);
 
-    double getSpeedX(double latitude, double longitude, int64_t timestamp);
+        double getTotalDistanceTraveled(Location<double> location, Location<double> prevLocation);
+        double getAverageSpeed(Location<double> location, int64_t timestamp);
 
-private:
-    double m_initialLatitude; //very first latitude
-    double m_initialLongitude; //very first longitude
+        double getSpeedX(Location<double> location, int64_t timestamp);
 
-    double m_prevLatitude; //latitude from previous iteration
-    double m_prevLongitude; //longitude from previous iteration
+        void logData(LoggedData &data);
 
-    double m_previousVelocity; //velocity from previous iteration
+    private:
+        double m_initialLatitude; //very first latitude
+        double m_initialLongitude; //very first longitude
 
-    int64_t m_initialTimestamp; //very first timestamp
+        Location<double> m_prevLocation;
 
-    int64_t m_prevTimestamp; //timestamp from previous iteration
-};
+        double m_previousVelocity; //velocity from previous iteration
 
+        int64_t m_initialTimestamp; //very first timestamp
+
+        int64_t m_prevTimestamp; //timestamp from previous iteration
+    };
+}
 #endif

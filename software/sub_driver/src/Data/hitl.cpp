@@ -156,10 +156,30 @@ namespace HITL
         m_columns.clear();
         m_data.clear();
     }
-
     
+    /**
+     * @brief log the data from the HITL data providers to the logged data struct
+     * 
+     * @param data struct to log the data to
+     * @param provider_manager data provider manager
+     * @param data_providers array of the 5 data providers (location, depth, pressure, salinity, temperature)
+     */
+    void logData(LoggedData &data, DataProviderManager &provider_manager, Data &location, Data &depth, Data &pressure, Data &salinity, Data &temperature)
+    {
+        data.HITL.index = (uint16_t)provider_manager.getIndex();
+        data.HITL.timestamp = provider_manager.getTimestamp();
 
+        data.HITL.location.latitude = location[0];
+        data.HITL.location.longitude = location[1];
 
+        data.HITL.depth = depth[0];
+
+        data.HITL.pressure = pressure[0];
+
+        data.HITL.salinity = salinity[0];
+
+        data.HITL.temperature = temperature[0];
+    }
 }
 
 #endif
