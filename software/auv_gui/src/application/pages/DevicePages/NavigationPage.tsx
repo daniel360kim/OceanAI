@@ -17,7 +17,8 @@ import {
   OrbitControls,
 } from '@electricui/components-desktop-three'
 
-import IMUModel from '../../components/xsens-mti300/xsens-mti300.glb'
+import IMUModel from '../../components/AUV-model/auv.glb'
+
 
 GLTF.preload(IMUModel)
 
@@ -39,8 +40,8 @@ const magDS = new MessageDataSource('md')
 
 const navigationLayoutDescription = `
     Chart Numeric 
-    Chart TimeSlice
     Chart Model
+    Chart TimeSlice
 `
 
 export const NavigationPage = (props: RouteComponentProps) => {
@@ -363,10 +364,12 @@ export const NavigationPage = (props: RouteComponentProps) => {
               <Card>
                 <Environment
                   camera={{
-                    fov: 50,
-                    position: [0, 0, -85],
+                    fov: 15,
+                    position: [0, 0, -805],
+                    zoom: .15,
+
                   }}
-                  style={{ width: '100%', height: '25vh' }}
+                  style={{ width: '100%', height: '55vh' }}
                 >
                   {/* <OrbitControls /> */}
                   <ControlledGroup
@@ -377,15 +380,15 @@ export const NavigationPage = (props: RouteComponentProps) => {
                     rotationAccessor={state => {
                       return [
                         state.y,
-                        state.z,
                         state.x,
+                        state.z,
                       ]
                     }}
                   >
                     <GLTF asset={IMUModel} />
                   </ControlledGroup>
-                  <ambientLight intensity={0.1} />
-                  <hemisphereLight intensity={0.3} />
+                  <ambientLight intensity={0.3} />
+                  <hemisphereLight intensity={0.1} />
                   <directionalLight intensity={1.0} />
                 </Environment>
               </Card>
