@@ -51,16 +51,13 @@ static Sensors::Thermistor external_temp(RX_RF, 10000, 4100, 25, 30, HZ_TO_NS(5)
 static Sensors::Transducer external_pres(TX_RF, 30, HZ_TO_NS(5));
 static Sensors::TotalDissolvedSolids total_dissolved_solids(TDS, 30, HZ_TO_NS(5));
 
-
-static Sensors::Voltage regulator(v_div, 30, HZ_TO_NS(5), 9.95, 1.992);
-static Sensors::Voltage battery(TX_GPS, 30, HZ_TO_NS(5), 9.62, 4.47);
+static Sensors::Voltage regulator(v_div, 30, HZ_TO_NS(1), 9.95, 1.992);
+static Sensors::Voltage battery(TX_GPS, 30, HZ_TO_NS(1), 9.62, 4.47);
 
 static Orientation ori;
  
 static LED signal(SIGNAL);
-static LEDStrip<RX_GPS, 15> led_strip;
 
-static int64_t previous_time;
 static teensy_clock::time_point start_time;
 
 static Velocity nav_v;
@@ -128,8 +125,7 @@ static StaticJsonDocument<STATIC_JSON_DOC_SIZE> data_json;
 void continuousFunctions(StateAutomation *state)
 {
     data.time_ns = scoped_timer.elapsed(); // scoped timer is a global object to measure time since program epoch
-    data.delta_time = (scoped_timer.elapsed() - previous_time) / 1000000000.0; //calculate the delta time
-    previous_time = scoped_timer.elapsed();
+    data.delta_time = scoped_timer.deltaTime(); // delta time is the time since the last time this function was called
 
     data.system_state = static_cast<uint8_t>(currentState); //update the current state within the logged data
 
@@ -152,13 +148,9 @@ void continuousFunctions(StateAutomation *state)
     external_pres.logToStruct(data);
     total_dissolved_solids.logToStruct(data);
 
-    //Voltage from battery
-    data.raw_voltage = battery.readRaw();
-    data.filt_voltage = battery.readFiltered(data.delta_time);
-
-    //Voltage from regulator
-    data.raw_regulator = regulator.readRaw();
-    data.filt_regulator = regulator.readFiltered(data.delta_time);
+    //log the voltage and regulator data
+    battery.logData(data, data.raw_voltage, data.filt_voltage);
+    regulator.logData(data, data.raw_regulator, data.filt_regulator);
 
     nav_v.updateVelocity(data); //calculate velocity from IMU data
     nav_p.updatePosition(data); //calculate position from IMU data
@@ -188,7 +180,7 @@ void continuousFunctions(StateAutomation *state)
         LEDb.blink(255, 0, 0, data.sd_log_rate_hz); //blink red if there is a warning
     }
 
-    led_strip.setColor(255, 255, 255); //turn on LED strip at the bottom of the vehicle
+    strip.setColor(255, 255, 255); //turn on LED strip at the bottom of the vehicle
 
     //Log and update buoyancy and pitch stepper motor data
     buoyancy.logToStruct(data);
@@ -221,92 +213,7 @@ void continuousFunctions(StateAutomation *state)
     //Get commands from the GUI
     TransportManager::Commands commands = TransportManager::getCommands();
 
-    //Update pitch stepper from the 
-    if(commands.auto_pitch != 0)
-    {
-        if(!pitch.isCalibrated())
-        {
-            Mechanics::setPitchSpeeds(pitch, 1000, 500);
-            pitch.calibrate();
-        }
-        else
-        {
-            if(commands.pitch.direction == 0)
-            {
-                commands.pitch.speed *= -1;
-            }
-
-            if(pitch.currentPosition() * -1 == STEPPER_HALF_STEPS_PITCH && commands.pitch.direction == 0)
-            {
-                commands.pitch.speed = 0;
-            }
-
-            if(pitch.currentPosition() == 0 && commands.pitch.direction == 1)
-            {
-                commands.pitch.speed = 0;
-            }
-            Mechanics::setPitchSpeeds(pitch, commands.pitch.speed, commands.pitch.acceleration);
-        }
-
-        if(commands.recalibrate_pitch != 0)
-        {
-            pitch.setCalibrated(false);
-        }
-    }
-    else //auto pitch proc here
-    {
-        if(!pitch.isCalibrated())
-        {
-            pitch.calibrate();
-        }
-        else
-        {
-            pitch.setMaxSpeed(Mechanics::PITCH_DEFAULT_STEPPER_SPEED);
-            pitch.setAcceleration(Mechanics::PITCH_DEFAULT_STEPPER_ACCELERATION);
-
-            CurrentState cur_state = currentState;
-            long current_position = static_cast<long>(buoyancy.currentPosition());
-            current_position = std::abs<long>(current_position);
-            if(cur_state == CurrentState::RESURFACING)
-            {
-                if(current_position < 5000)
-                {
-                    pitch.setSpeed(0);
-                }
-                else if(pitch.currentPosition() * -1 == STEPPER_HALF_STEPS_PITCH)
-                {
-                    pitch.setSpeed(0);
-                }
-                else
-                {
-                    pitch.moveTo(-10000);
-                    pitch.setSpeed(Mechanics::PITCH_DEFAULT_STEPPER_SPEED * -1);
-                }
-            }
-            else if(cur_state == CurrentState::DIVING_MODE)
-            {
-                if(pitch.currentPosition() == 0)
-                {
-                    pitch.setSpeed(0);
-                }
-                else if(current_position > 9000)
-                {
-                    pitch.moveTo(10000);
-                    pitch.setSpeed(Mechanics::PITCH_DEFAULT_STEPPER_SPEED);
-                }
-                else
-                {
-                    pitch.setSpeed(0);
-                }
-            }
-            else
-            {
-                pitch.setSpeed(0);
-            }
-
-        }
-
-    }
+    pitch.runPitch(commands, currentState, buoyancy.currentPosition());
 
     #if HITL_ON
         data_provider.update_frequency_scale(commands.hitl_scale);
@@ -451,8 +358,8 @@ void Initialization::enter(StateAutomation *state)
         TransportManager::Commands commands = TransportManager::getCommands(); //Wait for the UI to send the initialization commands
 
         //Set the stepper settings from the UI commands
-        Mechanics::setBuoyancySpeeds(buoyancy, commands.buoyancy.speed, commands.buoyancy.acceleration);
-        Mechanics::setPitchSpeeds(pitch, commands.pitch.speed, commands.pitch.acceleration);
+        buoyancy.setSpeeds(commands.buoyancy.speed, commands.buoyancy.acceleration);
+        pitch.setSpeeds(commands.pitch.speed, commands.pitch.acceleration);
 
         #if HITL_ON
             data_provider.update_frequency_scale(commands.hitl_scale);
@@ -473,7 +380,7 @@ void Initialization::exit(StateAutomation *state)
 {
     output.indicateCompleteStartup();
     // set previous time before main loop
-    previous_time = scoped_timer.elapsed();
+    scoped_timer.setPreviousTime(scoped_timer.elapsed());
 }
 
 void ErrorIndication::enter(StateAutomation *state)
@@ -496,8 +403,8 @@ void IdleMode::enter(StateAutomation *state)
 {
     currentState = CurrentState::IDLE_MODE;
     
-    Mechanics::setBuoyancySpeeds(buoyancy, 0, 0);
-    Mechanics::setPitchSpeeds(pitch, 0, 0);
+    buoyancy.setSpeeds(0, 0);
+    pitch.setSpeeds(0, 0);
 }
 
 void IdleMode::run(StateAutomation *state)
@@ -547,8 +454,8 @@ void Resurfacing::enter(StateAutomation *state)
     #if UI_ON
         TransportManager::Commands stepper_commands = TransportManager::getCommands();
 
-        Mechanics::setBuoyancySpeeds(buoyancy, stepper_commands.buoyancy.speed, stepper_commands.buoyancy.acceleration);
-        Mechanics::setPitchSpeeds(pitch, stepper_commands.pitch.speed, stepper_commands.pitch.acceleration);
+        buoyancy.setSpeeds(stepper_commands.buoyancy.speed, stepper_commands.buoyancy.acceleration);
+        pitch.setSpeeds(stepper_commands.pitch.speed, stepper_commands.pitch.acceleration);
     #else  
         Mechanics::setDefaultSettings(buoyancy, pitch);
     #endif
@@ -579,8 +486,8 @@ void Diving::enter(StateAutomation *state)
     #if UI_ON
         TransportManager::Commands stepper_commands = TransportManager::getCommands();
 
-        Mechanics::setBuoyancySpeeds(buoyancy, stepper_commands.buoyancy.speed, stepper_commands.buoyancy.acceleration);
-        Mechanics::setPitchSpeeds(pitch, stepper_commands.pitch.speed, stepper_commands.pitch.acceleration);
+        buoyancy.setSpeeds(stepper_commands.buoyancy.speed, stepper_commands.buoyancy.acceleration);
+        pitch.setSpeeds(stepper_commands.pitch.speed, stepper_commands.pitch.acceleration);
     #else
         Mechanics::setDefaultSettings(buoyancy, pitch);
     #endif

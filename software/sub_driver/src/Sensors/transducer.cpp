@@ -76,7 +76,7 @@ void Sensors::Transducer::logToStruct(LoggedData &data)
     int64_t current_time = scoped_timer.elapsed();
     if(current_time >= m_prev_log_ns + m_interval)
     {
-        double delta_time = data.delta_time;
+        double delta_time = (current_time - m_prev_log_ns) / 1e9; //convert to seconds
         data.raw_ext_pres = readRaw();
         data.filt_ext_pres = readFiltered(delta_time);
 

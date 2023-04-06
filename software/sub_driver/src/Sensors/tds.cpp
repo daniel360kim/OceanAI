@@ -70,7 +70,7 @@ void Sensors::TotalDissolvedSolids::logToStruct(LoggedData &data)
     int64_t current_time = scoped_timer.elapsed();
     if(current_time >= m_prev_log_ns + m_interval_ns)
     {
-        double delta_time = data.delta_time;
+        double delta_time = (current_time - m_prev_log_ns) / 1e9;
         data.raw_TDS = readRaw(data.filt_ext_temp);
         data.filt_TDS = readFiltered(delta_time, data.filt_ext_temp);
 

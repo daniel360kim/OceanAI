@@ -1,6 +1,7 @@
 #include "stepper.h"
 #include "../core/configuration.h"
 
+#include <cmath>
 
 namespace Mechanics
 {
@@ -95,6 +96,13 @@ namespace Mechanics
         {
             return false;
         }
+    }
+
+    void Stepper::setSpeeds(double speed, double acceleration)
+    {
+        setSpeed(speed);
+        setMaxSpeed(speed);
+        setAcceleration(acceleration);
     }
 
 
@@ -265,6 +273,101 @@ namespace Mechanics
         data.dive_stepper.acceleration = acceleration();
     }
 
+    void Pitch::runPitch(TransportManager::Commands &commands, CurrentState state, double buoyancy_position)
+    {
+        if(commands.auto_pitch != 0)
+        {
+            manualMode(commands);
+        }
+        else
+        {
+            autoMode(state, buoyancy_position);
+        }
+    }
+
+    void Pitch::manualMode(TransportManager::Commands &commands)
+    {
+        if(!isCalibrated())
+        {
+            setSpeeds(1000, 500);
+            calibrate();
+        }
+        else
+        {
+            if(commands.pitch.direction == 0)
+            {
+                commands.pitch.speed *= -1;
+            }
+
+            if(currentPosition() * -1 == properties.halves_length && commands.pitch.direction == 0)
+            {
+                commands.pitch.speed = 0;
+            }
+            
+            if(currentPosition() == 0 && commands.pitch.direction == 1)
+            {
+                commands.pitch.speed = 0;
+            }
+
+            setSpeeds(commands.pitch.speed, commands.pitch.acceleration);
+        }
+
+        if(commands.recalibrate_pitch != 0)
+        {
+            setCalibrated(false);
+        }
+    }
+
+    void Pitch::autoMode(CurrentState state, double buoyancy_position)
+    {
+        setSpeeds(PITCH_DEFAULT_STEPPER_SPEED, PITCH_DEFAULT_STEPPER_ACCELERATION);
+
+        //convert to long for comparisons
+        //GUI position readings are absolute, so we need to convert to absolute values
+        long new_buoyancy_position = static_cast<long>(buoyancy_position);
+        new_buoyancy_position = std::abs<long>(new_buoyancy_position);
+
+        long new_pitch_position = static_cast<long>(currentPosition());
+        new_pitch_position = std::abs<long>(new_pitch_position);
+
+        if(state == CurrentState::RESURFACING)
+        {
+            if(new_buoyancy_position < 5000)
+            {
+                setSpeed(0);
+            }
+            else if(new_pitch_position == properties.halves_length)
+            {
+                setSpeed(0);
+            }
+            else
+            {
+                moveTo(-1 * properties.halves_length);
+                setSpeed(-1 * PITCH_DEFAULT_STEPPER_SPEED);
+            }
+        }
+        else if(state == CurrentState::DIVING_MODE)
+        {
+            if(new_pitch_position == 0)
+            {
+                setSpeed(0);
+            }
+            else if(new_buoyancy_position < 9000)
+            {
+                moveTo(properties.halves_length);
+                setSpeed(PITCH_DEFAULT_STEPPER_SPEED);
+            }
+            else
+            {
+                setSpeed(0);
+            }
+        }
+        else
+        {
+            setSpeed(0);
+        }
+    }
+
 
     void Pitch::logToStruct(LoggedData &data)
     {
@@ -282,34 +385,6 @@ namespace Mechanics
     }
 
     /**
-     * @brief Sets the speeds and accelerations of the buoyancy module
-     * 
-     * @param buoyancy buoyancy object
-     * @param speed desired speed
-     * @param acceleration desired acceleration
-     */
-    void setBuoyancySpeeds(Buoyancy &buoyancy, double speed, double acceleration)
-    {
-        buoyancy.setSpeed(speed);
-        buoyancy.setMaxSpeed(speed);
-        buoyancy.setAcceleration(acceleration);
-    }
-
-    /**
-     * @brief Sets the speeds and accelerations of the pitch module
-     * 
-     * @param pitch pitch object
-     * @param speed desired speed
-     * @param acceleration desired acceleration
-     */
-    void setPitchSpeeds(Pitch &pitch, double speed, double acceleration)
-    {
-        pitch.setSpeed(speed);
-        pitch.setMaxSpeed(speed);
-        pitch.setAcceleration(acceleration);
-    }
-
-    /**
      * @brief Sets the buoyancy and pitch steppers to their default settings set in configuration.h
      * 
      * @param buoyancy buoyancy object
@@ -320,10 +395,10 @@ namespace Mechanics
         setDefaultSpeeds(buoyancy, pitch);
 
         buoyancy.setMinPulseWidth(MIN_PULSE_WIDTH);
-        buoyancy.setResolution(DEFAULT_STEPPER_RESOLUTION);
+        buoyancy.setResolution(Stepper::Resolution::HALF);
 
         pitch.setMinPulseWidth(MIN_PULSE_WIDTH);
-        pitch.setResolution(DEFAULT_STEPPER_RESOLUTION);
+        pitch.setResolution(Stepper::Resolution::HALF);
     }
 
     /**
@@ -334,8 +409,8 @@ namespace Mechanics
      */
     void setDefaultSpeeds(Buoyancy &buoyancy, Pitch &pitch)
     {
-        setBuoyancySpeeds(buoyancy, BUOYANCY_DEFAULT_STEPPER_SPEED, BUOYANCY_DEFAULT_STEPPER_ACCELERATION);
-        setPitchSpeeds(pitch, PITCH_DEFAULT_STEPPER_SPEED, PITCH_DEFAULT_STEPPER_ACCELERATION);
+        buoyancy.setSpeeds(BUOYANCY_DEFAULT_STEPPER_SPEED, BUOYANCY_DEFAULT_STEPPER_ACCELERATION);
+        pitch.setSpeeds(PITCH_DEFAULT_STEPPER_SPEED, PITCH_DEFAULT_STEPPER_ACCELERATION);
     }
 
     bool calibrateBoth(Buoyancy &buoyancy, Pitch &pitch)

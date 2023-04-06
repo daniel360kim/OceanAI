@@ -9,6 +9,8 @@
 #include "limit.h"
 #include "data/logged_data.h"
 #include "../core/pins.h"
+#include "../Data/TransportManager.h"
+#include "../core/StateAutomation.h"
 
 
 namespace Mechanics
@@ -48,6 +50,8 @@ namespace Mechanics
 
         void setResolution(Resolution resolution);
         bool calibrate();
+
+        void setSpeeds(double speed, double acceleration);
 
         double currentPosition_mm();
         double targetPosition_mm();
@@ -94,12 +98,16 @@ namespace Mechanics
     {
     public:
         explicit Pitch(StepperPins pins, Resolution resolution, StepperProperties properties) : Stepper(pins, resolution, properties) {}
+
+        void runPitch(TransportManager::Commands &commands, CurrentState state, double buoyancy_position);
         
         void logToStruct(LoggedData &data);
+    
+    private:
+        void manualMode(TransportManager::Commands &commands);
+        void autoMode(CurrentState state, double buoyancy_position);
     };
 
-    void setBuoyancySpeeds(Buoyancy &buoyancy, double speed, double acceleration);
-    void setPitchSpeeds(Pitch &pitch, double speed, double acceleration);
 
     void setDefaultSettings(Buoyancy &buoyancy, Pitch &pitch);
     void setDefaultSpeeds(Buoyancy &buoyancy, Pitch &pitch);

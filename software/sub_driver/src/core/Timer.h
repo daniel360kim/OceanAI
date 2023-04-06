@@ -61,7 +61,22 @@ namespace Time
             return elapsed() * 1000;
         }
 
+        double deltaTime()
+        {
+            int64_t currentTime = elapsed();
+            int64_t deltaTime = currentTime - m_previous_time;
+            m_previous_time = currentTime;
+
+            return deltaTime / 1000000000.0;
+        }
+
+        void setPreviousTime(int64_t time)
+        {
+            m_previous_time = time;
+        }
+
     protected:
+        int64_t m_previous_time = 0;
         std::chrono::time_point<teensy_clock, teensy_clock::duration> start_time;
     };
 

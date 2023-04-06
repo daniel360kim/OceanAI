@@ -95,7 +95,7 @@ namespace TransportManager
             //Convert to set size since data is transmitted to different devices
             loop_time = static_cast<uint16_t>(data.loop_time);
             voltage = static_cast<float>(data.raw_voltage);
-            regulator = static_cast<float>(data.filt_regulator);
+            regulator = static_cast<float>(data.raw_regulator);
             system_state = static_cast<uint8_t>(data.system_state);
             internal_temp = static_cast<float>(data.bmi_temp);
 

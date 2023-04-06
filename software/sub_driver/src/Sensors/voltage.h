@@ -31,6 +31,8 @@ namespace Sensors
         double readRaw();
         double readFiltered(const double delta_time);
 
+        void logData(LoggedData &data, double &log_location_raw, double &log_location_filtered); //since we have multiple voltmeters, we need to specify the location in the within the data struct
+
     private:
         uint8_t m_pin;
         long m_interval;

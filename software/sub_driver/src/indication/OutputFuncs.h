@@ -13,12 +13,14 @@
 #define OutputFuncs_h
 
 #include "LED.h"
+#include "LEDStrip.h"
 #include "../core/pins.h"
 
 #include <Buzzer.h>
 
 extern RGBLED LEDa;
 extern RGBLED LEDb;
+extern LEDStrip<RX_GPS, 15> strip;
 
 extern Buzzer buzzer;
 

@@ -16,7 +16,6 @@
 
 #include "timer.h"
 #include "../Data/logged_data.h"
-#include "../module/stepper.h"
 
 /**
  * Debug funciontality for the system
@@ -100,11 +99,9 @@ namespace Sensors
     constexpr Angles_3D<double> mag_bias = {0.36, 0.39, 0.49}; // in uT: set in mag calibration script
 }
 
-namespace TransportManager
-{
-    constexpr int SERIAL_BAUDRATE = 115200;
+
     constexpr int SEND_INTERVAL = HZ_TO_NS(100); //how often data is sent to the GUI
-}
+
 
 namespace Logging
 {
@@ -121,9 +118,7 @@ namespace Mechanics
 
     constexpr int PITCH_DEFAULT_STEPPER_SPEED = 1000; // default speed for stepper motor
     constexpr int PITCH_DEFAULT_STEPPER_ACCELERATION = 500; // default acceleration for stepper motor
-
-    constexpr Stepper::Resolution DEFAULT_STEPPER_RESOLUTION = Stepper::Resolution::HALF; // default resolution for stepper motor
-
+    
     constexpr int MIN_PULSE_WIDTH = 1; // minimum pulse width in microseconds for stepper motor
 }
 

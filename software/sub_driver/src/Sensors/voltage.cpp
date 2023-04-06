@@ -30,7 +30,6 @@ double Sensors::Voltage::readRaw()
         voltage = 0.0;
     }
 
-
     m_raw_voltage = voltage;
     m_voltage_updated = true;
 
@@ -58,6 +57,26 @@ double Sensors::Voltage::readFiltered(const double delta_time)
 
     m_voltage_updated = false;
     return filtered_voltage;
+}
+
+/**
+ * @brief logs data to the data struct
+ * 
+ * @param data data struct
+ * @param log_location_raw location where to log (needed because we have multiple voltmeters)
+ * @param log_location_filtered location where to log (needed because we have multiple voltmeters)
+ */
+void Sensors::Voltage::logData(LoggedData &data, double &log_location_raw, double &log_location_filtered)
+{
+    int64_t current_time = scoped_timer.elapsed();
+    if(current_time - m_prev_log_ns >= m_interval)
+    {
+        double delta_time = (current_time - m_prev_log_ns) / 1e9;
+        log_location_raw = readRaw();
+        log_location_filtered = readFiltered(delta_time);
+
+        m_prev_log_ns = current_time;
+    }
 }
 
 
