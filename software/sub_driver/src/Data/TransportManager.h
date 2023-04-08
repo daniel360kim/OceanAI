@@ -99,8 +99,8 @@ namespace TransportManager
             system_state = static_cast<uint8_t>(data.system_state);
             internal_temp = static_cast<float>(data.bmi_temp);
 
+            #if HITL_ON
             hitl_data = data.HITL;
-
             //seconds to hours
             hitl_data.timestamp /= 3600;
 
@@ -111,6 +111,8 @@ namespace TransportManager
 
             hitl_rate = data.hitl_rate;
             hitl_progress = static_cast<float>(data.hitl_progress);
+
+            #endif
 
             sd_log_interval_hz = data.sd_log_rate_hz;
 

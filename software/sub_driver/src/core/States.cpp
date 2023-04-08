@@ -184,10 +184,16 @@ void continuousFunctions(StateAutomation *state)
 
     //Log and update buoyancy and pitch stepper motor data
     buoyancy.logToStruct(data);
-    buoyancy.update();
+    if(!buoyancy.update())
+    {
+        warning = true;
+    }
 
     pitch.logToStruct(data);
-    pitch.update();
+    if(!pitch.update())
+    {
+        warning = true;
+    }
 
     logger.update_sd_capacity(data);
     data.sd_log_rate_hz = logger.getLoggingIntervalHz();
@@ -235,7 +241,8 @@ void continuousFunctions(StateAutomation *state)
     }
     #endif
 
-
+#else
+    pitch.runPitch(currentState, buoyancy.currentPosition());
 #endif
 
 }
@@ -294,11 +301,6 @@ void Initialization::enter(StateAutomation *state)
     LEDa.setColor(255, 0, 255);
     LEDb.setColor(255, 0, 255);
 
-
-    // I2C Scanner
-    //Sensors::scanI2C();
-    //SUCCESS_LOG("I2C Scanner Complete");
-
     LEDa.setColor(0, 255, 255);
     LEDb.setColor(0, 255, 255);
 
@@ -344,6 +346,7 @@ void Initialization::enter(StateAutomation *state)
     SUCCESS_LOG("SD Card Initialization Complete");
 
     Mechanics::setDefaultSettings(buoyancy, pitch);
+    Mechanics::setDefaultSpeeds(buoyancy, pitch);
 
     while(!Mechanics::calibrateBoth(buoyancy, pitch))
     {

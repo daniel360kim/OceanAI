@@ -100,6 +100,7 @@ namespace Mechanics
         explicit Pitch(StepperPins pins, Resolution resolution, StepperProperties properties) : Stepper(pins, resolution, properties) {}
 
         void runPitch(TransportManager::Commands &commands, CurrentState state, double buoyancy_position);
+        void runPitch(CurrentState state, double buoyancy_position);
         
         void logToStruct(LoggedData &data);
     

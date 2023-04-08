@@ -285,6 +285,11 @@ namespace Mechanics
         }
     }
 
+    void Pitch::runPitch(CurrentState state, double buoyancy_position)
+    {
+        autoMode(state, buoyancy_position);
+    }
+
     void Pitch::manualMode(TransportManager::Commands &commands)
     {
         if(!isCalibrated())
