@@ -337,7 +337,7 @@ namespace Mechanics
 
         if(state == CurrentState::RESURFACING)
         {
-            if(new_buoyancy_position < 5000)
+            if(new_buoyancy_position < 11000)
             {
                 setSpeed(0);
             }
