@@ -10,7 +10,7 @@
   <p align="center">
     A robotic and software orientated ocean development.
     <br />
-    <a href="[https://www.youtube.com/watch?v=q8Th1xE_4uQ&ab_channel=NMRocketry](https://www.youtube.com/watch?v=8TJVxcPY-2g)"><strong>See the video »</strong></a>
+    <a href="[https://www.youtube.com/watch?v=8TJVxcPY-2g&t=32s&ab_channel=NMRocketry]"><strong>See the video »</strong></a>
     <br />
     <br />
   </p>
